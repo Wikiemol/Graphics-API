@@ -1,0 +1,26 @@
+<html>
+	<head>
+		<script type = "text/javascript" src = "graphics.js">
+		</script>
+		<script>
+			var canvas = null;
+			var cxt = null;
+			window.addEventListener('load', onLoad);
+			function onLoad(e){
+				canvas = window.document.getElementById("can");
+				cxt = canvas.getContext('2d');
+				
+				var g = new Graphics(cxt);
+				g.drawLine(50,100,100,200,"red");
+				/*cxt.moveTo(50,100);
+				cxt.lineTo(100,200);
+				cxt.stroke();*/
+			}
+			
+		</script>
+	</head>
+	<body>
+		<canvas id = "can" width = "200" height = "200">
+		</canvas>
+	</body>
+</html>
