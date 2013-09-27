@@ -21,6 +21,7 @@ Graphics.prototype.drawLine = function(x1,y1,x2,y2,color){
 	var g = new Graphics(this.cxt);
 	if(dx == 0 && dy == 0){
 		g.drawPixel(x1,y1,color);
+		return;
 	}
 	
 	if(Math.abs(dx) > Math.abs(dy)){
@@ -36,10 +37,7 @@ Graphics.prototype.drawLine = function(x1,y1,x2,y2,color){
 		}
 		
 		for(var i = 0; i < Math.abs(dx/s); i++){
-			for(var j = 0; j < Math.abs(s); j++){
-				console.log(dx + " " + (dx/s));
-				g.drawPixel(x1 + j+i*s, y1+i,color);
-			}
+			g.drawPixel(x1+i,y1 +Math.floor(i/s),color);
 		}
 		
 	}else if(dx == dy){
@@ -58,10 +56,8 @@ Graphics.prototype.drawLine = function(x1,y1,x2,y2,color){
 			s = Math.ceil(dy/dx);
 		}
 		for(var i = 0; i < Math.abs(dy/s); i++){
-			for(var j = 0; j < Math.abs(s); j++){
-				console.log(dy + " " + (dy/s));
-				g.drawPixel(x1 + i, y1+j+i*s,color);
-			}
+				g.drawPixel(x1 + Math.floor(i/s), y1+i,color);
+			
 		}
 	}
 
