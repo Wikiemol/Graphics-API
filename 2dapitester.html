@@ -33,10 +33,15 @@
 				//g.drawLine(100,150,150,100); // dx is positive, dy is negative, |dy|=|dx|
 				//g.drawLine(100,150,200,100); // dx is positive, dy is negative, |dy|<|dx|
 
-				//g.drawLine(150,100,100,200); // dx is negative, dy is positive, |dy| > |dx|
+				g.drawLine(150,100,100,200); // dx is negative, dy is positive, |dy| > |dx|
 				//g.drawLine(150,100,100,150); // dx is negative, dy is positive, |dy| = |dx|
 				//g.drawLine(200,100,100,150); // dx is negative, dy is positive, |dy| < |dx|
-
+				
+				/*cxt.moveTo(150,100);
+				cxt.lineTo(100,200);
+				cxt.stroke();*/
+				
+				g.fillTriangle(100,100,200,200,20,150);
 				
 				
 			}	
