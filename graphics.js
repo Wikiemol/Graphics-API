@@ -25,52 +25,61 @@ Graphics.prototype.drawPixel = function(x,y){
 	this.cxt.fillStyle = this.getColor();
 	this.cxt.fillRect(x,y,1,1);
 	
+	
 }
 
 Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	var x1 = x_1;
-	var x2 = x_2;
 	var y1 = y_1;
+	var x2 = x_2;
 	var y2 = y_2;
 	
-	var dx = x2 - x1;
-	var dy = y2 - y1;
-	
-	var slope = 0;
-	if(dx < 0 && dy < 0){
+	if(x1 > x2){
 		x1 = x_2;
 		y1 = y_2;
 		x2 = x_1;
 		y2 = y_1;
-
-		dx = x2 - x1;
-		dy = y2 - y1;
-		
 	}
+
+	var dx = x2 - x1;
+	var dy = y2 - y1;
+	
 	if(dx == 0 && dy == 0){
-		
 		this.drawPixel(x1,y1);
 		return;
 	}
 	
-	if(dy >= dx){
+	if(dx == 0){
 		
-		slope = dx/dy;
-		
-		for(var i = 0; i <= Math.abs(dy);i++){
-			this.drawPixel(x1+Math.floor(i*slope),y1+i);
+		for(var i = 0; i < Math.abs(dy); i++){
+			this.drawPixel(x1,y1+i*dy/Math.abs(dy));
 		}
-	}else{
-		slope = dy/dx;
-		
-		
-		for(var i = 0; i < Math.abs(dx); i++){
-			this.drawPixel(x1+i,y1+Math.floor(i*slope));
+		return;
+	}
+	
+	
+	
+	if(Math.abs(dy) > Math.abs(dx)){
+		var slope = dx/dy;
+		for(var i = 0; i < Math.abs(dy); i++){
+			this.drawPixel(x1 + i*slope,y1 + i*slope/Math.abs(slope));
 			
 		}
+		
+		return;
+	} 
+	
+	var slope = dy/dx;
+	console.log(dy/dx);
+	
+	
+	for(var i = 0; i < Math.abs(dx); i++){
+		
+		this.drawPixel(x1 + i,y1 + i*slope);
 	}
 
-
+	return;
+	
 }
 
 
