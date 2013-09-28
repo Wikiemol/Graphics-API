@@ -73,7 +73,7 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 
 }
 
-var countDracula = 0;
+
 
 Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 	
