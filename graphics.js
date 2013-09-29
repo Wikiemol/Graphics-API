@@ -1,14 +1,16 @@
 function Graphics(context,c){
 	this.cxt = context;
 	var color = c;
-
+	if(!c){
+		color = "#000000";
+	}
+	console.log(color);
 	this.setColor = function(cl){
 		color = cl;
 	}
 	this.getColor = function(){
 		return color;
 	}
-	
 	
 	this.magnitude = function(a){
 		var k = 0;
@@ -19,6 +21,12 @@ function Graphics(context,c){
 		
 		return Math.sqrt(k);
 	}
+
+	this.crossProduct = function(a,b){
+		return [a[1]*b[2] - a[2]*b[1],-a[0]*b[2]+a[2]*b[0],a[0]*b[1] - a[1]*b[0]]
+	}
+
+	
 }
 
 Graphics.prototype.drawPixel = function(x,y){
@@ -50,14 +58,11 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	}
 	
 	if(dx == 0){
-		
 		for(var i = 0; i < Math.abs(dy); i++){
 			this.drawPixel(x1,y1+i*dy/Math.abs(dy));
 		}
 		return;
 	}
-	
-	
 	
 	if(Math.abs(dy) > Math.abs(dx)){
 		var slope = dx/dy;
@@ -70,8 +75,6 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	} 
 	
 	var slope = dy/dx;
-	console.log(dy/dx);
-	
 	
 	for(var i = 0; i < Math.abs(dx); i++){
 		
@@ -83,34 +86,23 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 }
 
 
-
 Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 	
 	var center = [(x1+x2+x3)/3,(y1+y2+y3)/3];
-	
-	var v1 = [center[0] - x1,center[1] - y1];
-	var v2 = [center[0] - x2,center[1] - y2];
-	var v3 = [center[0] - x3,center[1] - y3];
-	
-	var unitV1 = [v1[0]/this.magnitude(v1),v1[1]/this.magnitude(v1)];
-	var unitV2 = [v2[0]/this.magnitude(v2),v2[1]/this.magnitude(v2)];
-	var unitV3 = [v3[0]/this.magnitude(v3),v3[1]/this.magnitude(v3)];
+	var area = this.magnitude(this.crossProduct([x2-x1,y2-y1,0],[x3-x1,y3-y1,0]))/2;
 	
 	this.drawLine(x1,y1,x2,y2);
 	this.drawLine(x2,y2,x3,y3);
 	this.drawLine(x3,y3,x1,y1);
-	
+	var scale = 0.99; //Change so that the scaling factor gets smaller to match how big the triangle is (so that the minimum number of triangles are drawn). Maybe by scaling it so that the area of the new triangle is exactly the area minus the pixels of the perimeter. 
+	console.log("Perimeter: " + perimeter + " | Area: " + area + " | Scale: " + scale );
 	if(Math.abs(x1 - x2) < 1 && Math.abs(x2-x3) < 1 && Math.abs(y1 - y2) < 1 && Math.abs(y2-y3) < 1){
 		return;
 	}else{
-		this.fillTriangle(x1+unitV1[0],y1+unitV1[1],x2+unitV2[0],y2+unitV2[1],x3+unitV3[0],y3+unitV3[1]);
+		
+		count++;
+		this.fillTriangle(center[0] + (x1-center[0])*scale,center[1] + (y1-center[1])*scale,center[0] + (x2-center[0])*scale,center[1] + (y2-center[1])*scale,center[0] + (x3-center[0])*scale,center[1] + (y3-center[1])*scale);
+		
 	}
-
 	
 }
-
-
-
-
-
-
