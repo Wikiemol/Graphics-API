@@ -60,27 +60,23 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	
 	if(Math.abs(dy) > Math.abs(dx)){
 		var slope = dx/dy;
-		var sign = 1;
-		if(dx/dy < 0){
-			sign = -1;
-		}
-		for(var i = 0; i < Math.abs(dy); i += sign){
+
+		for(var i = 0; i < Math.abs(dy); i ++){
 			this.drawPixel(x1 + i*slope,y1 + i);
 			
 		}
 		
-		return;
-	} 
+	}else{ 
 	
-	var slope = dy/dx;
+		var slope = dy/dx;
 	
-	for(var i = 0; i < Math.abs(dx); i++){
+		for(var i = 0; i < Math.abs(dx); i++){
 		
-		this.drawPixel(x1 + i,y1 + i*slope);
-	}
+			this.drawPixel(x1 + i,y1 + i*slope);
+		}
 
-	return;
-	
+		
+	}
 }
 
 
