@@ -88,21 +88,26 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 
 Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 	
-	var center = [(x1+x2+x3)/3,(y1+y2+y3)/3];
-	var area = this.magnitude(this.crossProduct([x2-x1,y2-y1,0],[x3-x1,y3-y1,0]))/2;
+	var minX = Math.min(Math.min(x1,x2),x3);
+	var minY = Math.min(Math.min(y1,y2),y3);
+	var maxX = Math.max(Math.max(x1,x2),x3);
+	var maxY = Math.max(Math.min(y1,y2),y3);
 	
-	this.drawLine(x1,y1,x2,y2);
-	this.drawLine(x2,y2,x3,y3);
-	this.drawLine(x3,y3,x1,y1);
-	var scale = 0.99; //Change so that the scaling factor gets smaller to match how big the triangle is (so that the minimum number of triangles are drawn). Maybe by scaling it so that the area of the new triangle is exactly the area minus the pixels of the perimeter. 
-	console.log("Perimeter: " + perimeter + " | Area: " + area + " | Scale: " + scale );
-	if(Math.abs(x1 - x2) < 1 && Math.abs(x2-x3) < 1 && Math.abs(y1 - y2) < 1 && Math.abs(y2-y3) < 1){
-		return;
-	}else{
+	var area = getArea(x1,y1,x2,y2,x3,y3);
+	console.log(area);
+	for(var i = 0; i < maxX - minX; i++){
+		for(var j = 0; j < maxY - minY; j++){
+			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
+				this.drawPixel(minX + i, minY + j);
+			}
+		}
+	}
+	
+	function getArea(x_1,y_1,x_2,y_2,x_3,y_3){
 		
-		count++;
-		this.fillTriangle(center[0] + (x1-center[0])*scale,center[1] + (y1-center[1])*scale,center[0] + (x2-center[0])*scale,center[1] + (y2-center[1])*scale,center[0] + (x3-center[0])*scale,center[1] + (y3-center[1])*scale);
 		
+		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
+
 	}
 	
 }
