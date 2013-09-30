@@ -57,17 +57,15 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 		return;
 	}
 	
-	if(dx == 0){
-		for(var i = 0; i < Math.abs(dy); i++){
-			this.drawPixel(x1,y1+i*dy/Math.abs(dy));
-		}
-		return;
-	}
 	
 	if(Math.abs(dy) > Math.abs(dx)){
 		var slope = dx/dy;
-		for(var i = 0; i < Math.abs(dy); i++){
-			this.drawPixel(x1 + i*slope,y1 + i*slope/Math.abs(slope));
+		var sign = 1;
+		if(dx/dy < 0){
+			sign = -1;
+		}
+		for(var i = 0; i < Math.abs(dy); i += sign){
+			this.drawPixel(x1 + i*slope,y1 + i);
 			
 		}
 		
@@ -94,7 +92,7 @@ Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 	var maxY = Math.max(Math.min(y1,y2),y3);
 	
 	var area = getArea(x1,y1,x2,y2,x3,y3);
-	console.log(area);
+	
 	for(var i = 0; i < maxX - minX; i++){
 		for(var j = 0; j < maxY - minY; j++){
 			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
@@ -103,11 +101,8 @@ Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 		}
 	}
 	
-	function getArea(x_1,y_1,x_2,y_2,x_3,y_3){
-		
-		
+	function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
 		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
-
 	}
 	
 }
