@@ -60,11 +60,16 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	
 	if(Math.abs(dy) > Math.abs(dx)){
 		var slope = dx/dy;
+		var sign = 1;
+
+		if(dx/dy < 0){
+			sign = -1;
+		}
 
 		for(var i = 0; i < Math.abs(dy); i ++){
-			this.drawPixel(x1 + i*slope,y1 + i);
-			
+			this.drawPixel(x1 + i*slope,y1 + i*sign);
 		}
+		
 		
 	}else{ 
 	
