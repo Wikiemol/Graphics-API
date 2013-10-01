@@ -2,10 +2,13 @@ function Graphics(context,c){
 	this.cxt = context;
 	var color = c;
 	var standard_coordinates = false;
+	var perspective = 200;
+	var projectionPlane = 100;
+	
 	if(!c){
 		color = "#000000";
 	}
-	console.log(color);
+	
 	this.setColor = function(cl){
 		color = cl;
 	}
@@ -33,6 +36,19 @@ function Graphics(context,c){
 	this.getCoordinates = function(){
 		return standard_coordinates;
 	}
+	this.setPerspective = function(p){
+		perspective = p;
+	}
+	this.getPerspective = function(){
+		return perspective;
+	}
+	this.setProjectionPlane = function(p){
+		return projectionPlane;
+	}
+	this.getProjectionPlane = function(){
+		return projectionPlane;
+	}
+
 }
 
 Graphics.prototype.drawPixel = function(x,y){
@@ -120,5 +136,38 @@ Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
 	}
 
+}
+
+Graphics.prototype.drawLine3d = function(x_1,y_1,z_1,x_2,y_2,z_2){
+	var t1 = this.getProjectionPlane()/(this.getPerspective() - z_1); 
+	var x1 = t1*x_1;
+	var y1 = t1*y_1;
+
+	var t2 = this.getProjectionPlane()/(this.getPerspective() - z_2);
+	var x2 = t2*x_2;
+	var y2 = t2*y_2;
+	
+	
+	this.drawLine(x1,y1,x2,y2);
+	console.log(t2);
+	
+}
+
+Graphics.prototype.drawPrism = function(x,y,z,w,h,d){
+	this.drawLine3d(x-(w/2),y-(h/2),z-(d/2),x+(w/2),y-(h/2),z-(d/2)); //Bottom back line
+	this.drawLine3d(x-(w/2),y-(h/2),z+(d/2),x+(w/2),y-(h/2),z+(d/2)); //Bottom front line
+	this.drawLine3d(x-(w/2),y-(h/2),z+(d/2),x-(w/2),y-(h/2),z-(d/2)); //Bottom left line
+	this.drawLine3d(x+(w/2),y-(h/2),z+(d/2),x+(w/2),y-(h/2),z-(d/2)); //Bottom right line
+
+	this.drawLine3d(x-(w/2),y+(h/2),z-(d/2),x+(w/2),y+(h/2),z-(d/2)); //Top back line
+	this.drawLine3d(x-(w/2),y+(h/2),z+(d/2),x+(w/2),y+(h/2),z+(d/2)); //Top front line
+	this.drawLine3d(x-(w/2),y+(h/2),z+(d/2),x-(w/2),y+(h/2),z-(d/2)); //Top left line
+	this.drawLine3d(x+(w/2),y+(h/2),z+(d/2),x+(w/2),y+(h/2),z-(d/2)); //Top right line
+	
+	this.drawLine3d(x-(w/2),y-(h/2),z-(d/2),x-(w/2),y+(h/2),z-(d/2)); //Back left line
+	this.drawLine3d(x-(w/2),y-(h/2),z+(d/2),x-(w/2),y+(h/2),z+(d/2)); //Front left line
+	this.drawLine3d(x+(w/2),y-(h/2),z-(d/2),x+(w/2),y+(h/2),z-(d/2)); //Back right line
+	this.drawLine3d(x+(w/2),y-(h/2),z+(d/2),x+(w/2),y+(h/2),z+(d/2)); //Front right line
+	
 }
 

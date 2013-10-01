@@ -1,0 +1,49 @@
+<html>
+	<head>
+		<script type = "text/javascript" src = "graphics.js">
+		</script>
+		<script>
+			var canvas = null;
+			var cxt = null;
+			window.addEventListener('load', onLoad);
+			function onLoad(e){
+				canvas = window.document.getElementById("can");
+				cxt = canvas.getContext('2d');
+				
+				var g = new Graphics(cxt);
+				g.setColor("red");
+				g.setCoordinates(true);
+
+				/*var cx = 0;
+				var cy = 0;
+				for (var t= 0; t < 2*Math.PI; t += 0.1) {
+    					g.drawLine(cx, cy, cx + Math.cos(t)*50, cy + Math.sin(t)*50);
+				}*/
+					
+				//g.fillTriangle(-10,-10,0,10,10,0);
+				
+				
+				
+				
+				setInterval(draw,33);
+				//draw();
+			}
+			var z = 0; //There is an issue with the specific case z = 100, I don't know what it is.
+			function draw(){
+				cxt.clearRect(0,0,500,500);
+				var g = new Graphics(cxt);
+				g.setColor("red");
+				g.setCoordinates(true);
+				
+				g.drawPrism(z,0,-z,200,200,200);
+				z++;
+				console.log(z);
+			}
+			
+		</script>
+	</head>
+	<body>
+		<canvas id = "can" width = "500" height = "500">
+		</canvas>
+	</body>
+</html>
