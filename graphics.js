@@ -4,7 +4,8 @@ function Graphics(context,c){
 	var standard_coordinates = false;
 	var perspective = 200;
 	var projectionPlane = 100;
-	
+
+	var cue = []; //Polygons to be drawn
 	if(!c){
 		color = "#000000";
 	}
@@ -47,6 +48,43 @@ function Graphics(context,c){
 	}
 	this.getProjectionPlane = function(){
 		return projectionPlane;
+	}
+	this.pushToCue = function(p){
+		cue.push(p);
+	}
+	this.draw = function(){
+		
+		sortCue();
+		
+		for(var i = 0; i < cue.length; i++){
+			this.setColor(cue[i][3]);
+			var p1 = this.projectPoint(cue[i][0][0],cue[i][0][1],cue[i][0][2]);
+			var p2 = this.projectPoint(cue[i][1][0],cue[i][1][1],cue[i][1][2]);
+			var p3 = this.projectPoint(cue[i][2][0],cue[i][2][1],cue[i][2][2]);
+			this.fillTriangle(Math.round(p1[0]),Math.round(p1[1]),Math.round(p2[0]),Math.round(p2[1]),Math.round(p3[0]),Math.round(p3[1]));
+		}
+		clearCue();
+	}
+
+	function sortCue(){ //Sorts polygons in order of the depth of their midpoint from furthest away to closest
+		var l = cue.length;
+		for(var i = 0; i < l; i++){
+				
+				for(var j = 1; j < l; j++){
+					if(((cue[i][0][2] + cue[i][1][2] + cue[i][2][2])/3 > (cue[j][0][2] + cue[j][1][2] + cue[j][2][2])/3)){
+				
+						var temp = cue[j];
+						cue[j] = cue[i];
+						cue[i] 	 = temp;
+					}
+				}
+		
+		}
+	}
+	
+	function clearCue(){
+		
+		cue = [];
 	}
 
 }
@@ -170,10 +208,10 @@ Graphics.prototype.drawPrism = function(x,y,z,w,h,d){
 }
 
 Graphics.prototype.fillTriangle3d = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
-	var p1 = this.projectPoint(x1,y1,z1);
-	var p2 = this.projectPoint(x2,y2,z2);
-	var p3 = this.projectPoint(x3,y3,z3);
-	//console.log(p3);
-	this.fillTriangle(Math.round(p1[0]),Math.round(p1[1]),Math.round(p2[0]),Math.round(p2[1]),Math.round(p3[0]),Math.round(p3[1]));
+	
+	this.pushToCue([[x1,y1,z1],[x2,y2,z2],[x3,y3,z3],this.getColor()]);
+	
 }
+
+
 

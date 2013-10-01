@@ -28,18 +28,27 @@
 				setInterval(draw,33);
 				//draw();
 			}
-			var z = 0; //There is an issue with the specific case z = 100, I don't know what it is.
+			var z = 250; //There is an issue with the specific case z = 100, I don't know what it is.
 			function draw(){
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics(cxt);
-				g.setColor("red");
+				
 				g.setCoordinates(true);
 				
 				//g.drawPrism(z,0,-z,200,200,200);
 				z++;
-				console.log(z);
 				
-				g.fillTriangle3d(-100,z,0,100,z,0,0,z,-100);
+				g.setColor("red");
+				g.fillTriangle3d(-100+z,-100+z,0,100+z,-100+z,0   ,z,-100+z,-100); // base
+
+				g.setColor("yellow");
+				g.fillTriangle3d(-100+z,-100+z,0,z    ,-100+z,-100,z, 100+z,-50);
+
+				g.setColor("blue");
+				g.fillTriangle3d(-100+z,-100+z,0,100+z,-100+z,0   ,z, 100+z,-50);
+				g.draw();
+				
+				
 			}
 			
 		</script>
