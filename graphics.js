@@ -138,18 +138,16 @@ Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 
 }
 
-Graphics.prototype.drawLine3d = function(x_1,y_1,z_1,x_2,y_2,z_2){
+Graphics.prototype.projectPoint = function(x_1,y_1,z_1){
 	var t1 = this.getProjectionPlane()/(this.getPerspective() - z_1); 
 	var x1 = t1*x_1;
 	var y1 = t1*y_1;
+	
+	return [x1,y1];
+}
 
-	var t2 = this.getProjectionPlane()/(this.getPerspective() - z_2);
-	var x2 = t2*x_2;
-	var y2 = t2*y_2;
-	
-	
-	this.drawLine(x1,y1,x2,y2);
-	console.log(t2);
+Graphics.prototype.drawLine3d = function(x1,y1,z1,x2,y2,z2){
+	this.drawLine(this.projectPoint(x1,y1,z1)[0],this.projectPoint(x1,y1,z1)[1],this.projectPoint(x2,y2,z2)[0],this.projectPoint(x2,y2,z2)[1]);
 	
 }
 
@@ -169,5 +167,13 @@ Graphics.prototype.drawPrism = function(x,y,z,w,h,d){
 	this.drawLine3d(x+(w/2),y-(h/2),z-(d/2),x+(w/2),y+(h/2),z-(d/2)); //Back right line
 	this.drawLine3d(x+(w/2),y-(h/2),z+(d/2),x+(w/2),y+(h/2),z+(d/2)); //Front right line
 	
+}
+
+Graphics.prototype.fillTriangle3d = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
+	var p1 = this.projectPoint(x1,y1,z1);
+	var p2 = this.projectPoint(x2,y2,z2);
+	var p3 = this.projectPoint(x3,y3,z3);
+	//console.log(p3);
+	this.fillTriangle(Math.round(p1[0]),Math.round(p1[1]),Math.round(p2[0]),Math.round(p2[1]),Math.round(p3[0]),Math.round(p3[1]));
 }
 

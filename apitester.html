@@ -35,9 +35,11 @@
 				g.setColor("red");
 				g.setCoordinates(true);
 				
-				g.drawPrism(z,0,-z,200,200,200);
+				//g.drawPrism(z,0,-z,200,200,200);
 				z++;
 				console.log(z);
+				
+				g.fillTriangle3d(-100,z,0,100,z,0,0,z,-100);
 			}
 			
 		</script>
