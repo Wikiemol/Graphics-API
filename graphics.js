@@ -4,8 +4,16 @@ function Graphics(context,c){
 	var standard_coordinates = false;
 	var perspective = 200;
 	var projectionPlane = 100;
+	var depthMap	    = [];
+	var cue		    = [];
 
-	var cue = []; //Polygons to be drawn
+	for(var i = 0; i < this.cxt.canvas.width; i++){
+		depthMap[i] = [];
+		for(var j = 0; j < this.cxt.canvas.height; j++){
+			depthMap[i][j] = null;
+		}
+	}
+	
 	if(!c){
 		color = "#000000";
 	}
@@ -52,42 +60,72 @@ function Graphics(context,c){
 	this.pushToCue = function(p){
 		cue.push(p);
 	}
+	
 	this.draw = function(){
 		
-		sortCue();
+		this.sortCue();
 		
 		for(var i = 0; i < cue.length; i++){
-			this.setColor(cue[i][3]);
-			var p1 = this.projectPoint(cue[i][0][0],cue[i][0][1],cue[i][0][2]);
-			var p2 = this.projectPoint(cue[i][1][0],cue[i][1][1],cue[i][1][2]);
-			var p3 = this.projectPoint(cue[i][2][0],cue[i][2][1],cue[i][2][2]);
-			this.fillTriangle(Math.round(p1[0]),Math.round(p1[1]),Math.round(p2[0]),Math.round(p2[1]),Math.round(p3[0]),Math.round(p3[1]));
-		}
-		clearCue();
-	}
+			if(cue[i].length == 4){
+				var p1 	  = cue[i][0];
+				var p2	  = cue[i][1];
+				var p3	  = cue[i][2];
+				var proj1 = this.projectPoint(p1[0],p1[1],p1[2]);
+				var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
+				var proj3 = this.projectPoint(p3[0],p3[1],p3[2]);
 
-	function sortCue(){ //Sorts polygons in order of the depth of their midpoint from furthest away to closest
-		var l = cue.length;
-		for(var i = 0; i < l; i++){
+				this.setColor(cue[i][3]);
 				
-				for(var j = 1; j < l; j++){
-					if(((cue[i][0][2] + cue[i][1][2] + cue[i][2][2])/3 > (cue[j][0][2] + cue[j][1][2] + cue[j][2][2])/3)){
+				this.fillTriangle(proj1[0],proj1[1],proj2[0],proj2[1],proj3[0],proj3[1]);
+			}else if(cue[i].length == 3){
 				
-						var temp = cue[j];
-						cue[j] = cue[i];
-						cue[i] 	 = temp;
-					}
-				}
-		
+				var p1 	  = cue[i][0];
+				var p2	  = cue[i][1];
+				var proj1 = this.projectPoint(p1[0],p1[1],p1[2]);
+				var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
+				
+				this.setColor(cue[i][2]);
+				
+				this.drawLine(proj1[0],proj1[1],proj2[0],proj2[1]);
+			}
+			
 		}
-	}
-	
-	function clearCue(){
-		
 		cue = [];
+	}
+	//*******//
+	this.sortCue = function(){
+		
+		for(var i = 0; i < cue.length; i++){
+			var maxDistance = null;
+			for(var j = i; j < cue.length; j++){
+				
+				var averageDistance = 0;
+				for(var k = 0; k < (cue[j].length - 1); k++){
+					averageDistance += perspectiveDistance(cue[j][k][0],cue[j][k][1],cue[j][k][2])/(cue[j].length - 1);
+				}
+				
+				if(!maxDistance || averageDistance > maxDistance){
+					var temp = cue[j];
+					maxDistance = averageDistance;
+					cue[j] = cue[i];
+					cue[i] = temp;
+				}
+			
+			}
+		}
+		
+	}
+	//*******//
+		
+	function perspectiveDistance(x,y,z){
+		var distance = Math.sqrt(x*x + y*y + (z-perspective)*(z-perspective));
+
+		return distance;
 	}
 
 }
+
+
 
 Graphics.prototype.drawPixel = function(x,y){
 	this.cxt.fillStyle = this.getColor();
@@ -150,8 +188,16 @@ Graphics.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 }
 
 
-Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
-
+Graphics.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
+	
+	
+	var x1 = Math.round(x_1);
+	var y1 = Math.round(y_1);
+	var x2 = Math.round(x_2);
+	var y2 = Math.round(y_2);
+	var x3 = Math.round(x_3);
+	var y3 = Math.round(y_3);
+	
 	var minX = Math.min(Math.min(x1,x2),x3);
 	var minY = Math.min(Math.min(y1,y2),y3);
 	var maxX = Math.max(Math.max(x1,x2),x3);
@@ -164,16 +210,18 @@ Graphics.prototype.fillTriangle = function(x1,y1,x2,y2,x3,y3){
 		for(var j = 0; j < Math.abs(maxY - minY); j++){
 			
 			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
-				this.drawPixel(minX + i, minY + j);
-				
+					this.drawPixel(minX + i, minY + j);
 			}
 		}
 	}
-
+	
+	
 	function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
 		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
 	}
 
+	
+	
 }
 
 Graphics.prototype.projectPoint = function(x_1,y_1,z_1){
@@ -184,9 +232,17 @@ Graphics.prototype.projectPoint = function(x_1,y_1,z_1){
 	return [x1,y1];
 }
 
-Graphics.prototype.drawLine3d = function(x1,y1,z1,x2,y2,z2){
-	this.drawLine(this.projectPoint(x1,y1,z1)[0],this.projectPoint(x1,y1,z1)[1],this.projectPoint(x2,y2,z2)[0],this.projectPoint(x2,y2,z2)[1]);
+Graphics.prototype.inverseProject = function(x_1,y_1,z_1){ //with a given z (z_1) value and the already projected x (x_1) and y (y_1) on the 2d plane, this finds the original x and y that were projected from 3d space onto the plane 
+	var t1 = this.getProjectionPlane()/(this.getPerspective() - z_1);
+	var x1 = x_1/t1;
+	var y1 = y_1/t1;
 	
+	return [x1,y1];
+}
+
+Graphics.prototype.drawLine3d = function(x1,y1,z1,x2,y2,z2){
+	this.pushToCue([[x1,y1,z1],[x2,y2,z2],this.getColor()]);
+
 }
 
 Graphics.prototype.drawPrism = function(x,y,z,w,h,d){
@@ -199,18 +255,20 @@ Graphics.prototype.drawPrism = function(x,y,z,w,h,d){
 	this.drawLine3d(x-(w/2),y+(h/2),z+(d/2),x+(w/2),y+(h/2),z+(d/2)); //Top front line
 	this.drawLine3d(x-(w/2),y+(h/2),z+(d/2),x-(w/2),y+(h/2),z-(d/2)); //Top left line
 	this.drawLine3d(x+(w/2),y+(h/2),z+(d/2),x+(w/2),y+(h/2),z-(d/2)); //Top right line
-	
+
 	this.drawLine3d(x-(w/2),y-(h/2),z-(d/2),x-(w/2),y+(h/2),z-(d/2)); //Back left line
 	this.drawLine3d(x-(w/2),y-(h/2),z+(d/2),x-(w/2),y+(h/2),z+(d/2)); //Front left line
+		
+		  //	 0     , -100  , 0     , 0     , 100   ,  0
 	this.drawLine3d(x+(w/2),y-(h/2),z-(d/2),x+(w/2),y+(h/2),z-(d/2)); //Back right line
 	this.drawLine3d(x+(w/2),y-(h/2),z+(d/2),x+(w/2),y+(h/2),z+(d/2)); //Front right line
 	
 }
 
 Graphics.prototype.fillTriangle3d = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
-	
+
 	this.pushToCue([[x1,y1,z1],[x2,y2,z2],[x3,y3,z3],this.getColor()]);
-	
+
 }
 
 
