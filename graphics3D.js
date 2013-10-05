@@ -44,7 +44,7 @@ function Graphics3D(context,c){
 		return perspective;
 	}
 	this.setProjectionPlane = function(p){
-		return projectionPlane;
+		projectionPlane = p;
 	}
 	this.getProjectionPlane = function(){
 		return projectionPlane;
@@ -121,9 +121,9 @@ function Graphics3D(context,c){
 
 
 Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){
-	var t1 = this.getProjectionPlane()/(this.getPerspective() - z_1); 
-	var x1 = t1*x_1;
-	var y1 = t1*y_1;
+	var t1 = (this.getProjectionPlane()-this.getPerspective())/(this.getPerspective() - z_1); 
+	var x1 = -t1*x_1;
+	var y1 = -t1*y_1;
 	
 	return [x1,y1];
 }
