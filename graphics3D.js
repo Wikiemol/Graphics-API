@@ -2,8 +2,9 @@ function Graphics3D(context,c){
 	this.cxt = context;
 	var color = c;
 	var standard_coordinates = false;
-	var perspective = 200;
-	var projectionPlane = 100;
+	var sensor = [0,0,1100];
+	var focalLength = 600;
+	var lens = sensor[2] - focalLength;
 	var queue		    = [];
 	
 	if(!c){
@@ -37,17 +38,22 @@ function Graphics3D(context,c){
 	this.getCoordinates = function(){
 		return standard_coordinates;
 	}
-	this.setPerspective = function(p){
-		perspective = p;
+	this.setSensor = function(x,y,z){
+		sensor = [x,y,z];
+		lens = z - focalLength;
 	}
-	this.getPerspective = function(){
-		return perspective;
+	this.getSensor = function(){
+		return sensor;
 	}
-	this.setProjectionPlane = function(p){
-		projectionPlane = p;
+	this.setFocalLength = function(p){
+		focalLength = p;
+		lens = sensor[2] - focalLength;
 	}
-	this.getProjectionPlane = function(){
-		return projectionPlane;
+	this.getFocalLength = function(){
+		return focalLength;
+	}
+	this.getLens = function(){
+		return lens;
 	}
 	this.pushToQueue = function(p){
 		queue.push(p);
@@ -95,7 +101,7 @@ function Graphics3D(context,c){
 				
 				var averageDistance = 0;
 				for(var k = 0; k < (queue[j].length - 1); k++){
-					averageDistance += perspectiveDistance(queue[j][k][0],queue[j][k][1],queue[j][k][2])/(queue[j].length - 1);
+					averageDistance += sensorDistance(queue[j][k][0],queue[j][k][1],queue[j][k][2])/(queue[j].length - 1);
 				}
 				
 				if(!maxDistance || averageDistance > maxDistance){
@@ -111,8 +117,8 @@ function Graphics3D(context,c){
 	}
 	
 		
-	function perspectiveDistance(x,y,z){
-		var distance = Math.sqrt(x*x + y*y + (z-perspective)*(z-perspective));
+	function sensorDistance(x,y,z){
+		var distance = Math.sqrt((x-sensor[0])*(x-sensor[0]) + (y-sensor[1])*(y-sensor[1]) + (z-sensor[2])*(z-sensor[2]));
 
 		return distance;
 	}
@@ -121,15 +127,15 @@ function Graphics3D(context,c){
 
 
 Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){
-	var t1 = (this.getProjectionPlane()-this.getPerspective())/(this.getPerspective() - z_1); 
-	var x1 = -t1*x_1;
-	var y1 = -t1*y_1;
+	var t1 = (this.getLens()-this.getSensor()[2])/(this.getSensor()[2] - z_1); 
+	var x1 = this.getSensor()[0]+this.getSensor()[0]*t1-t1*x_1;
+	var y1 = this.getSensor()[1]+this.getSensor()[1]*t1-t1*y_1;
 	
-	return [x1,y1];
+	return [x1-this.getSensor()[0],y1-this.getSensor()[1]];
 }
 
 Graphics3D.prototype.inverseProject = function(x_1,y_1,z_1){ //with a given z (z_1) value and the already projected x (x_1) and y (y_1) on the 2d plane, this finds the original x and y that were projected from 3d space onto the plane 
-	var t1 = this.getProjectionPlane()/(this.getPerspective() - z_1);
+	var t1 = this.getLens()/(this.getSensor()[2] - z_1);
 	var x1 = x_1/t1;
 	var y1 = y_1/t1;
 	
