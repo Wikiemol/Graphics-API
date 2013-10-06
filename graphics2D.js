@@ -126,7 +126,40 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 }
 
 
+Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user
+	var points = [];
+	var averageCenter = [0,0];
+	var closestToCenter;
+	var shortestToCenter;
+	for(var i = 0; i < a.length/2; i++){ //calculates the average center and fills the points array in an organized manor with the user input.
+		points[i] = [a[i*2],a[i*2 + 1]];
+		
+		averageCenter[0] += points[i][0]/(a.length/2);
+		averageCenter[1] += points[i][1]/(a.length/2);
+		
+	}
 
+	for(var i = 0; i < points.length; i++){ //finds the index of the point in the points array which is closest to the average center
+		var distance = Math.sqrt((points[i][0] - averageCenter[0])*(points[i][0] - averageCenter[0]) + (points[i][1] - averageCenter[1])*(points[i][1] - averageCenter[1]))
+		if(typeof closestToCenter === 'undefined' || (distance < shortestToCenter)){
+			
+			shortestToCenter = distance;
+			closestToCenter = i;
+		}
+	}
+	for(var i = 0; i < closestToCenter; i++){ //shifts the array so that the point which is closest to the average center is first. This allows for concave polygons. 
+		var temp = points[0];
+		points.shift();
+		points.push(temp);
+	}
+	
+	var pivot = points[0];
+	
+	for(var i = 1; i < points.length-1; i++){
+		this.fillTriangle(points[i][0],points[i][1],points[i+1][0],points[i+1][1],pivot[0],pivot[1]);
+	}	
+	
+}
 
 
 
