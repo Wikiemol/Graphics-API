@@ -126,28 +126,62 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 }
 
 
-Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user
+Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user, does not work for all concave polygons
+	if(a.length%2 != 0) throw "Error: Incorrect argument length in fillPolygon. Length of argument must be divisible by 2."
+	if(a.length/2 < 3) throw "Error: Polygons must have at least 3 vertices."
+
 	var points = [];
-	var averageCenter = [0,0];
+	var pointsx = [];
+	var pointsy = [];
+	var averageCenter = [0,0]; //median average
 	var closestToCenter;
 	var shortestToCenter;
-	for(var i = 0; i < a.length/2; i++){ //calculates the average center and fills the points array in an organized manor with the user input.
+	for(var i = 0; i < a.length/2; i++){
 		points[i] = [a[i*2],a[i*2 + 1]];
 		
-		averageCenter[0] += points[i][0]/(a.length/2);
-		averageCenter[1] += points[i][1]/(a.length/2);
+		pointsx.push(a[i*2]);
+		pointsy.push(a[i*2 + 1]);
 		
+	}
+	var j;
+	for(var i = 0; i < pointsx.length; i++){ //Insertion sort of pointsx
+		var temp = pointsx[i];
+		
+		for(j = i-1; j >= 0 && points[j] > temp; j--){
+			pointsx[j+1] = pointsx[j];
+		}
+		pointsx[j+1] = temp;
+		
+	}
+	for(var i = 0; i < pointsy.length; i++){ //Insertion sort of pointsy
+		var temp = pointsy[i];
+		
+		for(j = i-1; j >= 0 && pointsy[j] > temp; j--){
+			pointsy[j+1] = pointsy[j];
+		}
+		pointsy[j+1] = temp;
+		
+	}
+	if(pointsx.length%2 == 0){ //median of x values
+		averageCenter[0] = (pointsx[pointsx.length/2] + pointsx[pointsx.length/2]- 1)/2 
+	}else{
+		averageCenter[0] = pointsx[(pointsx.length-1)/2]
+	}
+	
+	if(pointsy.length%2 == 0){ //median of y values
+		averageCenter[1] = (pointsy[pointsy.length/2] + pointsy[pointsy.length/2]- 1)/2
+	}else{
+		averageCenter[1] = pointsy[(pointsy.length-1)/2]
 	}
 
 	for(var i = 0; i < points.length; i++){ //finds the index of the point in the points array which is closest to the average center
 		var distance = Math.sqrt((points[i][0] - averageCenter[0])*(points[i][0] - averageCenter[0]) + (points[i][1] - averageCenter[1])*(points[i][1] - averageCenter[1]))
 		if(typeof closestToCenter === 'undefined' || (distance < shortestToCenter)){
-			
 			shortestToCenter = distance;
 			closestToCenter = i;
 		}
 	}
-	for(var i = 0; i < closestToCenter; i++){ //shifts the array so that the point which is closest to the average center is first. This allows for concave polygons. 
+	for(var i = 0; i < closestToCenter; i++){ //shifts the array so that the point which is closest to the median center is first. This allows for concave polygons. 
 		var temp = points[0];
 		points.shift();
 		points.push(temp);
@@ -158,7 +192,6 @@ Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user
 	for(var i = 1; i < points.length-1; i++){
 		this.fillTriangle(points[i][0],points[i][1],points[i+1][0],points[i+1][1],pivot[0],pivot[1]);
 	}	
-	
 }
 
 
