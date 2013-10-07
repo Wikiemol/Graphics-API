@@ -6,6 +6,8 @@ function Graphics3D(context,c){
 	var focalLength = 600;
 	var lens = sensor[2] - focalLength;
 	var queue		    = [];
+	var lights	= [];
+	var concavePolygons = false;
 	
 	if(!c){
 		color = "#000000";
@@ -47,6 +49,10 @@ function Graphics3D(context,c){
 	}
 	this.setFocalLength = function(p){
 		focalLength = p;
+		if(focalLength <= 0){
+			focalLength = 1;
+		}
+		
 		lens = sensor[2] - focalLength;
 	}
 	this.getFocalLength = function(){
@@ -58,7 +64,9 @@ function Graphics3D(context,c){
 	this.pushToQueue = function(p){
 		queue.push(p);
 	}
-	
+	this.setConcavePolygons = function(t){
+		concavePolygons = t;
+	}
 	this.draw = function(){
 		var g = new Graphics2D(this.cxt);
 		g.setCoordinates(standard_coordinates);
@@ -67,26 +75,52 @@ function Graphics3D(context,c){
 		
 		for(var i = 0; i < queue.length; i++){
 			if(queue[i].length == 4){
+				
 				var p1 	  = queue[i][0];
 				var p2	  = queue[i][1];
 				var p3	  = queue[i][2];
-				var proj1 = this.projectPoint(p1[0],p1[1],p1[2]);
-				var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
-				var proj3 = this.projectPoint(p3[0],p3[1],p3[2]);
-
-				g.setColor(queue[i][3]);
 				
-				g.fillTriangle(proj1[0],proj1[1],proj2[0],proj2[1],proj3[0],proj3[1]);
+				if(p1[2] < lens && p2[2] < lens && p3[2] < lens){
+					var proj1 = this.projectPoint(p1[0],p1[1],p1[2]);
+					var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
+					var proj3 = this.projectPoint(p3[0],p3[1],p3[2]);
+					
+					//applyLight(i);
+					
+					g.setColor(queue[i][3]);
+					g.fillTriangle(proj1[0],proj1[1],proj2[0],proj2[1],proj3[0],proj3[1]);
+				}
 			}else if(queue[i].length == 3){
 				
 				var p1 	  = queue[i][0];
 				var p2	  = queue[i][1];
-				var proj1 = this.projectPoint(p1[0],p1[1],p1[2]);
-				var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
 				
-				g.setColor(queue[i][2]);
+				if(p1[2] < lens && p2[2] < lens){
+					var proj1 = this.projectPoint(p1[0],p1[1],p1[2]);
+					var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
+					//applyLight(i);
+					g.setColor(queue[i][2]);
+					g.drawLine(proj1[0],proj1[1],proj2[0],proj2[1]);
+				}
+			}else{
 				
-				g.drawLine(proj1[0],proj1[1],proj2[0],proj2[1]);
+				var projectedPoints = [];
+				
+				g.setColor(queue[i][queue[i].length - 1]);
+				
+				for(var j = 0; j < queue[i].length - 1; j++){
+					projectedPoints[j*2] = this.projectPoint(queue[i][j][0],queue[i][j][1],queue[i][j][2])[0];
+					projectedPoints[j*2 + 1] = this.projectPoint(queue[i][j][0],queue[i][j][1],queue[i][j][2])[1];
+				}
+				
+				if(!concavePolygons){
+					
+					g.fillPolygonConvex(projectedPoints);
+				}else{
+					
+					g.fillPolygon(projectedPoints);
+				}
+				
 			}
 			
 		}
@@ -116,6 +150,34 @@ function Graphics3D(context,c){
 		
 	}
 	
+	function applyLight(a){ //pass the item *number* in the cue not the item itself. Will look at and change the color value of cue[a]
+		var amount = 0xAA;
+		var color = queue[a][queue[a].length -1];
+		//console.log(queue[a][queue[a].length -1]);
+		var r = parseInt(color.charAt(1) + color.charAt(2),16);
+		var g = parseInt(color.charAt(3) + color.charAt(4),16);
+		var b = parseInt(color.charAt(5) + color.charAt(6),16);
+	
+		if(!(r >= 0xFF)){
+			r += amount;
+		}
+		if(!(g >= 0xFF)){
+			g += amount;
+		}
+		if(!(b >= 0xFF)){
+			b += amount;
+		} 
+		
+		queue[a][queue[a].length - 1] = "#" + r.toString(16) + g.toString(16) + b.toString(16);
+		
+	}
+
+	function lightField(polygon){ //Pass the polygon itself, will return the color value needed
+	
+		//var normal = this.crossProduct(polygon[0]	
+		
+		
+	}
 		
 	function sensorDistance(x,y,z){
 		var distance = Math.sqrt((x-sensor[0])*(x-sensor[0]) + (y-sensor[1])*(y-sensor[1]) + (z-sensor[2])*(z-sensor[2]));
@@ -173,5 +235,20 @@ Graphics3D.prototype.fillTriangle = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
 
 }
 
+Graphics3D.prototype.fillPolygon = function(a){ 
+		
+		if(a.length%3 != 0) throw "Error: Incorrect argument length in fillPolygon. Length of argument must be divisible by 3."
+		if(a.length/3 <= 2) throw "Error: Polygons must have at least 3 vertices."
 
+		var polygon = [];
 
+		for(var i = 0; i < a.length/3; i++){
+			polygon[i] = [a[i*3],a[i*3 + 1],a[i*3 + 2]];
+		}
+
+		polygon.push(this.getColor());
+		
+		this.pushToQueue(polygon);
+			
+		
+}

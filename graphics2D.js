@@ -194,7 +194,19 @@ Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user
 	}	
 }
 
-
+Graphics2D.prototype.fillPolygonConvex = function(a){ //assumes polygon passed is convex. Faster than general polygon.
+	var midPoint = [0,0];
+	
+	for(var i = 0; i < a.length/2; i++){
+		midPoint[0] += a[i*2]/(a.length/2);
+		midPoint[1] += a[i*2 + 1]/(a.length/2);
+	}
+	
+	for(var i = 0; i < a.length/2 - 1; i++){
+		this.fillTriangle(a[i*2],a[i*2 + 1],a[i*2 + 2],a[i*2 + 3],midPoint[0],midPoint[1]);
+	}
+	this.fillTriangle(a[a.length - 2],a[a.length - 1],a[0],a[1],midPoint[0],midPoint[1]);
+}
 
 
 
