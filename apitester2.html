@@ -24,8 +24,7 @@
 					
 				//g.fillTriangle(-10,-10,0,10,10,0);
 				
-				
-				
+								
 				
 				setInterval(draw,33);
 				//draw();
@@ -35,35 +34,44 @@
 			var z = 0;
 			var sx = 0;
 			var sy = 0;
-			var p = 800;
+			var sz = 0;
+			var p = 0;
 			function draw(){
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics3D(cxt);
-				g.setSensor(sx,sy,300);
-				g.setFocalLength(100);
+				g.setSensor(150+sx,sy,1100 + sz);
+				g.setFocalLength(600 - p);
 				g.setCoordinates(true);
 				
 				
 
-				g.setColor("yellow");
+				g.setColor("#FFFF00");
 				g.fillTriangle(-100+x,0+y,50+z,-100+x,0+y,-50+z,0+x,100+y,0+z);
 
-				g.setColor("blue");
+				g.setColor("#0000FF");
 				g.fillTriangle(-100+x,0+y,50+z,100+x,0+y,50+z,0+x,100+y,0+z);
 				
-				g.setColor("brown");
+				g.setColor("#AA0000");
 				g.fillTriangle(100+x,0+y,50+z,100+x,0+y,-50+z,0+x,100+y,0+z);
 
-				g.setColor("purple");
+				g.setColor("#AA00FF");
 				g.fillTriangle(-100+x,0+y,-50+z,100+x,0+y,-50+z,0+x,100+y,0+z);
 				
-				g.setColor("red");
-				g.drawPrism(0+x,0+y,0+z,200,200,200);
+				g.setColor("#FF0000");
+				g.drawPrism(0,0,0,200,200,200);
+				g.setColor("#00AA88");
+				g.fillPolygon([100,-100,100,100,100,100,100,100,-100,100,-100,-100,100,-100,100]);
 				
 				g.draw();
 				
 				
+
+				
+				
+				
+				//p += 5;
 				sx++;
+				//sz -= 8
 			}
 			
 		</script>
