@@ -6,9 +6,11 @@ function Graphics3D(context,c){
 	var focalLength = 600;
 	var lens = sensor[2] - focalLength;
 	var queue		    = [];
-	var lights	= [];
-	var concavePolygons = false;
 	
+	var concavePolygons = false;
+	var lightVector = [-10,-10,-10];
+	var lightIntensity = 200;
+	var self = this;
 	if(!c){
 		color = "#000000";
 	}
@@ -31,9 +33,19 @@ function Graphics3D(context,c){
 	}
 
 	this.crossProduct = function(a,b){
+		
 		return [a[1]*b[2] - a[2]*b[1],-a[0]*b[2]+a[2]*b[0],a[0]*b[1] - a[1]*b[0]]
 	}
+	
+	this.dotProduct = function(a,b){
+		var result = 0;
+		for(var i = 0; i < a.length; i++){
+			result += a[i]*b[i];
+		}
 
+		return result;
+	}	
+	
 	this.setCoordinates = function(t){
 		standard_coordinates = t;
 	}
@@ -67,6 +79,9 @@ function Graphics3D(context,c){
 	this.setConcavePolygons = function(t){
 		concavePolygons = t;
 	}
+	this.setLightVector = function(a,b,c){
+		lightVector = [a,b,c];
+	}
 	this.draw = function(){
 		var g = new Graphics2D(this.cxt);
 		g.setCoordinates(standard_coordinates);
@@ -85,7 +100,7 @@ function Graphics3D(context,c){
 					var proj2 = this.projectPoint(p2[0],p2[1],p2[2]);
 					var proj3 = this.projectPoint(p3[0],p3[1],p3[2]);
 					
-					//applyLight(i);
+					applyLight(i);
 					
 					g.setColor(queue[i][3]);
 					g.fillTriangle(proj1[0],proj1[1],proj2[0],proj2[1],proj3[0],proj3[1]);
@@ -105,7 +120,7 @@ function Graphics3D(context,c){
 			}else{
 				
 				var projectedPoints = [];
-				
+				applyLight(i);
 				g.setColor(queue[i][queue[i].length - 1]);
 				
 				for(var j = 0; j < queue[i].length - 1; j++){
@@ -150,34 +165,58 @@ function Graphics3D(context,c){
 		
 	}
 	
-	function applyLight(a){ //pass the item *number* in the cue not the item itself. Will look at and change the color value of cue[a]
-		var amount = 0xAA;
-		var color = queue[a][queue[a].length -1];
-		//console.log(queue[a][queue[a].length -1]);
+	var applyLight = function(a){ //pass the item *number* in the queue not the item itself. Will look at and change the color value of queue[a]
+		
+		var normal = self.crossProduct([queue[a][0][0] - queue[a][1][0],queue[a][0][1] - queue[a][1][1],queue[a][0][2] - queue[a][1][2]],[queue[a][2][0] - queue[a][1][0],queue[a][2][1] - queue[a][1][1],queue[a][2][2] - queue[a][1][2]]); //Normal to the polygon
+		
+		var midPoint = [0,0,0]; //Midpoint of the polygon
+			
+		for(var i = 0; i < queue[a].length - 1; i++){ //Calculates midPoint
+			midPoint[0] += queue[a][i][0]/(queue[a].length - 1);
+			midPoint[1] += queue[a][i][1]/(queue[a].length - 1);
+			midPoint[2] += queue[a][i][2]/(queue[a].length - 1);
+		}		
+		
+		var perspectiveAngle = Math.acos(self.dotProduct([sensor[0] - midPoint[0], sensor[1] - midPoint[1], sensor[2] - midPoint[2]],normal)/(self.magnitude([sensor[0] - midPoint[0], sensor[1] - midPoint[1], sensor[2] - midPoint[2]])*self.magnitude(normal))); //Angle between vector between the observer and the midPoint and the normal vector
+		var lightAngle = Math.acos(self.dotProduct([lightVector[0] - midPoint[0], lightVector[1] - midPoint[1], lightVector[2] - midPoint[1]],normal)/(self.magnitude([lightVector[0] - midPoint[0], lightVector[1] - midPoint[1], lightVector[2] -midPoint[1]])*self.magnitude(normal))) //angle Between light vector and normal
+
+		var angle = perspectiveAngle + lightAngle; //combining the two angles
+		var amount = parseInt(Math.round(lightIntensity/(angle)),16); //amount to add to the r g b values of the color
+		var color = queue[a][queue[a].length -1]; 
+		console.log(lightIntensity/(angle));
 		var r = parseInt(color.charAt(1) + color.charAt(2),16);
 		var g = parseInt(color.charAt(3) + color.charAt(4),16);
 		var b = parseInt(color.charAt(5) + color.charAt(6),16);
-	
-		if(!(r >= 0xFF)){
-			r += amount;
+		
+		
+		r += amount;
+		if(r > 0xFF){
+			r = 0xFF;
+		}else if(r < 0x00){
+			r = 0x00;
 		}
-		if(!(g >= 0xFF)){
-			g += amount;
+		
+		g += amount;
+		if(g > 0xFF){
+			g = 0xFF;
+		}else if(g < 0x00){
+			g = 0x00
 		}
-		if(!(b >= 0xFF)){
-			b += amount;
-		} 
+		
+		
+		b += amount;
+		if(b > 0xFF){
+			b = 0xFF;
+		}else if(b < 0x00){
+			b = 0x00;
+		}
+		
 		
 		queue[a][queue[a].length - 1] = "#" + r.toString(16) + g.toString(16) + b.toString(16);
+		//console.log(queue[a][queue[a].length - 1]);
 		
 	}
 
-	function lightField(polygon){ //Pass the polygon itself, will return the color value needed
-	
-		//var normal = this.crossProduct(polygon[0]	
-		
-		
-	}
 		
 	function sensorDistance(x,y,z){
 		var distance = Math.sqrt((x-sensor[0])*(x-sensor[0]) + (y-sensor[1])*(y-sensor[1]) + (z-sensor[2])*(z-sensor[2]));
