@@ -42,26 +42,28 @@
 				g.setSensor(150+sx,sy,1100 + sz);
 				g.setFocalLength(600 - p);
 				g.setCoordinates(true);
-				
+				g.setLightVector(-10+x,-10+y,-10+z);
 				
 
-				g.setColor("#FFFF00");
-				g.fillTriangle(-100+x,0+y,50+z,-100+x,0+y,-50+z,0+x,100+y,0+z);
+				//g.setColor("#FFFF00");
+				//g.fillTriangle(-100+x,0+y,50+z,-100+x,0+y,-50+z,0+x,100+y,0+z);
 
-				g.setColor("#0000FF");
-				g.fillTriangle(-100+x,0+y,50+z,100+x,0+y,50+z,0+x,100+y,0+z);
+				//g.setColor("#0000FF");
+				//g.fillTriangle(-100+x,0+y,50+z,100+x,0+y,50+z,0+x,100+y,0+z);
 				
-				g.setColor("#AA0000");
-				g.fillTriangle(100+x,0+y,50+z,100+x,0+y,-50+z,0+x,100+y,0+z);
+				//g.setColor("#AA0000");
+				//g.fillTriangle(100+x,0+y,50+z,100+x,0+y,-50+z,0+x,100+y,0+z);
 
-				g.setColor("#AA00FF");
-				g.fillTriangle(-100+x,0+y,-50+z,100+x,0+y,-50+z,0+x,100+y,0+z);
+				//g.setColor("#AA00FF");
+				//g.fillTriangle(-100+x,0+y,-50+z,100+x,0+y,-50+z,0+x,100+y,0+z);
 				
-				g.setColor("#FF0000");
-				g.drawPrism(0,0,0,200,200,200);
-				g.setColor("#00AA88");
+				//g.setColor("#FF0000");
+				//g.drawPrism(0,0,0,200,200,200);
+				g.setColor("#443333");
 				g.fillPolygon([100,-100,100,100,100,100,100,100,-100,100,-100,-100,100,-100,100]);
-				
+				g.fillPolygon([-100,-100,-100,100,-100,-100,100,100,-100,-100,100,-100,-100,-100,-100]);
+				g.fillPolygon([-100,-100,100,-100,-100,-100,-100,100,-100,-100,100,100,-100,-100,100]);
+				g.fillPolygon([-100,-100,100,100,-100,100,100,-100,-100,-100,-100,-100,-100,-100,100]);
 				g.draw();
 				
 				
@@ -70,7 +72,8 @@
 				
 				
 				//p += 5;
-				sx++;
+				//sy--;
+				x--;
 				//sz -= 8
 			}
 			
