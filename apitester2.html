@@ -26,7 +26,8 @@
 				
 								
 				
-				setInterval(draw,33);
+				// setInterval(draw,33);
+				setInterval(draw2,33);
 				//draw();
 			}
 			var y = 0;
@@ -72,6 +73,69 @@
 				//p += 5;
 				sx++;
 				//sz -= 8
+			}
+
+			var t = 0;
+			function draw2(){
+				cxt.clearRect(0,0,500,500);
+				var g = new Graphics3D(cxt);
+				g.setSensor(150,200,1100);
+				g.setFocalLength(600 - p);
+				g.setCoordinates(true);
+
+				// Square around origin.
+				var x = new Array(4);
+				var z = new Array(4);
+				x[0] = -100; z[0] = -100;
+				x[1] =  100; z[1] = -100;
+				x[2] =  100; z[2] =  100;
+				x[3] = -100; z[3] =  100;
+
+				// Rotate square.
+				for (var i = 0; i < 4; i++) {
+					var newX = x[i]*Math.cos(t) - z[i]*Math.sin(t);
+					var newZ = x[i]*Math.sin(t) + z[i]*Math.cos(t);
+					x[i] = newX;
+					z[i] = newZ;
+				}
+
+				var fillQuad = function (g, x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4) {
+				    g.fillTriangle(x1,y1,z1, x2,y2,z2, x3,y3,z3);
+				    g.fillTriangle(x1,y1,z1, x3,y3,z3, x4,y4,z4);
+				};
+
+				// Draw cube.
+				g.setColor("#808080");
+				// Top.
+				fillQuad(g,
+				    x[0], 100, z[0],
+				    x[1], 100, z[1],
+				    x[2], 100, z[2],
+				    x[3], 100, z[3]);
+				// Bottom.
+				fillQuad(g,
+				    x[0], -100, z[0],
+				    x[1], -100, z[1],
+				    x[2], -100, z[2],
+				    x[3], -100, z[3]);
+				// Sides.
+				var COLORS = ["#AA1111", "#11AA11", "#1111AA", "#AAAA11"];
+				for (var i = 0; i < 4; i++) {
+				    var x1 = x[i];
+				    var z1 = z[i];
+				    var x2 = x[(i + 1)%4];
+				    var z2 = z[(i + 1)%4];
+				    g.setColor(COLORS[i]);
+				    fillQuad(g,
+					x1, 100, z1,
+					x2, 100, z2,
+					x2, -100, z2,
+					x1, -100, z1);
+				}
+
+				g.draw();
+
+				t += 0.03;
 			}
 			
 		</script>
