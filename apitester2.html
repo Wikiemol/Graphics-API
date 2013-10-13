@@ -1,14 +1,18 @@
 <html>
 	<head>
+		<script type = "text/javascript" src = "vector.js">
+		</script>
 		<script type = "text/javascript" src = "graphics2D.js">
 		</script>
 		<script type = "text/javascript" src = "graphics3D.js">
 		</script>
+		
 		<script>
 			var canvas = null;
 			var cxt = null;
 			window.addEventListener('load', onLoad);
 			function onLoad(e){
+				
 				canvas = window.document.getElementById("can");
 				cxt = canvas.getContext('2d');
 				
@@ -28,10 +32,10 @@
 				
 				// setInterval(draw,33);
 				setInterval(draw2,33);
-				//draw();
+				//draw2();
 			}
 			var y = 0;
-			var x = 0;
+			var x1 = 0;
 			var z = 0;
 			var sx = 0;
 			var sy = 0;
@@ -78,11 +82,11 @@
 				//sz -= 8
 			}
 
-			var t = 0;
+			var t = 5;
 			function draw2(){
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics3D(cxt);
-				g.setSensor(150,200,1100);
+				g.setSensor(0,200,1100);
 				g.setFocalLength(600 - p);
 				g.setCoordinates(true);
 
@@ -103,24 +107,21 @@
 				}
 
 				var fillQuad = function (g, x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4) {
-				    g.fillTriangle(x1,y1,z1, x2,y2,z2, x3,y3,z3);
-				    g.fillTriangle(x1,y1,z1, x3,y3,z3, x4,y4,z4);
+				    //g.fillTriangle(x1,y1,z1, x2,y2,z2, x3,y3,z3);
+				    //g.fillTriangle(x1,y1,z1, x3,y3,z3, x4,y4,z4);
+				    g.fillPolygon([x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4]);
 				};
 
 				// Draw cube.
+				
 				g.setColor("#808080");
-				// Top.
-				fillQuad(g,
-				    x[0], 100, z[0],
-				    x[1], 100, z[1],
-				    x[2], 100, z[2],
-				    x[3], 100, z[3]);
 				// Bottom.
 				fillQuad(g,
 				    x[0], -100, z[0],
 				    x[1], -100, z[1],
 				    x[2], -100, z[2],
 				    x[3], -100, z[3]);
+				//g.draw();
 				// Sides.
 				var COLORS = ["#AA1111", "#11AA11", "#1111AA", "#AAAA11"];
 				for (var i = 0; i < 4; i++) {
@@ -135,10 +136,19 @@
 					x2, -100, z2,
 					x1, -100, z1);
 				}
-
+				//g.draw();
+				g.setColor("#808080");
+				// Top.
+				fillQuad(g,
+				    x[0], 100, z[0],
+				    x[1], 100, z[1],
+				    x[2], 100, z[2],
+				    x[3], 100, z[3]);
 				g.draw();
-
+				
+				
 				t += 0.03;
+				
 			}
 			
 		</script>
