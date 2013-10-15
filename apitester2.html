@@ -6,7 +6,8 @@
 		</script>
 		<script type = "text/javascript" src = "graphics3D.js">
 		</script>
-		
+		<script text = "text/javascript" src = "light.js"></script>
+		<script text = "text/javascript" src = "material.js"></script>		
 		<script>
 			var canvas = null;
 			var cxt = null;
@@ -16,9 +17,9 @@
 				canvas = window.document.getElementById("can");
 				cxt = canvas.getContext('2d');
 				
-				var g = new Graphics2D(cxt);
-				g.setColor("red");
-				g.setCoordinates(true);
+				// var g = new Graphics2D(cxt);
+				// g.setColor("red");
+				// g.setCoordinates(true);
 
 				/*var cx = 0;
 				var cy = 0;
@@ -64,16 +65,12 @@
 				
 				//g.setColor("#FF0000");
 				//g.drawPrism(0,0,0,200,200,200);
-				g.setColor("#443333");
+				g.setMaterial(new Material("#443333"));
 				g.fillPolygon([100,-100,100,100,100,100,100,100,-100,100,-100,-100,100,-100,100]);
 				g.fillPolygon([-100,-100,-100,100,-100,-100,100,100,-100,-100,100,-100,-100,-100,-100]);
 				g.fillPolygon([-100,-100,100,-100,-100,-100,-100,100,-100,-100,100,100,-100,-100,100]);
 				g.fillPolygon([-100,-100,100,100,-100,100,100,-100,-100,-100,-100,-100,-100,-100,100]);
 				g.draw();
-				
-				
-
-				
 				
 				
 				//p += 5;
@@ -89,7 +86,7 @@
 				g.setSensor(0,200,1100);
 				g.setFocalLength(600 - p);
 				g.setCoordinates(true);
-
+				// var l = new Light(10,10);
 				// Square around origin.
 				var x = new Array(4);
 				var z = new Array(4);
@@ -114,7 +111,7 @@
 
 				// Draw cube.
 				
-				g.setColor("#808080");
+				g.setMaterial(new Material("#808080"));
 				// Bottom.
 				fillQuad(g,
 				    x[0], -100, z[0],
@@ -123,13 +120,14 @@
 				    x[3], -100, z[3]);
 				//g.draw();
 				// Sides.
+				
 				var COLORS = ["#AA1111", "#11AA11", "#1111AA", "#AAAA11"];
 				for (var i = 0; i < 4; i++) {
 				    var x1 = x[i];
 				    var z1 = z[i];
 				    var x2 = x[(i + 1)%4];
 				    var z2 = z[(i + 1)%4];
-				    g.setColor(COLORS[i]);
+				    g.setMaterial(new Material(COLORS[i]));
 				    fillQuad(g,
 					x1, 100, z1,
 					x2, 100, z2,
@@ -137,7 +135,7 @@
 					x1, -100, z1);
 				}
 				//g.draw();
-				g.setColor("#808080");
+				g.setMaterial(new Material("#808080"));
 				// Top.
 				fillQuad(g,
 				    x[0], 100, z[0],
