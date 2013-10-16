@@ -1,4 +1,4 @@
-function Material(c,diff,amb,spec,sh) { //color, specularity, diffusion, ambience, shine
+function Material(c,diff,amb,spec,sh) { //color, specularity 0 - 1, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1
 	var color = c;
 	var specularity = spec;
 	var diffusion = diff;
@@ -27,6 +27,12 @@ function Material(c,diff,amb,spec,sh) { //color, specularity, diffusion, ambienc
 	}
 	this.getShine = function(){
 		return shine;
+	}
+	this.setDiffusion = function(a){
+		diffusion = a;
+	}
+	this.getDiffusion = function(){
+		return diffusion;
 	}
 }
 

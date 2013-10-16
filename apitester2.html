@@ -65,7 +65,7 @@
 				
 				//g.setColor("#FF0000");
 				//g.drawPrism(0,0,0,200,200,200);
-				g.setMaterial(new Material("#443333"));
+				g.setMaterial(new Material("#443333",1));
 				g.fillPolygon([100,-100,100,100,100,100,100,100,-100,100,-100,-100,100,-100,100]);
 				g.fillPolygon([-100,-100,-100,100,-100,-100,100,100,-100,-100,100,-100,-100,-100,-100]);
 				g.fillPolygon([-100,-100,100,-100,-100,-100,-100,100,-100,-100,100,100,-100,-100,100]);
@@ -90,6 +90,10 @@
 				// Square around origin.
 				var x = new Array(4);
 				var z = new Array(4);
+				var light = new Light("point",1);
+				light.setPosition(0,200,1100);
+				
+				g.addLight(light);
 				x[0] = -100; z[0] = -100;
 				x[1] =  100; z[1] = -100;
 				x[2] =  100; z[2] =  100;
@@ -111,7 +115,7 @@
 
 				// Draw cube.
 				
-				g.setMaterial(new Material("#808080"));
+				g.setMaterial(new Material("#AA8080",1));
 				// Bottom.
 				fillQuad(g,
 				    x[0], -100, z[0],
@@ -121,13 +125,13 @@
 				//g.draw();
 				// Sides.
 				
-				var COLORS = ["#AA1111", "#11AA11", "#1111AA", "#AAAA11"];
+				
 				for (var i = 0; i < 4; i++) {
 				    var x1 = x[i];
 				    var z1 = z[i];
 				    var x2 = x[(i + 1)%4];
 				    var z2 = z[(i + 1)%4];
-				    g.setMaterial(new Material(COLORS[i]));
+				    
 				    fillQuad(g,
 					x1, 100, z1,
 					x2, 100, z2,
@@ -135,7 +139,7 @@
 					x1, -100, z1);
 				}
 				//g.draw();
-				g.setMaterial(new Material("#808080"));
+				
 				// Top.
 				fillQuad(g,
 				    x[0], 100, z[0],
@@ -146,7 +150,7 @@
 				
 				
 				t += 0.03;
-				
+				sx++;
 			}
 			
 		</script>
