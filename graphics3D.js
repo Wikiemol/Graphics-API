@@ -178,7 +178,7 @@ function Graphics3D(context){
 			var diffusionLight = lights[i].diffusionIntensityVector(midPoint[0],midPoint[1],midPoint[2]);
 			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0)  diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //checks if diffusion is greater than 0, if so it will take it into account
 		}
-		console.log(diffuse);
+		
 		if(diffuse < 0){
 			diffuse = 0;
 		}
@@ -304,4 +304,8 @@ Graphics3D.prototype.drawGrid = function() {
 	}
 	
 	this.setMaterial(temp);
+};
+
+Graphics3D.prototype.fillPrism = function(x,y,z,w,h,d,xr,yr,zr) { //center point x y and z - width height and depth - rotation about x, y and z axis with respect to center point
+	var topVertices = [new Vrector(x+w/2,y+h/2,z+d/2),new Vector(x-w/2,y+h/2,z+d/2),new Vector(x-w/2,y+h/2,z-d/2),new Vector(x+w/2,y+h/2,z-d/2)];
 };

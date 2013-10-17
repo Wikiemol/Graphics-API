@@ -41,13 +41,13 @@ function Light(t,diff,spec){ //type diffusion specularity
 		};
 }
 
-Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff at 0 and iSpec at 1
+Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff .at(0) and iSpec .at(1)
 	var point = new Vector(x,y,z);
 	var iDiff;
 	var iSpec;
 	if (this.getType() == "point") {
 		var distance = this.getPosition().subtract(point).magnitude();
-		iDiff = this.getDiffusion()/(distance*distance);
+		iDiff = 100000*this.getDiffusion()/(distance*distance);
 		iSpec = this.getSpecularity()/(distance*distance);
 	}else if(this.getType() == "directional") {
 		iDiff = this.getDiffusion();
@@ -55,6 +55,7 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff at 0
 	}else if(this.getType() == "spot"){
 		//Making this later
 	}
+	console.log(iDiff);
 	return new Vector(iDiff,iSpec);
 };
 
@@ -65,6 +66,8 @@ Light.prototype.directionAt = function(x,y,z) { //Returns unit vector in directi
 		direction = point.subtract(this.getPosition()).unit();
 	}else if(this.getType() == "directional"){
 		direction = this.getDirection().unit();
+	}else if(this.getType() == "spot"){
+		//Don't forget to add this
 	}
 	return direction;
 };
@@ -74,5 +77,7 @@ Light.prototype.specularIntensityVector = function(x,y,z) { //Returns directiona
 };
 
 Light.prototype.diffusionIntensityVector = function(x,y,z) { //Returns directional unit vector multiplied by the diffusion component
-	return this.directionAt(x,y,z).multiply(this.getDiffusion());
+	// console.log(this.directionAt(x,y,z).multiply(this.intensityAt(x,y,z).at(0)).getVectorAsArray());
+	return this.directionAt(x,y,z).multiply(this.intensityAt(x,y,z).at(0));
+
 };
