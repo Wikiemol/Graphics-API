@@ -84,23 +84,27 @@
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics3D(cxt);
 				g.setSensor(0,200,1100);
-				g.setFocalLength(600);
+				g.setFocalLength(500);
 				g.setCoordinates(true);
 				// g.drawGrid();
 				// Square around origin.
 				var x = new Array(4);
 				var z = new Array(4);
 				var light1 = new Light("point",1);
-				light1.setPosition(0,200,200);
+				light1.setPosition(0,sx,0);
+				g.setMaterial(new Material("#FF0000",0))
+				g.drawPrism(0,sx,0,10,10,10)
 				var light2 = new Light("point",1);
-				light2.setPosition(500,0,0);
+				light2.setPosition(400,200,0);
+				// g.setMaterial(new Material("#FF0000"))
+				// g.drawPrism(400,200,0,10,10,10)
 				g.addLight(light1);
-				g.addLight(light2);
+				// g.addLight(light2);
 				x[0] = -100; z[0] = -100;
 				x[1] =  100; z[1] = -100;
 				x[2] =  100; z[2] =  100;
 				x[3] = -100; z[3] =  100;
-
+				g.setMaterial(new Material("#80AA80",1));
 				// Rotate square.
 				for (var i = 0; i < 4; i++) {
 					var newX = x[i]*Math.cos(t) - z[i]*Math.sin(t);
@@ -117,7 +121,7 @@
 
 				// Draw cube.
 				
-				g.setMaterial(new Material("#808080",1));
+				
 				// Bottom.
 				fillQuad(g,
 				    x[0], -100, z[0],
@@ -151,9 +155,9 @@
 				g.draw();
 				
 				
-				t += 0.03;
+				// t += 0.03;
 				// p-=5;
-				// sx += 10;
+				sx +=5;
 				// console.log("P: " + p + " | sx: " + sx)
 			}
 			

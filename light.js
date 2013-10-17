@@ -55,7 +55,6 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff .at(
 	}else if(this.getType() == "spot"){
 		//Making this later
 	}
-	console.log(iDiff);
 	return new Vector(iDiff,iSpec);
 };
 

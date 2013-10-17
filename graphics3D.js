@@ -17,6 +17,8 @@ function Graphics3D(context){
 		lights.push(l);
 	}
 	this.setMaterial = function(cl){
+
+		if(!cl.getColor()) throw "Error: setMaterial takes Materials as arguments."
 		material = cl;
 	}
 	
@@ -84,7 +86,6 @@ function Graphics3D(context){
 					var proj3 = this.projectPoint(p3.at(0),p3.at(1),p3.at(2));
 					
 					
-					
 					g.setColor(applyLight(i));
 					g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
 				}
@@ -98,6 +99,7 @@ function Graphics3D(context){
 					var proj2 = this.projectPoint(p2.at(0),p2.at(1),p2.at(2));
 					
 					g.setColor(queue[i][2].getColor());
+
 					g.drawLine(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1));
 				}
 			}else{
@@ -181,6 +183,8 @@ function Graphics3D(context){
 		
 		if(diffuse < 0){
 			diffuse = 0;
+		}else if( diffuse > 1){
+			diffuse = 1;
 		}
 		
 		/*** calculating color ***/
@@ -196,6 +200,7 @@ function Graphics3D(context){
 		if(Math.round(red) <= 15) {
 			red = "0" + Math.round(red).toString(16);
 		}else{
+
 			red = Math.round(red).toString(16);
 		};
 
@@ -211,7 +216,6 @@ function Graphics3D(context){
 			green = Math.round(green).toString(16);
 		};
 		var color = "#" + red + green + blue;
-		
 		return color;
 
 	}
