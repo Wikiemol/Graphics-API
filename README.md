@@ -46,4 +46,22 @@ A simple 3d graphics library for html5 canvas I'm making for the sake of learnin
 17. **drawLine(x1,y1,z1,x2,y2,z2)** Adds a line to the render queue
     - *x1,y1,z1*: First point of the line
     - *x2,y2,z2*: Second point of the line
-18. **drawPrism()** Adds the wireframe of a prism
+18. **drawPrism(x,y,z,w,h,d)** Adds the wireframe of a prism to the render queue
+    - *x,y,z*: The center point of the prism (not the corner)
+    - *w*: width
+    - *h*: height
+    - *d*: depth
+19. **fillTriangle(x1,y1,z1,x2,y2,z2,x3,y3,z3)** Adds a triangle to the render queue
+    - *x1,y1,z1* First vertex of the triangle
+    - *x2,y2,z2* Second vertex of the triangle
+    - *x3,y3,z3* Third vertex of the triangle
+20. **fillPolygon(a)** Takes an array of length divisible by 3. The members of the array are the points of the polygon in 3d space.
+21. **drawGrid()** Adds a 600x600 grid centered at the origin and parallel to the xz plane to the render queue.
+22. ~~**fillPrism(x,y,z,w,h,d,xr,yr,zr)** Adds a prism to the render queue.~~
+    - ~~*x,y,z* Center point of the prism (not the corner)~~
+    - ~~*w*: width~~
+    - ~~*h*: height~~
+    - ~~*d*: depth~~
+    - ~~*xr* rotation about x axis~~
+    - ~~*yr* rotation about y axis~~
+    - ~~*zr* rotation about z axis~~
