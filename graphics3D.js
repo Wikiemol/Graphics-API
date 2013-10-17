@@ -1,6 +1,5 @@
 function Graphics3D(context){
 	this.cxt = context;
-	
 	var standard_coordinates = false;
 
 	var sensor               = new Vector(0,0,1100);
@@ -13,6 +12,7 @@ function Graphics3D(context){
 	var material;
 	var concavePolygons      = false;
 	var self = this;
+	var ambientLight		 = 0;
 	this.pushLight = function(l){
 		lights.push(l);
 	}
@@ -33,6 +33,7 @@ function Graphics3D(context){
 	this.setSensor = function(x,y,z){
 		sensor.set(x,y,z);
 		lens = z - focalLength;
+
 	}
 	this.getSensor = function(){
 		return sensor;
@@ -42,7 +43,6 @@ function Graphics3D(context){
 		if(focalLength <= 0){
 			focalLength = 1;
 		}
-		
 		lens = sensor.at(2) - focalLength;
 	}
 	this.getFocalLength = function(){
@@ -66,7 +66,11 @@ function Graphics3D(context){
 		g.setCoordinates(standard_coordinates);
 
 		this.sortQueue();
-		
+		//Calculating ambientLight
+
+
+
+		//Drawing polygons
 		for(var i = 0; i < queue.length; i++){
 			if(queue[i].length == 4){
 				
@@ -93,7 +97,7 @@ function Graphics3D(context){
 					var proj1 = this.projectPoint(p1.at(0),p1.at(1),p1.at(2));
 					var proj2 = this.projectPoint(p2.at(0),p2.at(1),p2.at(2));
 					
-					g.setColor(applyLight(i));
+					g.setColor(queue[i][2].getColor());
 					g.drawLine(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1));
 				}
 			}else{
@@ -156,7 +160,7 @@ function Graphics3D(context){
 	var applyLight = function(a){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
 		var midPoint       = [0,0,0];
 		var specularLight  = new Vector(0,0,0);
-		var diffusionLight = new Vector(0,0,0);
+		var diffuse = 0;
 		var side1          = queue[a][0].subtract(queue[a][1]);
 		var side2          = queue[a][2].subtract(queue[a][1]);
 		var normal         = side1.cross(side2).unit();
@@ -171,10 +175,10 @@ function Graphics3D(context){
 
 		for(var i = 0; i < lights.length; i++){
 			specularLight   = specularLight.add(lights[i].specularIntensityVector(midPoint[0],midPoint[1],midPoint[2]));
-			diffusionLight = diffusionLight.add(lights[i].diffusionIntensityVector(midPoint[0],midPoint[1],midPoint[2]));
+			var diffusionLight = lights[i].diffusionIntensityVector(midPoint[0],midPoint[1],midPoint[2]);
+			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0)  diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //checks if diffusion is greater than 0, if so it will take it into account
 		}
-		
-		var diffuse = diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion();
+		console.log(diffuse);
 		if(diffuse < 0){
 			diffuse = 0;
 		}
@@ -207,7 +211,7 @@ function Graphics3D(context){
 			green = Math.round(green).toString(16);
 		};
 		var color = "#" + red + green + blue;
-		console.log(blue);
+		
 		return color;
 
 	}
@@ -218,7 +222,6 @@ function Graphics3D(context){
 		
 		return distance;
 	}
-
 }
 
 
@@ -240,7 +243,7 @@ Graphics3D.prototype.inverseProject = function(x_1,y_1,z_1){ //with a given z (z
 
 Graphics3D.prototype.drawLine = function(x1,y1,z1,x2,y2,z2){
 
-	this.pushToQueue([[x1,y1,z1],[x2,y2,z2],this.getMaterial()]);
+	this.pushToQueue([new Vector(x1,y1,z1),new Vector(x2,y2,z2),this.getMaterial()]);
 
 }
 
@@ -289,3 +292,16 @@ Graphics3D.prototype.fillPolygon = function(a){
 Graphics3D.prototype.addLight = function(light) {
 	this.pushLight(light);
 }
+
+Graphics3D.prototype.drawGrid = function() {
+	var temp = this.getMaterial();
+	this.setMaterial(new Material("#808080"));
+	for(var i = 0; i <= 10; i++){
+		this.drawLine(-300+i*60,0,300,-300+i*60,0,-300);
+	}
+	for(var i = 0; i <= 10; i++){
+		this.drawLine(-300,0,-300+i*60,300,0,-300+i*60);
+	}
+	
+	this.setMaterial(temp);
+};
