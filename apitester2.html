@@ -1,22 +1,23 @@
 <html>
 	<head>
-		<script type = "text/javascript" src = "vector.js">
-		</script>
-		<script type = "text/javascript" src = "graphics2D.js">
-		</script>
-		<script type = "text/javascript" src = "graphics3D.js">
-		</script>
+		<script type = "text/javascript" src = "vector.js"></script>
+		<script type = "text/javascript" src = "graphics2D.js"></script>
+		<script type = "text/javascript" src = "graphics3D.js"></script>
 		<script text = "text/javascript" src = "light.js"></script>
-		<script text = "text/javascript" src = "material.js"></script>		
+		<script text = "text/javascript" src = "material.js"></script>
+		<script text = "text/javascript" src = "matrix.js"></script>	
 		<script>
 			var canvas = null;
 			var cxt = null;
+			var g;
 			window.addEventListener('load', onLoad);
+
 			function onLoad(e){
 				
 				canvas = window.document.getElementById("can");
 				cxt = canvas.getContext('2d');
-				
+				g = new Graphics3D(cxt);
+
 				// var g = new Graphics2D(cxt);
 				// g.setColor("red");
 				// g.setCoordinates(true);
@@ -31,10 +32,16 @@
 				
 								
 				
-				// setInterval(draw,33);
-				setInterval(draw2,33);
+				// setInterval(draw2,33);
 				// draw2();
+
+				setInterval(draw3,33);
+				// draw3();
 			}
+
+
+
+
 			var y = 0;
 			var x1 = 0;
 			var z = 0;
@@ -79,7 +86,7 @@
 				//sz -= 8
 			}
 
-			var t = Math.PI/6;
+			var t = 0;
 			function draw2(){
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics3D(cxt);
@@ -91,15 +98,16 @@
 				var x = new Array(4);
 				var z = new Array(4);
 				var light1 = new Light("point",1);
-				light1.setPosition(0,sx,0);
+				light1.setPosition(-100,sx,600);
+
 				g.setMaterial(new Material("#FF0000",0))
-				g.drawPrism(0,sx,0,10,10,10)
+				
 				var light2 = new Light("point",1);
-				light2.setPosition(400,200,0);
-				// g.setMaterial(new Material("#FF0000"))
-				// g.drawPrism(400,200,0,10,10,10)
-				g.addLight(light1);
-				// g.addLight(light2);
+				light2.setPosition(200,200,0);
+				// light2.setReach(10);
+				g.addLight(light1,true);
+				g.addLight(light2,true);
+				g.drawGrid();
 				x[0] = -100; z[0] = -100;
 				x[1] =  100; z[1] = -100;
 				x[2] =  100; z[2] =  100;
@@ -155,12 +163,26 @@
 				g.draw();
 				
 				
-				// t += 0.03;
+				t += 0.03;
 				// p-=5;
 				sx +=5;
 				// console.log("P: " + p + " | sx: " + sx)
 			}
-			
+			var light = new Light("point",1);
+			function draw3(){
+				cxt.clearRect(0,0,500,500)
+				g.setCoordinates(true);
+				light.setPosition(500,500,500);
+				
+				g.addLight(light,true);
+				
+				g.setSensor(0,200,1100);
+				g.setFocalLength(500);
+				g.drawGrid();
+				g.fillPrism(0,0,0,200,200,200,t,t,t);
+				g.draw();
+				t += 0.03;
+			}
 		</script>
 	</head>
 	<body>

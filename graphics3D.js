@@ -9,12 +9,18 @@ function Graphics3D(context){
 	var queue                = [];
 
 	var lights               = [];
-	var material;
+	var material			 = new Material("#808080",1);
 	var concavePolygons      = false;
 	var self = this;
 	var ambientLight		 = 0;
-	this.pushLight = function(l){
+	this.addLight = function(l,visible){
 		lights.push(l);
+		if(visible) {
+			var temp = this.getMaterial();
+			this.setMaterial(new Material("#FF8000"));
+			this.drawPrism(l.getPosition().at(0),l.getPosition().at(1),l.getPosition().at(2),10,10,10);
+			this.setMaterial(temp);
+		}
 	}
 	this.setMaterial = function(cl){
 
@@ -58,9 +64,6 @@ function Graphics3D(context){
 	}
 	this.setConcavePolygons = function(t){ //Allows for concave polygons to be drawn accurately. However, setting to "true" will make all polygon drawing slower.
 		concavePolygons = t;
-	}
-	this.setLightVector = function(a,b,c){
-		lightVector.set(a,b,c);
 	}
 	this.draw = function(){
 		var g = new Graphics2D(this.cxt);
@@ -237,7 +240,7 @@ Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d
 	return new Vector(x1-this.getSensor().at(0),y1-this.getSensor().at(1));
 }
 
-Graphics3D.prototype.inverseProject = function(x_1,y_1,z_1){ //with a given z (z_1) value and the already projected x (x_1) and y (y_1) on the 2d plane, this finds the original x and y that were projected from 3d space onto the plane 
+Graphics3D.prototype.inverseProjectPoint = function(x_1,y_1,z_1){ //with a given z (z_1) value and the already projected x (x_1) and y (y_1) on the 2d plane, this finds the original x and y that were projected from 3d space onto the plane 
 	var t1 = this.getLens()/(this.getSensor().at(2) - z_1);
 	var x1 = x_1/t1;
 	var y1 = y_1/t1;
@@ -293,9 +296,7 @@ Graphics3D.prototype.fillPolygon = function(a){
 		this.pushToQueue(polygon);
 }
 
-Graphics3D.prototype.addLight = function(light) {
-	this.pushLight(light);
-}
+
 
 Graphics3D.prototype.drawGrid = function() {
 	var temp = this.getMaterial();
@@ -311,5 +312,45 @@ Graphics3D.prototype.drawGrid = function() {
 };
 
 Graphics3D.prototype.fillPrism = function(x,y,z,w,h,d,xr,yr,zr) { //center point x y and z - width height and depth - rotation about x, y and z axis with respect to center point
-	var topVertices = [new Vrector(x+w/2,y+h/2,z+d/2),new Vector(x-w/2,y+h/2,z+d/2),new Vector(x-w/2,y+h/2,z-d/2),new Vector(x+w/2,y+h/2,z-d/2)];
+	if(typeof xr === 'undefined') { xr = 0; yr = 0; zr = 0; }
+	else if(typeof yr === 'undefined') {yr = 0; zr = 0;}
+	else if(typeof zr === 'undefined') {zr = 0;}
+	var center = new Vector(x,y,z);
+	var rotationX = new Matrix('rx',xr);
+	var rotationY = new Matrix('ry',yr);
+	
+	var rotationZ = new Matrix('rz',zr);
+	console.log(rotationZ.row(0).getVectorAsArray())
+	console.log(rotationZ.row(1).getVectorAsArray())
+	console.log(rotationZ.row(2).getVectorAsArray())
+	var top = [rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,h/2,-d/2)))).add(center),
+					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,-d/2)))).add(center),
+					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,d/2)))).add(center),
+					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,h/2,d/2)))).add(center)];
+
+	var bottom = [rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,-h/2,-d/2)))).add(center),
+					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,-h/2,-d/2)))).add(center),
+					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,-h/2,d/2)))).add(center),
+					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,-h/2,d/2)))).add(center)];
+
+	this.fillPolygon([top[0].at(0),top[0].at(1),top[0].at(2), //Top
+					 top[1].at(0),top[1].at(1),top[1].at(2),
+					 top[2].at(0),top[2].at(1),top[2].at(2),
+					 top[3].at(0),top[3].at(1),top[3].at(2)]);
+
+	this.fillPolygon([bottom[3].at(0),bottom[3].at(1),bottom[3].at(2), //Bottom
+					 bottom[2].at(0),bottom[2].at(1),bottom[2].at(2),
+					 bottom[1].at(0),bottom[1].at(1),bottom[1].at(2),
+					 bottom[0].at(0),bottom[0].at(1),bottom[0].at(2)]);
+
+	for(var i = 0; i < 4; i++){
+		this.fillPolygon([
+						 bottom[i%4].at(0),bottom[i%4].at(1),bottom[i%4].at(2),
+						 bottom[(i+1)%4].at(0),bottom[(i+1)%4].at(1),bottom[(i+1)%4].at(2),
+						 top[(i+1)%4].at(0),top[(i+1)%4].at(1),top[(i+1)%4].at(2),
+						 top[i%4].at(0),top[i%4].at(1),top[i%4].at(2)
+						 ]);
+	}
 };
+
+
