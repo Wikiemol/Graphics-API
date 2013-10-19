@@ -13,11 +13,10 @@
 			window.addEventListener('load', onLoad);
 
 			function onLoad(e){
-				
 				canvas = window.document.getElementById("can");
 				cxt = canvas.getContext('2d');
 				g = new Graphics3D(cxt);
-
+				g.setCoordinates(true);
 				// var g = new Graphics2D(cxt);
 				// g.setColor("red");
 				// g.setCoordinates(true);
@@ -36,12 +35,12 @@
 				// draw2();
 
 				setInterval(draw3,33);
-				// draw3();
+				draw3();
 			}
 
 
 
-
+			var x = 0;
 			var y = 0;
 			var x1 = 0;
 			var z = 0;
@@ -86,7 +85,7 @@
 				//sz -= 8
 			}
 
-			var t = 0;
+			var t = Math.PI/6;
 			function draw2(){
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics3D(cxt);
@@ -168,20 +167,32 @@
 				sx +=5;
 				// console.log("P: " + p + " | sx: " + sx)
 			}
-			var light = new Light("point",1);
+			var light1 = new Light("point",1);
+			var light2 = new Light("point",0.5);
 			function draw3(){
-				cxt.clearRect(0,0,500,500)
-				g.setCoordinates(true);
-				light.setPosition(200,200,200);
+				cxt.clearRect(0,0,500,500);
+				cxt.fillStyle = "#000000"
+				cxt.fillRect(0,0,500,500);
+				light1.setPosition(1000 + sx,100,300);
+				light1.setGel(255,0,0)
+				// light1.setGel(1,1,1);
+				light2.setPosition(0,200,300);
 				
-				g.addLight(light,true);
-				
-				g.setSensor(0,200,1100);
+				g.addLight(light1,true);
+				g.addLight(light2,true);
+				g.setSensor(0,200 + sy,1100);
 				g.setFocalLength(500);
-				g.drawGrid();
-				g.fillPrism(0,0,0,200,200,200,t,t,t);
+				// g.drawGrid();
+				g.setMaterial(new Material("#8080FF",1));
+				g.fillPrism(0,0,0,300,100,100,t,0,t);
+				g.setMaterial(new Material("#80FF80",1));
+				g.fillPrism(-300,0,0,100,100,100,t,t,0);
+				g.setMaterial(new Material("#FF8080",1));
+				g.fillPrism(300,0,0,100,100,100,0,t,t);
 				g.draw();
 				t += 0.03;
+				// sy-=5;
+				sx -=5;
 			}
 		</script>
 	</head>

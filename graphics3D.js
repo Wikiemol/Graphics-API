@@ -171,7 +171,8 @@ function Graphics3D(context){
 		var side2          = queue[a][2].subtract(queue[a][1]);
 		var normal         = side1.cross(side2).unit();
 		var materialColor  = queue[a][queue[a].length-1].getColor(); //A material color in a material world
-
+		var totalGel       = {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b for all lights respectively
+		var totalColor     = 0; //Will contain sum of all color values without discriminating r g and b components
 		for(var i = 0; i < queue[a].length - 2;i++){
 			midPoint[0] += queue[a][i].at(0)/(queue[a].length - 1);
 			midPoint[1] += queue[a][i].at(1)/(queue[a].length - 1);
@@ -181,10 +182,26 @@ function Graphics3D(context){
 
 		for(var i = 0; i < lights.length; i++){
 			specularLight   = specularLight.add(lights[i].specularIntensityVector(midPoint[0],midPoint[1],midPoint[2]));
+
+			/**Calculate Diffuse**/
+
 			var diffusionLight = lights[i].diffusionIntensityVector(midPoint[0],midPoint[1],midPoint[2]);
-			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0)  diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //checks if diffusion is greater than 0, if so it will take it into account
+			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0){
+				 diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //checks if diffusion is greater than 0, if so it will take it into account
+			}
+
+			/**Calculate color contribution (totalgel contribution)**/
+			totalGel["r"] += lights[i].getGel()["r"]*diffusionLight.magnitude();
+			totalGel["g"] += lights[i].getGel()["g"]*diffusionLight.magnitude();
+			totalGel["b"] += lights[i].getGel()["b"]*diffusionLight.magnitude();
+
+			totalColor += (lights[i].getGel()["r"] + lights[i].getGel()["g"] + lights[i].getGel()["b"])*diffusionLight.magnitude();
 		}
-		
+		var rRatio = 3*totalGel["r"]/totalColor;
+		var gRatio = 3*totalGel["g"]/totalColor;
+		var bRatio = 3*totalGel["b"]/totalColor;
+
+
 		if(diffuse < 0){
 			diffuse = 0;
 		}else if( diffuse > 1){
@@ -197,12 +214,14 @@ function Graphics3D(context){
 		var green = parseInt(parseInt(materialColor.charAt(3) + materialColor.charAt(4),16).toString(10),10);
 		var blue = parseInt(parseInt(materialColor.charAt(5) + materialColor.charAt(6),16).toString(10),10);
 
-		red *= diffuse;
-		green *= diffuse;
-		blue *= diffuse;
+		red *= diffuse*rRatio;
+		green *= diffuse*gRatio;
+		blue *= diffuse*bRatio;
 
 		if(Math.round(red) <= 15) {
 			red = "0" + Math.round(red).toString(16);
+		}else if(red > 255){
+			red = "FF";
 		}else{
 
 			red = Math.round(red).toString(16);
@@ -210,16 +229,21 @@ function Graphics3D(context){
 
 		if(Math.round(blue) <= 15) {
 			blue = "0" + Math.round(blue).toString(16);
+		}else if(blue > 255){
+			blue = "FF";
 		}else{
 			blue = Math.round(blue).toString(16);
 		};
 
 		if(Math.round(green) <= 15) {
 			green = "0" + Math.round(green).toString(16);
+		}else if(green > 255){
+			green = "FF";
 		}else{
 			green = Math.round(green).toString(16);
 		};
 		var color = "#" + red + green + blue;
+		console.log(red);
 		return color;
 
 	}
@@ -321,9 +345,7 @@ Graphics3D.prototype.fillPrism = function(x,y,z,w,h,d,xr,yr,zr) { //center point
 	var rotationY = new Matrix('ry',yr);
 	
 	var rotationZ = new Matrix('rz',zr);
-	console.log(rotationZ.row(0).getVectorAsArray())
-	console.log(rotationZ.row(1).getVectorAsArray())
-	console.log(rotationZ.row(2).getVectorAsArray())
+
 	var top = [rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,h/2,-d/2)))).add(center),
 					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,-d/2)))).add(center),
 					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,d/2)))).add(center),

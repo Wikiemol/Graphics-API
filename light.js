@@ -5,6 +5,7 @@ function Light(t,diff,spec){ //type diffusion specularity
 		var direction = new Vector(-10,-10,0);
 		var pos = new Vector();
 		var reach = 1;
+		var gel = {"r": 255, "g": 255, "b": 255};
 		if(typeof t === 'undefined'){
 			type = 'point';
 		}else{
@@ -45,6 +46,33 @@ function Light(t,diff,spec){ //type diffusion specularity
 		}
 		this.getReach = function(){
 			return reach;
+		}
+
+		this.setGel = function(r,g,b){
+			gel["r"] = r;
+			gel["b"] = b;
+			gel["g"] = g;
+		}
+
+		this.getGel = function(){
+			return gel;
+		}
+
+		this.setGelBySaturation = function(r,g,b){ // R G and B values are given as percentages of total color. R + G + B = 1 is a statement that must always be true. Will fill in empty values.
+			var redPerc   = r;
+			var greenPerc = g;
+			var bluePerc  = b;
+
+			if(!g) { //If only red is defined, green + blue will be equal to the 1 - red;
+				greenPerc  = (1 - r)/2;
+				bluePerc   = (1 - r)/2;
+			}else if(!b) { //If only blue is undefined, blue will be the remaining space of 1 - (r + g)
+				bluePerc   = 1 - (r + g);
+			}
+
+			if(redPerc + bluePerc + greenPerc != 1) throw "Error: R + G + B must be equal to 1";
+
+
 		}
 }
 
