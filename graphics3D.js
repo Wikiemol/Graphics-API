@@ -128,6 +128,7 @@ function Graphics3D(context){
 			
 		}
 		queue = [];
+		lights = [];
 	}
 	
 	this.sortQueue = function(){
