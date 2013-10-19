@@ -4,6 +4,7 @@ function Light(t,diff,spec){ //type diffusion specularity
 		var type; //Can be "point", "directional", or "spot" **spot light isn't made yet
 		var direction = new Vector(-10,-10,0);
 		var pos = new Vector();
+		var reach = 1;
 		if(typeof t === 'undefined'){
 			type = 'point';
 		}else{
@@ -39,6 +40,12 @@ function Light(t,diff,spec){ //type diffusion specularity
 			if(type != "directional" && type != "spot") throw "Error: Light object is not a directional or spot light. It is a " + type + " light.";
 			direction.set(x,y,z);
 		};
+		this.setReach = function(r){
+			reach = r;
+		}
+		this.getReach = function(){
+			return reach;
+		}
 }
 
 Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff .at(0) and iSpec .at(1)
@@ -47,7 +54,7 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff .at(
 	var iSpec;
 	if (this.getType() == "point") {
 		var distance = this.getPosition().subtract(point).magnitude();
-		iDiff = 100000*this.getDiffusion()/(distance*distance);
+		iDiff = this.getReach()*100000*this.getDiffusion()/(distance*distance);
 		iSpec = this.getSpecularity()/(distance*distance);
 	}else if(this.getType() == "directional") {
 		iDiff = this.getDiffusion();
