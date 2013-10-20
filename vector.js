@@ -9,7 +9,7 @@ function Vector(){
 		return vectorArray;	
 	}
 	
-	this.set = function(){
+	this.set = function(){ //Completely overrides current vectorArray
 		for(var i = 0; i < arguments.length; i++){
 			vectorArray[i] = arguments[i];
 		}
@@ -21,6 +21,10 @@ function Vector(){
 	
 	this.at = function(i){
 		return vectorArray[i];
+	}
+
+	this.getLength = function(){
+		return vectorArray.length;
 	}
 }
 
