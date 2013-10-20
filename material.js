@@ -2,8 +2,8 @@ function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, diff
 	var color = "#808080";
 	var specularity = 0;
 	var diffusion = 1;
-	var ambience = arguments[0]["ambience"];
-	var shine = 12;
+	var ambience = 1;
+	var shine = 1;
 
 	if(!(typeof m === 'undefined')){
 		if(!(typeof m["color"] === 'undefined')){
