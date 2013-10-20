@@ -15,9 +15,8 @@ A simple 3d graphics library for html5 canvas I'm making for the sake of learnin
 3. **Material(c,diff,amb,spec,shine)** When used with the new keyword it creates a new Material
     - *c*: color of material
     - *diff*: diffusion component of material, a value from 0 to 1
-    - ~~*amb*: ambient component of material, a value from 0 to 1~~
     - ~~*spec*: specular component of material, a value from 0 to 1~~
-    - ~~*shine*: shine component of material~~
+    - *shine*: shine component of material
 4. **Graphics2D(context)** Handles 2d graphics
 
 <h2> Methods </h2>
