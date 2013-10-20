@@ -17,15 +17,19 @@ function Graphics3D(context){
 		lights.push(l);
 		if(visible) {
 			var temp = this.getMaterial();
-			this.setMaterial(new Material("#FF8000"));
+			this.setMaterial({"color":"#FF8000"});
 			this.drawPrism(l.getPosition().at(0),l.getPosition().at(1),l.getPosition().at(2),10,10,10);
 			this.setMaterial(temp);
 		}
 	}
 	this.setMaterial = function(cl){
-
-		if(!cl.getColor()) throw "Error: setMaterial takes Materials as arguments."
-		material = cl;
+		
+		// if(!(cl instanceof Array)) throw "Error: setMaterial takes Array as arguments."
+		material = new Material({"color": cl["color"],
+								"diffusion": cl["diffusion"],
+								"ambience": cl["ambience"],
+								"specularity": cl["specularity"],
+								"shine": cl["shine"]});
 	}
 	
 	this.getMaterial = function(){
@@ -65,13 +69,52 @@ function Graphics3D(context){
 	this.setConcavePolygons = function(t){ //Allows for concave polygons to be drawn accurately. However, setting to "true" will make all polygon drawing slower.
 		concavePolygons = t;
 	}
-	this.draw = function(){
+	this.draw = function(t){ //lights true/false, ambience true/false, ambienceOnly true/false. Pass a curly brackets array i.e. {"lights": false, "ambience": false, "ambienceOnly": true}
+		var lightIsOn = true;
+		var ambienceIsOn = true;
+		var ambienceOnly = false;
+
+		if(!(typeof t === 'undefined')){
+			if(!(typeof t["lights"] ==='undefined')){
+				lightIsOn = t["lights"];
+			}
+	
+			if(!(typeof t["ambience"] === 'undefined')){
+				ambienceIsOn = t["ambience"];
+			}
+
+			if(!(typeof t["ambienceOnly"] === 'undefined')){
+				ambienceOnly = t["ambienceOnly"];
+			}
+		}
+
+
 		var g = new Graphics2D(this.cxt);
 		
 		g.setCoordinates(standard_coordinates);
 
 		this.sortQueue();
 		//Calculating ambientLight
+		var ambientLights = [];
+		
+		if(ambienceIsOn){
+			for(var i = 0; i < queue.length; i++){
+				if(queue[i].length != 3){
+					if(createAmbientLightFor(i)){
+						ambientLights.push(createAmbientLightFor(i));
+					}
+				}
+			}
+
+
+			if(ambienceOnly){
+				lights = ambientLights;
+			}else{
+				lights = lights.concat(ambientLights);
+			}
+			
+			// console.log(lights)
+		}
 
 
 
@@ -88,8 +131,12 @@ function Graphics3D(context){
 					var proj2 = this.projectPoint(p2.at(0),p2.at(1),p2.at(2));
 					var proj3 = this.projectPoint(p3.at(0),p3.at(1),p3.at(2));
 					
+					if(lightIsOn){
+						g.setColor(applyLight(i));
+					}else{
+						g.setColor(queue[i][queue[i].length-1].getColor())
+					}
 					
-					g.setColor(applyLight(i));
 					g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
 				}
 			}else if(queue[i].length == 3){
@@ -109,7 +156,12 @@ function Graphics3D(context){
 				
 				var projectedPoints = [];
 				
-				g.setColor(applyLight(i));
+				if(lightIsOn){
+					g.setColor(applyLight(i));
+				}else{
+
+					g.setColor(queue[i][queue[i].length-1].getColor())
+				}
 				
 				for(var j = 0; j < queue[i].length - 1; j++){
 					projectedPoints[j*2] = this.projectPoint(queue[i][j].at(0),queue[i][j].at(1),queue[i][j].at(2)).at(0);
@@ -173,30 +225,32 @@ function Graphics3D(context){
 		var materialColor  = queue[a][queue[a].length-1].getColor(); //A material color in a material world
 		var totalGel       = {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b for all lights respectively
 		var totalColor     = 0; //Will contain sum of all color values without discriminating r g and b components
-		for(var i = 0; i < queue[a].length - 2;i++){
+		for(var i = 0; i < queue[a].length - 2;i++){ //calculating midPoint
 			midPoint[0] += queue[a][i].at(0)/(queue[a].length - 1);
 			midPoint[1] += queue[a][i].at(1)/(queue[a].length - 1);
 			midPoint[2] += queue[a][i].at(2)/(queue[a].length - 1);
-
 		}
 
-		for(var i = 0; i < lights.length; i++){
+
+
+		for(var i = 0; i < lights.length; i++){ //totaling light contributions
 			specularLight   = specularLight.add(lights[i].specularIntensityVector(midPoint[0],midPoint[1],midPoint[2]));
 
 			/**Calculate Diffuse**/
 
 			var diffusionLight = lights[i].diffusionIntensityVector(midPoint[0],midPoint[1],midPoint[2]);
-			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0){
-				 diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //checks if diffusion is greater than 0, if so it will take it into account
+			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
+				 diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
 			}
 
 			/**Calculate color contribution (totalgel contribution)**/
-			totalGel["r"] += lights[i].getGel()["r"]*diffusionLight.magnitude();
-			totalGel["g"] += lights[i].getGel()["g"]*diffusionLight.magnitude();
-			totalGel["b"] += lights[i].getGel()["b"]*diffusionLight.magnitude();
+			totalGel["r"] += lights[i].getGel()["r"]*lights[i].intensityAt(midPoint[0],midPoint[1],midPoint[2]).at(0);
+			totalGel["g"] += lights[i].getGel()["g"]*lights[i].intensityAt(midPoint[0],midPoint[1],midPoint[2]).at(0);
+			totalGel["b"] += lights[i].getGel()["b"]*lights[i].intensityAt(midPoint[0],midPoint[1],midPoint[2]).at(0);
 
 			totalColor += (lights[i].getGel()["r"] + lights[i].getGel()["g"] + lights[i].getGel()["b"])*diffusionLight.magnitude();
 		}
+
 		var rRatio = 3*totalGel["r"]/totalColor;
 		var gRatio = 3*totalGel["g"]/totalColor;
 		var bRatio = 3*totalGel["b"]/totalColor;
@@ -218,16 +272,15 @@ function Graphics3D(context){
 		green *= diffuse*gRatio;
 		blue *= diffuse*bRatio;
 
-		if(Math.round(red) <= 15) {
+		if(Math.round(red) <= 15) { //if red is single digit in hex make it double digit
 			red = "0" + Math.round(red).toString(16);
-		}else if(red > 255){
+		}else if(red > 255){ //if red is triple digit in hex make it highest double digit ("FF" or 255 in decimal)
 			red = "FF";
 		}else{
-
-			red = Math.round(red).toString(16);
+			red = Math.round(red).toString(16); //otherwise convert red normally
 		};
 
-		if(Math.round(blue) <= 15) {
+		if(Math.round(blue) <= 15) { //same as red except for blue
 			blue = "0" + Math.round(blue).toString(16);
 		}else if(blue > 255){
 			blue = "FF";
@@ -235,20 +288,69 @@ function Graphics3D(context){
 			blue = Math.round(blue).toString(16);
 		};
 
-		if(Math.round(green) <= 15) {
+		if(Math.round(green) <= 15) { //same as blue except for green
 			green = "0" + Math.round(green).toString(16);
 		}else if(green > 255){
 			green = "FF";
 		}else{
 			green = Math.round(green).toString(16);
 		};
+
 		var color = "#" + red + green + blue;
-		console.log(red);
 		return color;
 
 	}
 
+	var createAmbientLightFor = function(a){ //creates a light to simulate light bouncing off of faces in space. The intensity of bounce depends on shine component
+
+		if(queue[a][queue[a].length-1].getShine() == 0){ //If no shine component for material then there is no need to create a new light
+			return false;
+		}
+		var materialColor  = queue[a][queue[a].length-1].getColor();
+		var side1          = queue[a][0].subtract(queue[a][1]);
+		var side2          = queue[a][2].subtract(queue[a][1]);
+		var normal         = side1.cross(side2).unit();
+		// console.log(normal.getVectorAsArray());
+		var midPoint = new Vector(0,0,0);
+		for(var i = 0; i < queue[a].length-1; i++){ //calculating midPoint
+			midPoint = midPoint.add(new Vector(queue[a][i].at(0),queue[a][i].at(1),queue[a][i].at(2)));
+		}
 		
+		// console.log(midPoint.getVectorAsArray())
+
+		var diffuse = 0;
+
+		for(var i = 0; i < lights.length; i++){
+			var diffusionLight = lights[i].diffusionIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2));
+				 diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getShine(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
+				 // console.log(queue[a][queue[a].length - 1].getShine());
+			
+
+		}
+
+		var red = parseInt(parseInt(materialColor.charAt(1) + materialColor.charAt(2),16).toString(10),10);
+		var green = parseInt(parseInt(materialColor.charAt(3) + materialColor.charAt(4),16).toString(10),10);
+		var blue = parseInt(parseInt(materialColor.charAt(5) + materialColor.charAt(6),16).toString(10),10);
+		
+		// console.log("red: " + red + " | green: " + green + " | blue: " + blue);
+
+		if(diffuse < 0){
+			diffuse = 0;
+		}else if( diffuse > 1){
+			diffuse = 1;
+		}
+
+		//diffuse *= queue[a][queue[a].length-1].getShine();
+		
+		console.log(diffuse)
+		var shineLight = new Light({"type": "point","diffusion": diffuse});
+		shineLight.setPosition(midPoint.at(0),midPoint.at(1),midPoint.at(2))
+		shineLight.setGel({"r": red, "g": green, "b": blue});
+
+		
+		return shineLight;
+	}
+	
 	function sensorDistance(x,y,z){
 		var distance = Math.sqrt((x-sensor.at(0))*(x-sensor.at(0)) + (y-sensor.at(1))*(y-sensor.at(1)) + (z-sensor.at(2))*(z-sensor.at(2)));
 		
@@ -347,14 +449,14 @@ Graphics3D.prototype.fillPrism = function(x,y,z,w,h,d,xr,yr,zr) { //center point
 	var rotationZ = new Matrix('rz',zr);
 
 	var top = [rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,h/2,-d/2)))).add(center),
-					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,-d/2)))).add(center),
-					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,d/2)))).add(center),
-					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,h/2,d/2)))).add(center)];
+			   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,-d/2)))).add(center),
+			   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,h/2,d/2)))).add(center),
+			   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,h/2,d/2)))).add(center)];
 
 	var bottom = [rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,-h/2,-d/2)))).add(center),
-					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,-h/2,-d/2)))).add(center),
-					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,-h/2,d/2)))).add(center),
-					   rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,-h/2,d/2)))).add(center)];
+				  rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,-h/2,-d/2)))).add(center),
+				  rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(-w/2,-h/2,d/2)))).add(center),
+				  rotationZ.multiplyVector(rotationY.multiplyVector(rotationX.multiplyVector(new Vector(w/2,-h/2,d/2)))).add(center)];
 
 	this.fillPolygon([top[0].at(0),top[0].at(1),top[0].at(2), //Top
 					 top[1].at(0),top[1].at(1),top[1].at(2),
@@ -375,5 +477,3 @@ Graphics3D.prototype.fillPrism = function(x,y,z,w,h,d,xr,yr,zr) { //center point
 						 ]);
 	}
 };
-
-

@@ -1,9 +1,32 @@
-function Material(c,diff,amb,spec,sh) { //color, specularity 0 - 1, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1
-	var color = c;
-	var specularity = spec;
-	var diffusion = diff;
-	var ambience = amb;
-	var shine = shine;
+function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1, set by passing in a curly brackets array eg. {"color":"#808080","diffusion":0.5 ... etc.}
+	var color = "#808080";
+	var specularity = 0;
+	var diffusion = 1;
+	var ambience = arguments[0]["ambience"];
+	var shine = 12;
+
+	if(!(typeof m === 'undefined')){
+		if(!(typeof m["color"] === 'undefined')){
+			color = m["color"];
+		}
+
+		if(!(typeof m["specularity"] === 'undefined')){
+			specularity = m["specularity"];
+		}
+
+		if(!(typeof m["diffusion"] === 'undefined')){
+			diffusion = m["diffusion"];
+		}
+
+		if(!(typeof m["ambience"] === 'undefined')){
+			ambience = m["ambience"];
+		}
+
+		if(!(typeof m["shine"] === 'undefined')){
+			shine = m["shine"];
+		}
+	}
+
 	this.setColor = function(a){
 		color = a;
 	}

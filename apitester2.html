@@ -85,7 +85,7 @@
 				//sz -= 8
 			}
 
-			var t = Math.PI/6;
+			var t = 7*Math.PI/6;
 			function draw2(){
 				cxt.clearRect(0,0,500,500);
 				var g = new Graphics3D(cxt);
@@ -167,32 +167,37 @@
 				sx +=5;
 				// console.log("P: " + p + " | sx: " + sx)
 			}
-			var light1 = new Light("point",1);
-			var light2 = new Light("point",0.5);
+			var light1 = new Light({"diffusion":1});
+			var light2 = new Light({"diffusion":0.5});
 			function draw3(){
+
 				cxt.clearRect(0,0,500,500);
 				cxt.fillStyle = "#000000"
 				cxt.fillRect(0,0,500,500);
-				light1.setPosition(1000 + sx,100,300);
-				light1.setGel(255,0,0)
-				// light1.setGel(1,1,1);
+
+				light1.setPosition(1000*Math.cos(t/2),0,300);
+				light1.setGelBySaturation({"r":0.7,"g":0.3});
+
 				light2.setPosition(0,200,300);
 				
 				g.addLight(light1,true);
-				g.addLight(light2,true);
+				g.addLight(light2);
+
 				g.setSensor(0,200 + sy,1100);
 				g.setFocalLength(500);
-				// g.drawGrid();
-				g.setMaterial(new Material("#8080FF",1));
+				
+				g.setMaterial({"color": "#8080FF", "shine": 0}); //Blue middle
 				g.fillPrism(0,0,0,300,100,100,t,0,t);
-				g.setMaterial(new Material("#80FF80",1));
+
+				g.setMaterial({"color": "#80FF80"}); //Green left
 				g.fillPrism(-300,0,0,100,100,100,t,t,0);
-				g.setMaterial(new Material("#FF8080",1));
+
+				g.setMaterial({"color": "#FF8080"}); //Red Right
 				g.fillPrism(300,0,0,100,100,100,0,t,t);
-				g.draw();
+				g.draw({"lights":true, "ambienceOnly": false});
 				t += 0.03;
 				// sy-=5;
-				sx -=5;
+				
 			}
 		</script>
 	</head>
