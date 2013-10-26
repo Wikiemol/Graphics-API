@@ -8,7 +8,7 @@ function Light(l){ //type, diffusion, specularity, pass a curly brackets array e
 		var gel = {"r": 255, "g": 255, "b": 255};
 		
 		if(!(typeof l === 'undefined')){
-			console.log(l["diffusion"]);
+			
 			
 			if(!(typeof l["diffusion"] === 'undefined')){
 				iDiff = l["diffusion"];
@@ -53,6 +53,10 @@ function Light(l){ //type, diffusion, specularity, pass a curly brackets array e
 			if(type != "directional" && type != "spot") throw "Error: Light object is not a directional or spot light. It is a(n) " + type + " light.";
 			direction.set(x,y,z);
 		};
+		this.getDirection = function(){
+			return direction;
+		}
+
 		this.setReach = function(r){
 			reach = r;
 		}
@@ -140,7 +144,7 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with iDiff .at(
 	var iDiff;
 	var iSpec;
 	if (this.getType() == "point") {
-		var distance = this.getPosition().subtract(point).magnitude();
+		var distance = this.distance(x,y,z);
 		iDiff = this.getReach()*100000*this.getDiffusion()/(distance*distance);
 		iSpec = this.getSpecularity()/(distance*distance);
 	}else if(this.getType() == "directional") {
@@ -172,5 +176,12 @@ Light.prototype.specularIntensityVector = function(x,y,z) { //Returns directiona
 Light.prototype.diffusionIntensityVector = function(x,y,z) { //Returns directional unit vector multiplied by the diffusion component
 	// console.log(this.directionAt(x,y,z).multiply(this.intensityAt(x,y,z).at(0)).getVectorAsArray());
 	return this.directionAt(x,y,z).multiply(this.intensityAt(x,y,z).at(0));
+
+};
+
+Light.prototype.distance = function(x,y,z) {
+	var point = new Vector(x,y,z);
+	var distance = this.getPosition().subtract(point).magnitude();
+	return distance;
 
 };

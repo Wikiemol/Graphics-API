@@ -16,6 +16,9 @@ function Graphics3D(context){
 	this.addLight = function(l,visible){
 		lights.push(l);
 		if(visible) {
+			if(l.getType() == "directional"){
+				console.warn("Warning: Directional lights cannot be shown. To get rid of this warning do not pass a visible boolean to addLight.");
+			}
 			var temp = this.getMaterial();
 			this.setMaterial({"color":"#FF8000"});
 			this.drawPrism(l.getPosition().at(0),l.getPosition().at(1),l.getPosition().at(2),10,10,10);
@@ -216,40 +219,51 @@ function Graphics3D(context){
 	}
 	
 	var applyLight = function(a){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
-		var midPoint       = [0,0,0];
-		var specularLight  = new Vector(0,0,0);
-		var diffuse = 0;
-		var side1          = queue[a][0].subtract(queue[a][1]);
-		var side2          = queue[a][2].subtract(queue[a][1]);
-		var normal         = side1.cross(side2).unit();
-		var materialColor  = queue[a][queue[a].length-1].getColor(); //A material color in a material world
-		var totalGel       = {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b for all lights respectively
-		var totalColor     = 0; //Will contain sum of all color values without discriminating r g and b components
+		var midPoint		= new Vector(0,0,0);
+		var specularity	= 0;
+		var diffuse			= 0;
+		var side1			= queue[a][0].subtract(queue[a][1]);
+		var side2			= queue[a][2].subtract(queue[a][1]);
+		var normal			= side1.cross(side2).unit();
+		var materialColor	= queue[a][queue[a].length-1].getColor(); //A material color in a material world
+		var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
+		var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
+		var viewPointVector = new Vector(0,0,0); //Vector between midpoint and viewPoint
 		for(var i = 0; i < queue[a].length - 2;i++){ //calculating midPoint
-			midPoint[0] += queue[a][i].at(0)/(queue[a].length - 1);
-			midPoint[1] += queue[a][i].at(1)/(queue[a].length - 1);
-			midPoint[2] += queue[a][i].at(2)/(queue[a].length - 1);
+			midPoint = midPoint.add(new Vector(queue[a][i].at(0)/(queue[a].length - 1),
+											   queue[a][i].at(1)/(queue[a].length - 1),
+											   queue[a][i].at(2)/(queue[a].length - 1)))
 		}
 
-
-
+		// viewPointVector = viewPointVector.add(self.getSensor().subtract(midPoint)).unit().multiply(-1);
+		viewPointVector = viewPointVector.add(midPoint.subtract(self.getSensor())).unit().multiply(1);
 		for(var i = 0; i < lights.length; i++){ //totaling light contributions
-			specularLight   = specularLight.add(lights[i].specularIntensityVector(midPoint[0],midPoint[1],midPoint[2]));
 
-			/**Calculate Diffuse**/
+			/**Calculate Specularity**/
+			var specularLight = lights[i].specularIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2)).multiply(1);
 
-			var diffusionLight = lights[i].diffusionIntensityVector(midPoint[0],midPoint[1],midPoint[2]);
+			var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
+
+			if(lightReflection.dot(viewPointVector)*queue[a][queue[a].length - 1].getSpecularity() > 0){
+				specularity += lightReflection.dot(viewPointVector)*queue[a][queue[a].length - 1].getSpecularity()*(400/lights[i].distance(midPoint.at(0),midPoint.at(1),midPoint.at(2)));
+			}
+
+			/**Calculate Diffusion**/
+
+			var diffusionLight = lights[i].diffusionIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2));
 			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
 				 diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
 			}
 
 			/**Calculate color contribution (totalgel contribution)**/
-			totalGel["r"] += lights[i].getGel()["r"]*lights[i].intensityAt(midPoint[0],midPoint[1],midPoint[2]).at(0);
-			totalGel["g"] += lights[i].getGel()["g"]*lights[i].intensityAt(midPoint[0],midPoint[1],midPoint[2]).at(0);
-			totalGel["b"] += lights[i].getGel()["b"]*lights[i].intensityAt(midPoint[0],midPoint[1],midPoint[2]).at(0);
+			totalGel["r"] += lights[i].getGel()["r"]*lights[i].intensityAt(midPoint.at(0),midPoint.at(1),midPoint.at(2)).at(0);
+			totalGel["g"] += lights[i].getGel()["g"]*lights[i].intensityAt(midPoint.at(0),midPoint.at(1),midPoint.at(2)).at(0);
+			totalGel["b"] += lights[i].getGel()["b"]*lights[i].intensityAt(midPoint.at(0),midPoint.at(1),midPoint.at(2)).at(0);
 
 			totalColor += (lights[i].getGel()["r"] + lights[i].getGel()["g"] + lights[i].getGel()["b"])*diffusionLight.magnitude();
 		}
+
+		console.log("specularity: " + specularity);
 
 		var rRatio = 3*totalGel["r"]/totalColor;
 		var gRatio = 3*totalGel["g"]/totalColor;
@@ -267,11 +281,16 @@ function Graphics3D(context){
 		var red = parseInt(parseInt(materialColor.charAt(1) + materialColor.charAt(2),16).toString(10),10);
 		var green = parseInt(parseInt(materialColor.charAt(3) + materialColor.charAt(4),16).toString(10),10);
 		var blue = parseInt(parseInt(materialColor.charAt(5) + materialColor.charAt(6),16).toString(10),10);
-
+		
 		red *= diffuse*rRatio;
 		green *= diffuse*gRatio;
 		blue *= diffuse*bRatio;
 
+		red += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMax(),queue[a][queue[a].length - 1].getSpecularExponent());
+		green += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMax(),queue[a][queue[a].length - 1].getSpecularExponent());
+		blue += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMax(),queue[a][queue[a].length - 1].getSpecularExponent());
+
+		console.log("red: " + red);
 		if(Math.round(red) <= 15) { //if red is single digit in hex make it double digit
 			red = "0" + Math.round(red).toString(16);
 		}else if(red > 255){ //if red is triple digit in hex make it highest double digit ("FF" or 255 in decimal)
@@ -402,13 +421,13 @@ Graphics3D.prototype.drawPrism = function(x,y,z,w,h,d){
 }
 
 Graphics3D.prototype.fillTriangle = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
-	if(typeof this.getMaterial() === 'undefined') console.log("Warning material undefined."); 
+	if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined."); 
 	this.pushToQueue([new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial()]);
 
 }
 
 Graphics3D.prototype.fillPolygon = function(a){ 
-		if(typeof this.getMaterial() === 'undefined') console.log("Warning material undefined."); 
+		if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined."); 
 		if(a.length%3 != 0) throw "Error: Incorrect argument length in fillPolygon. Length of argument must be divisible by 3."
 		if(a.length/3 <= 2) throw "Error: Polygons must have at least 3 vertices."
 
@@ -476,4 +495,77 @@ Graphics3D.prototype.fillPrism = function(x,y,z,w,h,d,xr,yr,zr) { //center point
 						 top[i%4].at(0),top[i%4].at(1),top[i%4].at(2)
 						 ]);
 	}
+};
+
+Graphics3D.prototype.fillEllipsoid = function(x,y,z,xRadius,yRadius,zRadius,xr,yr,zr,divisions) {
+	var divisions = divisions; //if we want n divisions, divisions must equal n/2
+	var stretchX  = xRadius/100;
+	var stretchY  = yRadius/100;
+	var stretchZ  = zRadius/100;
+	var rx = new Matrix('rx',xr);
+	var ry = new Matrix('ry',yr);
+	var rz = new Matrix('rz',zr);
+	
+	for(var i = 0; i <= divisions; i++){
+		// no stretch is a sphere with a radius of 100
+		var z1 = (i)*100/divisions;
+		var z2 = (i+1)*100/divisions;
+		console.log(z2);
+		// x^2 + y^2 = 100 - z^2
+		for(var j = 0; j <= 2*divisions; j++){
+			
+			var p1 = new Vector(stretchX*Math.sqrt(100*100-z1*z1)*Math.cos(j*2*Math.PI/(2*divisions)), //x 
+								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin(j*2*Math.PI/(2*divisions)), //y
+								stretchZ*z1);													  //z
+			
+			var p2 = new Vector(stretchX*Math.sqrt(100*100-z1*z1)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
+								stretchZ*z1);														  //z
+			
+			var p3 = new Vector(stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
+								stretchZ*z2);														  //z
+
+			var p4 = new Vector(stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
+								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j)*2*Math.PI/(2*divisions)), //y
+								stretchZ*z2);														//z
+
+			var p5 = new Vector(-stretchX*Math.sqrt(100*100-z1*z1)*Math.cos(j*2*Math.PI/(2*divisions)), //x 
+								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin(j*2*Math.PI/(2*divisions)), //y
+								-stretchZ*z1);													  //z
+			
+			var p6 = new Vector(-stretchX*Math.sqrt(100*100-z1*z1)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
+								-stretchZ*z1);														  //z
+			
+			var p7 = new Vector(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
+								-stretchZ*z2);														  //z
+
+			var p8 = new Vector(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
+								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j)*2*Math.PI/(2*divisions)), //y
+								-stretchZ*z2);
+			/***Rotation transforms***/
+
+			var rp1 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p1)))
+			var rp2 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p2)))
+			var rp3 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p3)))
+			var rp4 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p4)))
+
+			var rp5 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p5)))
+			var rp6 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p6)))
+			var rp7 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p7)))
+			var rp8 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p8)))
+
+			this.fillPolygon([rp1.at(0) + x,rp1.at(1) + y,rp1.at(2) + z,
+							  rp2.at(0) + x,rp2.at(1) + y,rp2.at(2) + z,
+							  rp3.at(0) + x,rp3.at(1) + y,rp3.at(2) + z,
+							  rp4.at(0) + x,rp4.at(1) + y,rp4.at(2) + z]);
+			this.fillPolygon([rp5.at(0) + x,rp5.at(1) + y,rp5.at(2) + z,
+							  rp6.at(0) + x,rp6.at(1) + y,rp6.at(2) + z,
+							  rp7.at(0) + x,rp7.at(1) + y,rp7.at(2) + z,
+							  rp8.at(0) + x,rp8.at(1) + y,rp8.at(2) + z]);
+		}
+	}
+
 };

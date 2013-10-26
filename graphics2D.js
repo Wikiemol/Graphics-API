@@ -45,7 +45,6 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	var y1 = y_1;
 	var x2 = x_2;
 	var y2 = y_2;
-
 	if(x1 > x2){
 		x1 = x_2;
 		y1 = y_2;

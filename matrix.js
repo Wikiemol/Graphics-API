@@ -1,4 +1,4 @@
-function Matrix() { //can also take array of vectors
+function Matrix() { //can take array of vectors, in addition, it can be set to a rotation matrix by passing 'rx' 'ry' or 'rx' as the first argument, and the angle to be rotated as the second
 	var matrixArray = [];
 	var width;
 	var height;
