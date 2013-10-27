@@ -1,9 +1,13 @@
 function Graphics2D(context,c){
-	this.cxt = context;
-	var color = c;
-	var standard_coordinates = false;
-	var queue		    = [];
+	this.cxt 					= context;
+	var color 					= c;
+	var standard_coordinates 	= false;
+	var buffer		    		= [];
 
+	for(var i = 0; i < cxt.canvas.width; i++){
+		buffer.push([]);
+	}
+	
 	
 	
 	if(!c){
@@ -24,20 +28,45 @@ function Graphics2D(context,c){
 	this.getCoordinates = function(){
 		return standard_coordinates;
 	}
-}
 
-
-
-Graphics2D.prototype.drawPixel = function(x,y){
-	this.cxt.fillStyle = this.getColor();
-	if(!this.getCoordinates()){
-		this.cxt.fillRect(x,y,1,1);
-		
-	}else{
-		this.cxt.fillRect(x+this.cxt.canvas.width/2,-y+this.cxt.canvas.height/2,1,1);
+	this.getBuffer = function(){
+		return buffer;
 	}
 
+	this.draw = function(){
+
+		var l1 = buffer.length;
+		
+		for(var i = 0; i < l1; i++){
+			
+			var l2 = buffer[i].length;
+			var j;
+			for(j = 0; j<=l2; j++){
+				if(!(typeof buffer[i][j] === 'undefined')){
+					// console.log("hi")
+					this.cxt.fillStyle = buffer[i][j];
+					this.cxt.fillRect(i,j,1,1);
+				}
+			}
+		}
+	}
+	this.drawPixel = function(x1,y1){
+		var x = Math.round(x1);
+		var y = Math.round(y1);
+
+		if(standard_coordinates){
+			x = Math.round(x1+this.cxt.canvas.width/2);
+			y = Math.round(-y1+this.cxt.canvas.height/2);
+		}
+
+		if(x <= context.canvas.width && x >= 0 && y <= context.canvas.height && y >= 0){
+			buffer[x][y] = color;
+
+		}
+
+	}
 }
+
 
 Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	
@@ -104,10 +133,11 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 	var maxY = Math.max(Math.max(y1,y2),y3);
 
 	var area = getArea(x1,y1,x2,y2,x3,y3);
-	
-	for(var i = 0; i < Math.abs(maxX - minX); i++){
+	var n1 = Math.abs(maxX - minX);
+	var n2 = Math.abs(maxY - minY);
+	for(var i = 0; i < n1; i++){
 		
-		for(var j = 0; j < Math.abs(maxY - minY); j++){
+		for(var j = 0; j < n2; j++){
 			
 			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
 					this.drawPixel(minX + i, minY + j);
@@ -195,13 +225,13 @@ Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user
 
 Graphics2D.prototype.fillPolygonConvex = function(a){ //assumes polygon passed is convex. Faster than general polygon.
 	var midPoint = [0,0];
-	
-	for(var i = 0; i < a.length/2; i++){
-		midPoint[0] += a[i*2]/(a.length/2);
-		midPoint[1] += a[i*2 + 1]/(a.length/2);
+	var n1 = a.length/2;
+	for(var i = 0; i < n1; i++){
+		midPoint[0] += a[i*2]/(n1);
+		midPoint[1] += a[i*2 + 1]/(n1);
 	}
-	
-	for(var i = 0; i < a.length/2 - 1; i++){
+	var n2 = a.length/2 - 1;
+	for(var i = 0; i < n2; i++){
 		this.fillTriangle(a[i*2],a[i*2 + 1],a[i*2 + 2],a[i*2 + 3],midPoint[0],midPoint[1]);
 	}
 	this.fillTriangle(a[a.length - 2],a[a.length - 1],a[0],a[1],midPoint[0],midPoint[1]);

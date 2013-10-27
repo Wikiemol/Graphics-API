@@ -1,13 +1,15 @@
-function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, specularMax 0 - 15, specularExponent 0 - infinity, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1, set by passing in a curly brackets array eg. {"color":"#808080","diffusion":0.5 ... etc.}
+function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, specularMultiplier 0 - 15, specularExponent 0 - infinity, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1, set by passing in a curly brackets array eg. {"color":"#808080","diffusion":0.5 ... etc.}
 	var color = "#808080";
 	var specularity = 1;
 	var diffusion = 1;
 	var ambience = 1;
 	var shine = 1;
-	var specularMax = 5;
+	var specularMultiplier = 5;
 	var specularExponent = 3;
 	if(!(typeof m === 'undefined')){
+		console.log(m["specularExponent"])
 		if(!(typeof m["color"] === 'undefined')){
+
 			color = m["color"];
 		}
 
@@ -27,11 +29,12 @@ function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, spec
 			shine = m["shine"];
 		}
 
-		if(!(typeof m["specularMax"] === 'undefined')){
-			specularMax = m["specularMax"];
+		if(!(typeof m["specularMultiplier"] === 'undefined')){
+			specularMultiplier = m["specularMultiplier"];
 		}
 
 		if(!(typeof m["specularExponent"] === 'undefined')){
+
 			specularExponent = m["specularExponent"];
 		}
 	}
@@ -67,12 +70,12 @@ function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, spec
 		return diffusion;
 	}
 
-	this.getSpecularMax = function(){
-		return specularMax;
+	this.getSpecularMultiplier = function(){
+		return specularMultiplier;
 	}
 
-	this.setSpecularMax = function(s){
-		specularMax = s;
+	this.setSpecularMultiplier = function(s){
+		specularMultiplier = s;
 	}
 
 	this.getSpecularExponent = function(){

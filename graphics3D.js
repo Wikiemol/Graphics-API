@@ -32,7 +32,9 @@ function Graphics3D(context){
 								"diffusion": cl["diffusion"],
 								"ambience": cl["ambience"],
 								"specularity": cl["specularity"],
-								"shine": cl["shine"]});
+								"shine": cl["shine"],
+								"specularExponent": cl["specularExponent"],
+								"specularMultiplier": cl["specularMultiplier"]});
 	}
 	
 	this.getMaterial = function(){
@@ -182,6 +184,7 @@ function Graphics3D(context){
 			}
 			
 		}
+		g.draw();
 		queue = [];
 		lights = [];
 	}
@@ -263,7 +266,6 @@ function Graphics3D(context){
 			totalColor += (lights[i].getGel()["r"] + lights[i].getGel()["g"] + lights[i].getGel()["b"])*diffusionLight.magnitude();
 		}
 
-		console.log("specularity: " + specularity);
 
 		var rRatio = 3*totalGel["r"]/totalColor;
 		var gRatio = 3*totalGel["g"]/totalColor;
@@ -286,11 +288,10 @@ function Graphics3D(context){
 		green *= diffuse*gRatio;
 		blue *= diffuse*bRatio;
 
-		red += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMax(),queue[a][queue[a].length - 1].getSpecularExponent());
-		green += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMax(),queue[a][queue[a].length - 1].getSpecularExponent());
-		blue += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMax(),queue[a][queue[a].length - 1].getSpecularExponent());
+		red += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
+		green += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
+		blue += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
 
-		console.log("red: " + red);
 		if(Math.round(red) <= 15) { //if red is single digit in hex make it double digit
 			red = "0" + Math.round(red).toString(16);
 		}else if(red > 255){ //if red is triple digit in hex make it highest double digit ("FF" or 255 in decimal)
@@ -510,7 +511,6 @@ Graphics3D.prototype.fillEllipsoid = function(x,y,z,xRadius,yRadius,zRadius,xr,y
 		// no stretch is a sphere with a radius of 100
 		var z1 = (i)*100/divisions;
 		var z2 = (i+1)*100/divisions;
-		console.log(z2);
 		// x^2 + y^2 = 100 - z^2
 		for(var j = 0; j <= 2*divisions; j++){
 			

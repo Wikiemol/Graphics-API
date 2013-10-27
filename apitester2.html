@@ -37,6 +37,8 @@
 
 				setInterval(draw2,33)
 				// draw2();
+
+				// draw3();
 			}
 
 
@@ -52,7 +54,7 @@
 			
 
 			var t = 7*Math.PI/6;
-			var light1 = new Light({"diffusion":1});
+			var light1 = new Light({"diffusion":1,"specularity":1});
 			var light2 = new Light({"diffusion":0.5});
 			function draw(){
 
@@ -84,23 +86,35 @@
 				// sy-=5;
 				
 			}
-
+			var lastFrame = new Date;
 			function draw2(){
 				cxt.clearRect(0,0,500,500);
 				cxt.fillStyle = "#000000"
 				cxt.fillRect(0,0,500,500);
+				cxt.fillStyle = "#FFFFFF"
+				var thisFrame = new Date;
+				cxt.fillText("FPS: " + Math.round(1000/(thisFrame - lastFrame)),10,20);
+				lastFrame = thisFrame;
 
 				g.setSensor(0,200 + sy,1100);
 				g.setFocalLength(500);
-				light1.setPosition(100*Math.cos(sx),100,400);
-				// light1.setGelBySaturation({"r":0.1})
+				light1.setPosition(100,100,400);
+				light1.setGelBySaturation({"r":0.5})
 				// g.drawGrid();
 				g.addLight(light1,true);
-				g.setMaterial({"color": "#FF8080"});
-				g.fillEllipsoid(0,0,0,100,100,50,0,sx,0,8);
+				g.setMaterial({"color": "#80FF80", "specularExponent": 6, "specularMultiplier": 2});
+				g.fillEllipsoid(0,0,0,100,100,50,sx,sx,sx,8);
 				g.draw({"lights":true,"ambience":false});
 				sx+=0.03 
 				
+			}
+
+			function draw3(){
+				g = new Graphics2D(cxt);
+				g.drawPixel(10,-10);
+				g.drawPixel(11,-10);
+				g.drawPixel(12,-10);
+				g.draw();
 			}
 		</script>
 	</head>
