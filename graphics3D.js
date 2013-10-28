@@ -20,7 +20,7 @@ function Graphics3D(context){
 				console.warn("Warning: Directional lights cannot be shown. To get rid of this warning do not pass a visible boolean to addLight.");
 			}
 			var temp = this.getMaterial();
-			this.setMaterial({"color":"#FF8000"});
+			this.setMaterial({"color":[255,128,0]});
 			this.drawPrism(l.getPosition().at(0),l.getPosition().at(1),l.getPosition().at(2),10,10,10);
 			this.setMaterial(temp);
 		}
@@ -223,7 +223,7 @@ function Graphics3D(context){
 	
 	var applyLight = function(a){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
 		var midPoint		= new Vector(0,0,0);
-		var specularity	= 0;
+		var specularity		= 0;
 		var diffuse			= 0;
 		var side1			= queue[a][0].subtract(queue[a][1]);
 		var side2			= queue[a][2].subtract(queue[a][1]);
@@ -280,9 +280,9 @@ function Graphics3D(context){
 		
 		/*** calculating color ***/
 
-		var red = parseInt(parseInt(materialColor.charAt(1) + materialColor.charAt(2),16).toString(10),10);
-		var green = parseInt(parseInt(materialColor.charAt(3) + materialColor.charAt(4),16).toString(10),10);
-		var blue = parseInt(parseInt(materialColor.charAt(5) + materialColor.charAt(6),16).toString(10),10);
+		var red = materialColor[0];
+		var green = materialColor[1];
+		var blue = materialColor[2];
 		
 		red *= diffuse*rRatio;
 		green *= diffuse*gRatio;
@@ -292,31 +292,19 @@ function Graphics3D(context){
 		green += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
 		blue += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
 
-		if(Math.round(red) <= 15) { //if red is single digit in hex make it double digit
-			red = "0" + Math.round(red).toString(16);
-		}else if(red > 255){ //if red is triple digit in hex make it highest double digit ("FF" or 255 in decimal)
-			red = "FF";
-		}else{
-			red = Math.round(red).toString(16); //otherwise convert red normally
-		};
+		if(red > 255){ 
+			red = 255;
+		}
 
-		if(Math.round(blue) <= 15) { //same as red except for blue
-			blue = "0" + Math.round(blue).toString(16);
-		}else if(blue > 255){
-			blue = "FF";
-		}else{
-			blue = Math.round(blue).toString(16);
-		};
+		if(blue > 255){
+			blue = 255;
+		}
 
-		if(Math.round(green) <= 15) { //same as blue except for green
-			green = "0" + Math.round(green).toString(16);
-		}else if(green > 255){
-			green = "FF";
-		}else{
-			green = Math.round(green).toString(16);
-		};
+		if(green > 255){
+			green = 255;
+		}
 
-		var color = "#" + red + green + blue;
+		var color = [red,green,blue];
 		return color;
 
 	}
@@ -348,9 +336,6 @@ function Graphics3D(context){
 
 		}
 
-		var red = parseInt(parseInt(materialColor.charAt(1) + materialColor.charAt(2),16).toString(10),10);
-		var green = parseInt(parseInt(materialColor.charAt(3) + materialColor.charAt(4),16).toString(10),10);
-		var blue = parseInt(parseInt(materialColor.charAt(5) + materialColor.charAt(6),16).toString(10),10);
 		
 		// console.log("red: " + red + " | green: " + green + " | blue: " + blue);
 
@@ -365,7 +350,7 @@ function Graphics3D(context){
 		console.log(diffuse)
 		var shineLight = new Light({"type": "point","diffusion": diffuse});
 		shineLight.setPosition(midPoint.at(0),midPoint.at(1),midPoint.at(2))
-		shineLight.setGel({"r": red, "g": green, "b": blue});
+		shineLight.setGel({"r": materialColor[0], "g": materialColor[1], "b": materialColor[2]});
 
 		
 		return shineLight;

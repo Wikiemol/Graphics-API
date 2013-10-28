@@ -1,6 +1,6 @@
 function Graphics2D(context,c){
 	this.cxt 					= context;
-	var color 					= c;
+	var color 					= [0,0,0];
 	var standard_coordinates 	= false;
 	var WIDTH 					= context.canvas.width;
 	var HEIGHT 					= context.canvas.height;
@@ -8,11 +8,14 @@ function Graphics2D(context,c){
 	var data 					= imageData.data;
 	
 	if(!c){
-		color = "#000000";
+		color = [0,0,0];
+	}else{
+		color = [c[0],c[1],c[2]];
 	}
 
 	this.setColor = function(cl){
-		color = cl;
+
+		color = [cl[0],cl[1],cl[2]];
 	}
 	this.getColor = function(){
 		return color;
@@ -27,9 +30,7 @@ function Graphics2D(context,c){
 	}
 
 	this.drawPixel = function(x1,y1){
-		var red = parseInt(parseInt(color.charAt(1) + color.charAt(2),16).toString(10),10);
-		var green = parseInt(parseInt(color.charAt(3) + color.charAt(4),16).toString(10),10);
-		var blue = parseInt(parseInt(color.charAt(5) + color.charAt(6),16).toString(10),10);
+		
 
 		var x = Math.round(x1);
 		var y = Math.round(y1);
@@ -39,12 +40,12 @@ function Graphics2D(context,c){
 			y = Math.round(-y1+HEIGHT/2);
 		}
 
-		if(x <= WIDTH && x >= 0 && y <= HEIGHT && y >= 0){
-			var point = (x+y*HEIGHT)*4;
+		if(x < WIDTH && x >= 0 && y < HEIGHT && y >= 0){
+			var point = (x+y*WIDTH)*4;
 
-			data[point + 0] = red; //r
-			data[point + 1] = green; //g
-			data[point + 2] = blue; //b
+			data[point + 0] = color[0]; //r
+			data[point + 1] = color[1]; //g
+			data[point + 2] = color[2]; //b
 			data[point + 3] = 255; //a
 		}
 	}

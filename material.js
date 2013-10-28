@@ -34,7 +34,6 @@ function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, spec
 		}
 
 		if(!(typeof m["specularExponent"] === 'undefined')){
-
 			specularExponent = m["specularExponent"];
 		}
 	}
