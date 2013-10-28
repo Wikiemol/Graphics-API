@@ -97,8 +97,27 @@ function Graphics3D(context){
 		var g = new Graphics2D(this.cxt);
 		
 		g.setCoordinates(standard_coordinates);
+		
+		queue = queue.sort(function(a,b){
+			var amidPoint = new Vector(0,0,0);
+			var bmidPoint = new Vector(0,0,0);
+			
+			for(var i = 0; i < a.length - 1; i++){
+				amidPoint = amidPoint.add(new Vector(a[i].at(0)/(a.length-1),
+										 			 a[i].at(1)/(a.length-1),
+													 a[i].at(2)/(a.length-1)));
+			}
+			for(var i = 0; i < b.length - 1; i++){
+				bmidPoint = bmidPoint.add(new Vector(b[i].at(0)/(b.length - 1),
+										 			 b[i].at(1)/(b.length - 1),
+										 			 b[i].at(2)/(b.length - 1)));
+			}
+			var aAverageDistance = sensorDistance(amidPoint.at(0),amidPoint.at(1),amidPoint.at(2));
+			var bAverageDistance = sensorDistance(bmidPoint.at(0),bmidPoint.at(1),bmidPoint.at(2));
 
-		this.sortQueue();
+			return bAverageDistance - aAverageDistance;
+		})
+
 		//Calculating ambientLight
 		var ambientLights = [];
 		
@@ -189,37 +208,9 @@ function Graphics3D(context){
 		lights = [];
 	}
 	
-	this.sortQueue = function(){
-		//console.log("0: "+queue[0]);
-		//console.log("1: "+queue[1] + "\n");
-		for(var i = 0; i < queue.length; i++){
-			var maxDistance = null;
-			for(var j = i; j < queue.length; j++){
-				var midPoint = [0,0,0]
-				
-				for(var k = 0; k < (queue[j].length - 1); k++){
-					midPoint[0] += queue[j][k].at(0)/(queue[j].length - 1);
-					midPoint[1] += queue[j][k].at(1)/(queue[j].length - 1);
-					midPoint[2] += queue[j][k].at(2)/(queue[j].length - 1);
-				}
-				
-				var averageDistance = sensorDistance(midPoint[0],midPoint[1],midPoint[2]);
-				//console.log("Max distance: " + maxDistance + " | averageDistance: " + averageDistance );
-				//console.log("1) midPoint: " + midPoint + " | maxDistance: " + maxDistance + " | averageDistance: " + averageDistance); console.log( "queue[" + i + "]: " + queue[i]); console.log("queue[" + j + "]: " + queue[j]); 
-				if(!maxDistance || averageDistance > maxDistance){
-					var temp = queue[j];
-					maxDistance = averageDistance;
-					queue[j] = queue[i];
-					queue[i] = temp;
-				}
-				//console.log("2) midPoint: " + midPoint + " | maxDistance: " + maxDistance + " | averageDistance: " + averageDistance); console.log( "queue[" + i + "]: " + queue[i]); console.log("queue[" + j + "]: " + queue[j] + "\n"); 
-
-			
-			}
-		}
 		//console.log("0: "+queue[0]);
 		//console.log("1: "+queue[1]);
-	}
+	
 	
 	var applyLight = function(a){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
 		var midPoint		= new Vector(0,0,0);

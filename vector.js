@@ -1,31 +1,32 @@
 function Vector(){
-	var vectorArray = [];
+	this.vectorArray = [];
 	
 	for(var i = 0; i < arguments.length; i++){
-		vectorArray.push(arguments[i]);
+		this.vectorArray.push(arguments[i]);
 	}
 	
-	this.getVectorAsArray = function(){
-		return vectorArray;	
-	}
-	
-	this.set = function(){ //Completely overrides current vectorArray
-		for(var i = 0; i < arguments.length; i++){
-			vectorArray[i] = arguments[i];
-		}
-	}
-		
-	this.setAt = function(i,a){
-		vectorArray[i] = a;
-	}
-	
-	this.at = function(i){
-		return vectorArray[i];
-	}
+}
 
-	this.getLength = function(){
-		return vectorArray.length;
+Vector.prototype.getVectorAsArray = function(){
+	return this.vectorArray;	
+}
+
+Vector.prototype.set = function(){ //Completely overrides current this.vectorArray
+	for(var i = 0; i < arguments.length; i++){
+		this.vectorArray[i] = arguments[i];
 	}
+}
+
+Vector.prototype.setAt = function(i,a){
+	this.vectorArray[i] = a;
+}
+
+Vector.prototype.at = function(i){
+	return this.vectorArray[i];
+}
+
+Vector.prototype.getLength = function(){
+	return this.vectorArray.length;
 }
 
 Vector.prototype.cross = function(v){
@@ -89,7 +90,6 @@ Vector.prototype.unit = function(){
 
 Vector.prototype.angle = function(v){ //angle between two vectors
 	var angle = Math.acos(this.dot(v)/(this.magnitude()*v.magnitude()))
-	
 	return angle;
 }
 

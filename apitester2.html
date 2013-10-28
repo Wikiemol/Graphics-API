@@ -99,10 +99,10 @@
 				g.setSensor(0,200 + sy,1100);
 				g.setFocalLength(500);
 				light1.setPosition(100,100,400);
-				light1.setGelBySaturation({"r":0.5})
+				
 				// g.drawGrid();
 				g.addLight(light1,true);
-				g.setMaterial({"color": [128,255,128], "specularExponent": 6, "specularMultiplier": 2});
+				g.setMaterial({"color": [255,128,128], "specularExponent": 6, "specularMultiplier": 2});
 				g.fillEllipsoid(0,0,0,100,100,50,sx,sx,sx,8);
 				g.draw({"lights":true,"ambience":false});
 				sx+=0.03 
