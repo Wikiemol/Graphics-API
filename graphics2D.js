@@ -2,13 +2,10 @@ function Graphics2D(context,c){
 	this.cxt 					= context;
 	var color 					= c;
 	var standard_coordinates 	= false;
-	var buffer		    		= [];
-
-	for(var i = 0; i < cxt.canvas.width; i++){
-		buffer.push([]);
-	}
-	
-	
+	var WIDTH 					= context.canvas.width;
+	var HEIGHT 					= context.canvas.height;
+	var imageData 				= context.getImageData(0,0,WIDTH,HEIGHT);
+	var data 					= imageData.data;
 	
 	if(!c){
 		color = "#000000";
@@ -29,41 +26,31 @@ function Graphics2D(context,c){
 		return standard_coordinates;
 	}
 
-	this.getBuffer = function(){
-		return buffer;
-	}
-
-	this.draw = function(){
-
-		var l1 = buffer.length;
-		
-		for(var i = 0; i < l1; i++){
-			
-			var l2 = buffer[i].length;
-			var j;
-			for(j = 0; j<=l2; j++){
-				if(!(typeof buffer[i][j] === 'undefined')){
-					// console.log("hi")
-					this.cxt.fillStyle = buffer[i][j];
-					this.cxt.fillRect(i,j,1,1);
-				}
-			}
-		}
-	}
 	this.drawPixel = function(x1,y1){
+		var red = parseInt(parseInt(color.charAt(1) + color.charAt(2),16).toString(10),10);
+		var green = parseInt(parseInt(color.charAt(3) + color.charAt(4),16).toString(10),10);
+		var blue = parseInt(parseInt(color.charAt(5) + color.charAt(6),16).toString(10),10);
+
 		var x = Math.round(x1);
 		var y = Math.round(y1);
 
 		if(standard_coordinates){
-			x = Math.round(x1+this.cxt.canvas.width/2);
-			y = Math.round(-y1+this.cxt.canvas.height/2);
+			x = Math.round(x1+WIDTH/2);
+			y = Math.round(-y1+HEIGHT/2);
 		}
 
-		if(x <= context.canvas.width && x >= 0 && y <= context.canvas.height && y >= 0){
-			buffer[x][y] = color;
+		if(x <= WIDTH && x >= 0 && y <= HEIGHT && y >= 0){
+			var point = (x+y*HEIGHT)*4;
 
+			data[point + 0] = red; //r
+			data[point + 1] = green; //g
+			data[point + 2] = blue; //b
+			data[point + 3] = 255; //a
 		}
+	}
 
+	this.draw = function(){
+		context.putImageData(imageData,0,0);
 	}
 }
 

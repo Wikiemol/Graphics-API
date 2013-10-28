@@ -103,18 +103,22 @@
 				// g.drawGrid();
 				g.addLight(light1,true);
 				g.setMaterial({"color": "#80FF80", "specularExponent": 6, "specularMultiplier": 2});
-				g.fillEllipsoid(0,0,0,100,100,50,sx,sx,sx,8);
+				g.fillEllipsoid(0,0,0,100,100,50,sx,sx,sx,9);
 				g.draw({"lights":true,"ambience":false});
 				sx+=0.03 
 				
 			}
 
 			function draw3(){
-				g = new Graphics2D(cxt);
-				g.drawPixel(10,-10);
-				g.drawPixel(11,-10);
-				g.drawPixel(12,-10);
-				g.draw();
+				var imageData = cxt.getImageData(0,0,canvas.width,canvas.height);
+				var data = imageData.data;
+
+				data[(x+y*canvas.height)*4 + 0] = 255; //r
+				data[(x+y*canvas.height)*4 + 1] = 0; //g
+				data[(x+y*canvas.height)*4 + 2] = 0; //b
+				data[(x+y*canvas.height)*4 + 3] = 255; //a
+
+				cxt.putImageData(imageData,0,0);
 			}
 		</script>
 	</head>
