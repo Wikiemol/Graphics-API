@@ -9,7 +9,7 @@ function Graphics3D(context){
 	var queue                = [];
 
 	var lights               = [];
-	var material			 = new Material("#808080",1);
+	this.material			 = new Material("#808080",1);
 	var concavePolygons      = false;
 	var self = this;
 	var ambientLight		 = 0;
@@ -28,7 +28,7 @@ function Graphics3D(context){
 	this.setMaterial = function(cl){
 		
 		// if(!(cl instanceof Array)) throw "Error: setMaterial takes Array as arguments."
-		material = new Material({"color": cl["color"],
+		this.material = new Material({"color": cl["color"],
 								"diffusion": cl["diffusion"],
 								"ambience": cl["ambience"],
 								"specularity": cl["specularity"],
@@ -36,10 +36,6 @@ function Graphics3D(context){
 								"specularExponent": cl["specularExponent"],
 								"specularMultiplier": cl["specularMultiplier"]});
 	}
-	
-	this.getMaterial = function(){
-		return material;
-	}	
 	
 	this.setCoordinates = function(t){
 		standard_coordinates = t;
@@ -99,23 +95,15 @@ function Graphics3D(context){
 		g.setCoordinates(standard_coordinates);
 		
 		queue = queue.sort(function(a,b){
-			var amidPoint = new Vector(0,0,0);
-			var bmidPoint = new Vector(0,0,0);
 			
-			for(var i = 0; i < a.length - 1; i++){
-				amidPoint = amidPoint.add(new Vector(a[i].at(0)/(a.length-1),
-										 			 a[i].at(1)/(a.length-1),
-													 a[i].at(2)/(a.length-1)));
-			}
-			for(var i = 0; i < b.length - 1; i++){
-				bmidPoint = bmidPoint.add(new Vector(b[i].at(0)/(b.length - 1),
-										 			 b[i].at(1)/(b.length - 1),
-										 			 b[i].at(2)/(b.length - 1)));
-			}
-			var aAverageDistance = sensorDistance(amidPoint.at(0),amidPoint.at(1),amidPoint.at(2));
-			var bAverageDistance = sensorDistance(bmidPoint.at(0),bmidPoint.at(1),bmidPoint.at(2));
+			var bDistance = Math.sqrt((sensor.at(0) - b.midPoint().at(0))*(sensor.at(0) - b.midPoint().at(0)) + 
+									  (sensor.at(1) - b.midPoint().at(1))*(sensor.at(1) - b.midPoint().at(1)) +
+									  (sensor.at(2) - b.midPoint().at(2))*(sensor.at(2) - b.midPoint().at(2)));
 
-			return bAverageDistance - aAverageDistance;
+			var aDistance = Math.sqrt((sensor.at(0) - a.midPoint().at(0))*(sensor.at(0) - a.midPoint().at(0)) + 
+									  (sensor.at(1) - a.midPoint().at(1))*(sensor.at(1) - a.midPoint().at(1)) +
+									  (sensor.at(2) - a.midPoint().at(2))*(sensor.at(2) - a.midPoint().at(2)));
+			return bDistance - aDistance;
 		})
 
 		//Calculating ambientLight
@@ -139,67 +127,30 @@ function Graphics3D(context){
 			
 			// console.log(lights)
 		}
-
-
-
 		//Drawing polygons
 		for(var i = 0; i < queue.length; i++){
-			if(queue[i].length == 4){
-				
-				var p1 	  = queue[i][0];
-				var p2	  = queue[i][1];
-				var p3	  = queue[i][2];
-				
-				if(p1.at(2) < lens && p2.at(2) < lens && p3.at(2) < lens){
-					var proj1 = this.projectPoint(p1.at(0),p1.at(1),p1.at(2));
-					var proj2 = this.projectPoint(p2.at(0),p2.at(1),p2.at(2));
-					var proj3 = this.projectPoint(p3.at(0),p3.at(1),p3.at(2));
+			var a = queue[i];
+			if(a instanceof Triangle3D){
+				if(a.p1.at(2) < lens && a.p2.at(2) < lens && a.p3.at(2) < lens){
+					var proj1 = this.projectPoint(a.p1.at(0),a.p1.at(1),a.p1.at(2));
+					var proj2 = this.projectPoint(a.p2.at(0),a.p2.at(1),a.p2.at(2));
+					var proj3 = this.projectPoint(a.p3.at(0),a.p3.at(1),a.p3.at(2));
 					
 					if(lightIsOn){
 						g.setColor(applyLight(i));
 					}else{
-						g.setColor(queue[i][queue[i].length-1].getColor())
+						g.setColor(a.getMaterial().getColor())
 					}
 					
 					g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
 				}
-			}else if(queue[i].length == 3){
-				
-				var p1 	  = queue[i][0];
-				var p2	  = queue[i][1];
-				
-				if(p1.at(2) < lens && p2.at(2) < lens){
-					var proj1 = this.projectPoint(p1.at(0),p1.at(1),p1.at(2));
-					var proj2 = this.projectPoint(p2.at(0),p2.at(1),p2.at(2));
-					
-					g.setColor(queue[i][2].getColor());
-
+			}else if(a instanceof Line3D){
+				if(a.p1.at(2) < lens && a.p2.at(2) < lens){
+					var proj1 = this.projectPoint(a.p1.at(0),a.p1.at(1),a.p1.at(2));
+					var proj2 = this.projectPoint(a.p2.at(0),a.p2.at(1),a.p2.at(2));
+					g.setColor(a.getMaterial().getColor());
 					g.drawLine(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1));
 				}
-			}else{
-				
-				var projectedPoints = [];
-				
-				if(lightIsOn){
-					g.setColor(applyLight(i));
-				}else{
-
-					g.setColor(queue[i][queue[i].length-1].getColor())
-				}
-				
-				for(var j = 0; j < queue[i].length - 1; j++){
-					projectedPoints[j*2] = this.projectPoint(queue[i][j].at(0),queue[i][j].at(1),queue[i][j].at(2)).at(0);
-					projectedPoints[j*2 + 1] = this.projectPoint(queue[i][j].at(0),queue[i][j].at(1),queue[i][j].at(2)).at(1);
-				}
-				
-				if(!concavePolygons){
-					
-					g.fillPolygonConvex(projectedPoints);
-				}else{
-					
-					g.fillPolygon(projectedPoints);
-				}
-				
 			}
 			
 		}
@@ -212,25 +163,22 @@ function Graphics3D(context){
 		//console.log("1: "+queue[1]);
 	
 	
-	var applyLight = function(a){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
-		var midPoint		= new Vector(0,0,0);
+	var applyLight = function(i){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
+		var a = queue[i];
+		var midPoint		= a.midPoint();
 		var specularity		= 0;
 		var diffuse			= 0;
-		var side1			= queue[a][0].subtract(queue[a][1]);
-		var side2			= queue[a][2].subtract(queue[a][1]);
-		var normal			= side1.cross(side2).unit();
-		var materialColor	= queue[a][queue[a].length-1].getColor(); //A material color in a material world
+		var normal			= a.normal().unit();
+
+		var material 		= a.getMaterial();
+		var materialColor	= material.getColor();
+		
 		var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
 		var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
 		var viewPointVector = new Vector(0,0,0); //Vector between midpoint and viewPoint
-		for(var i = 0; i < queue[a].length - 2;i++){ //calculating midPoint
-			midPoint = midPoint.add(new Vector(queue[a][i].at(0)/(queue[a].length - 1),
-											   queue[a][i].at(1)/(queue[a].length - 1),
-											   queue[a][i].at(2)/(queue[a].length - 1)))
-		}
+		viewPointVector = viewPointVector.add(midPoint.subtract(self.getSensor())).unit();
 
-		// viewPointVector = viewPointVector.add(self.getSensor().subtract(midPoint)).unit().multiply(-1);
-		viewPointVector = viewPointVector.add(midPoint.subtract(self.getSensor())).unit().multiply(1);
+
 		for(var i = 0; i < lights.length; i++){ //totaling light contributions
 
 			/**Calculate Specularity**/
@@ -238,15 +186,17 @@ function Graphics3D(context){
 
 			var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
 
-			if(lightReflection.dot(viewPointVector)*queue[a][queue[a].length - 1].getSpecularity() > 0){
-				specularity += lightReflection.dot(viewPointVector)*queue[a][queue[a].length - 1].getSpecularity()*(400/lights[i].distance(midPoint.at(0),midPoint.at(1),midPoint.at(2)));
+			if(lightReflection.dot(viewPointVector)*material.getSpecularity() > 0){
+				specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/lights[i].distance(midPoint.at(0),midPoint.at(1),midPoint.at(2)));
 			}
 
 			/**Calculate Diffusion**/
 
 			var diffusionLight = lights[i].diffusionIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2));
-			if(diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion() >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
-				 diffuse += diffusionLight.dot(normal)*queue[a][queue[a].length - 1].getDiffusion(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
+
+			if(diffusionLight.dot(normal)*material.getDiffusion() >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
+
+				diffuse += diffusionLight.dot(normal)*material.getDiffusion(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
 			}
 
 			/**Calculate color contribution (totalgel contribution)**/
@@ -257,7 +207,7 @@ function Graphics3D(context){
 			totalColor += (lights[i].getGel()["r"] + lights[i].getGel()["g"] + lights[i].getGel()["b"])*diffusionLight.magnitude();
 		}
 
-
+		
 		var rRatio = 3*totalGel["r"]/totalColor;
 		var gRatio = 3*totalGel["g"]/totalColor;
 		var bRatio = 3*totalGel["b"]/totalColor;
@@ -279,9 +229,9 @@ function Graphics3D(context){
 		green *= diffuse*gRatio;
 		blue *= diffuse*bRatio;
 
-		red += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
-		green += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
-		blue += Math.pow(specularity*queue[a][queue[a].length - 1].getSpecularMultiplier(),queue[a][queue[a].length - 1].getSpecularExponent());
+		red += Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
+		green += Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
+		blue += Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
 
 		if(red > 255){ 
 			red = 255;
@@ -296,6 +246,7 @@ function Graphics3D(context){
 		}
 
 		var color = [red,green,blue];
+		
 		return color;
 
 	}
@@ -354,6 +305,9 @@ function Graphics3D(context){
 	}
 }
 
+Graphics3D.prototype.getMaterial = function(){
+	return this.material;
+}	
 
 Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d space
 	var t1 = (this.getLens()-this.getSensor().at(2))/(this.getSensor().at(2) - z_1); //the t derived from the z component of the parametric line between the point to be projected and the sensor assuming the line intersects the lens, the lens is flat, and the lens is parallel to the xy plane
@@ -372,8 +326,11 @@ Graphics3D.prototype.inverseProjectPoint = function(x_1,y_1,z_1){ //with a given
 }
 
 Graphics3D.prototype.drawLine = function(x1,y1,z1,x2,y2,z2){
+	var p1 = new Vector(x1,y1,z1);
+	var p2 = new Vector(x2,y2,z2);
 
-	this.pushToQueue([new Vector(x1,y1,z1),new Vector(x2,y2,z2),this.getMaterial()]);
+	var line = new Line3D(p1,p2,this.getMaterial());
+	this.pushToQueue(line);
 
 }
 
@@ -398,9 +355,9 @@ Graphics3D.prototype.drawPrism = function(x,y,z,w,h,d){
 }
 
 Graphics3D.prototype.fillTriangle = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
-	if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined."); 
-	this.pushToQueue([new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial()]);
-
+	if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined.");
+	var triangle = new Triangle3d(new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial());
+	this.pushToQueue(triangle);
 }
 
 Graphics3D.prototype.fillPolygon = function(a){ 
@@ -409,14 +366,18 @@ Graphics3D.prototype.fillPolygon = function(a){
 		if(a.length/3 <= 2) throw "Error: Polygons must have at least 3 vertices."
 
 		var polygon = [];
-
+		var midpoint = new Vector(0,0,0);
+		var material = this.getMaterial();
 		for(var i = 0; i < a.length/3; i++){
 			polygon[i] = new Vector(a[i*3],a[i*3 + 1],a[i*3 + 2]);
+			midpoint = midpoint.add(polygon[i].multiply(3/a.length));
 		}
-
-		polygon.push(this.getMaterial());
+ 
+		for(var i = 0; i < polygon.length - 1; i++){
+			this.pushToQueue(new Triangle3D(polygon[i],polygon[i+1],midpoint,material));
+		}
 		
-		this.pushToQueue(polygon);
+		this.pushToQueue(new Triangle3D(polygon[polygon.length - 1], polygon[0],midpoint,material));
 }
 
 

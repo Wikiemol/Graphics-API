@@ -1,88 +1,86 @@
-function Material(m) { //color - RGB hexadecimal string, specularity 0 - 1, specularMultiplier 0 - 15, specularExponent 0 - infinity, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1, set by passing in a curly brackets array eg. {"color":"#808080","diffusion":0.5 ... etc.}
-	var color = "#808080";
-	var specularity = 1;
-	var diffusion = 1;
-	var ambience = 1;
-	var shine = 1;
-	var specularMultiplier = 5;
-	var specularExponent = 3;
+function Material(m) { //color - RGB array [r,g,b], specularity 0 - 1, specularMultiplier 0 - 15, specularExponent 0 - infinity, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1, set by passing in a curly brackets array eg. {"color":"#808080","diffusion":0.5 ... etc.}
+	this.c = [128,128,128];
+	this.specularity = 1;
+	this.diffusion = 1;
+	this.ambience = 1;
+	this.shine = 1;
+	this.specularMultiplier = 5;
+	this.specularExponent = 3;
 	if(!(typeof m === 'undefined')){
-		console.log(m["specularExponent"])
+		
 		if(!(typeof m["color"] === 'undefined')){
 
-			color = m["color"];
+			this.c = m["color"];
 		}
 
 		if(!(typeof m["specularity"] === 'undefined')){
-			specularity = m["specularity"];
+			this.specularity = m["specularity"];
 		}
 
 		if(!(typeof m["diffusion"] === 'undefined')){
-			diffusion = m["diffusion"];
+			this.diffusion = m["diffusion"];
 		}
 
 		if(!(typeof m["ambience"] === 'undefined')){
-			ambience = m["ambience"];
+			this.ambience = m["ambience"];
 		}
 
 		if(!(typeof m["shine"] === 'undefined')){
-			shine = m["shine"];
+			this.shine = m["shine"];
 		}
 
 		if(!(typeof m["specularMultiplier"] === 'undefined')){
-			specularMultiplier = m["specularMultiplier"];
+			this.specularMultiplier = m["specularMultiplier"];
 		}
 
 		if(!(typeof m["specularExponent"] === 'undefined')){
-			specularExponent = m["specularExponent"];
+			this.specularExponent = m["specularExponent"];
 		}
 	}
 
-	this.setColor = function(a){
-		color = a;
-	}
-	this.getColor = function(){
-		return color;
-	}
-	this.setSpecularity = function(a){
-		specularity = a;
-	}
-	this.getSpecularity = function(){
-		return specularity;
-	}
-	this.setAmbience = function(a){
-		ambience = a;
-	}
-	this.getAmbience = function(){
-		return ambience;
-	}
-	this.setShine = function(a){
-		shine = a;
-	}
-	this.getShine = function(){
-		return shine;
-	}
-	this.setDiffusion = function(a){
-		diffusion = a;
-	}
-	this.getDiffusion = function(){
-		return diffusion;
-	}
-
-	this.getSpecularMultiplier = function(){
-		return specularMultiplier;
-	}
-
-	this.setSpecularMultiplier = function(s){
-		specularMultiplier = s;
-	}
-
-	this.getSpecularExponent = function(){
-		return specularExponent;
-	}
-
-	this.setSpecularExponent = function(a){
-		specularExponent = a;
-	}
+	
 }
 
+Material.prototype.setColor = function(a){
+	this.c = a;
+}
+Material.prototype.getColor = function(){
+	return this.c;
+}
+Material.prototype.setSpecularity = function(a){
+	this.specularity = a;
+}
+Material.prototype.getSpecularity = function(){
+	return this.specularity;
+}
+Material.prototype.setAmbience = function(a){
+	this.ambience = a;
+}
+Material.prototype.getAmbience = function(){
+	return this.ambience;
+}
+Material.prototype.setShine = function(a){
+	this.shine = a;
+}
+Material.prototype.getShine = function(){
+	return this.shine;
+}
+Material.prototype.setDiffusion = function(a){
+	this.diffusion = a;
+}
+Material.prototype.getDiffusion = function(){
+	
+	return this.diffusion;
+}
+Material.prototype.getSpecularMultiplier = function(){
+	return this.specularMultiplier;
+}
+Material.prototype.setSpecularMultiplier = function(s){
+	this.specularMultiplier = s;
+}
+Material.prototype.getSpecularExponent = function(){
+	return this.specularExponent;
+}
+Material.prototype.setSpecularExponent = function(a){
+	this.specularExponent = a;
+}

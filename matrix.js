@@ -1,70 +1,13 @@
 function Matrix() { //can take array of vectors, in addition, it can be set to a rotation matrix by passing 'rx' 'ry' or 'rx' as the first argument, and the angle to be rotated as the second
-	var matrixArray = [];
-	var width;
-	var height;
-
-	
-	this.at = function(a,b){
-		matrixArray[a].at(b);
-	}
-	this.column = function(a){
-
-		var vector = new Vector();
-		for(var i = 0; i < matrixArray.length; i++){
-			vector.setAt(i,matrixArray[i].at(a));
-		}
-		return vector;
-	}
-
-	this.row = function(a){
-		return matrixArray[a];
-	}
-
-	this.getHeight = function(){
-		return height;
-	}
-
-	this.getWidth = function(){
-		return width;
-	}
-
-	this.setRow = function(r,v){
-		if(v.getLength != height) throw "Error: Argument not the right size. Cannot change height or width of matrix."
-		if(!(v instanceof Vector)) throw 'Error: Rows can only be set to vectors.'
-		matrixArray[r] = v;
-	}
-
-	this.setAt = function(a,b,v){
-		matrixArray[a].setAt(b,v); 
-	}
-
-	this.getMatrixAsArray = function(){
-		return matrixArray;
-	}
-
-	this.setMatrix = function(){ //Overrides instance completely
-		
-		matrixArray = [];
-		if(arguments[0] instanceof Array){
-			matrixArray = arguments[0];
-			width = matrixArray[0].getLength();
-			height = matrixArray.length;
-		}else{
-			width		= arguments[0].getLength();
-			height		= arguments.length;
-			for(var i = 0; i < arguments.length; i++){
-				if(!(arguments[i] instanceof Vector)) throw 'Error: Matrix objects take vectors or a single array with vectors as elements.'
-				if(arguments[i].getLength() != width && width) throw 'Error: All arguments must be the same length.'
-				matrixArray.push(arguments[i]);
-			}	
-		}
-	}
+	this.matrixArray = [];
+	this.w;
+	this.h;
 
 	if(arguments[0] instanceof Array){
 
-		matrixArray = arguments[0];
-		width = matrixArray[0].getLength();
-		height = matrixArray.length;
+		this.matrixArray = arguments[0];
+		this.w = this.matrixArray[0].getLength();
+		this.h = this.matrixArray.length;
 	}else if(arguments[0] == 'rx'){
 		this.rotationX(arguments[1]);
 	}else if(arguments[0] == 'ry'){
@@ -72,16 +15,64 @@ function Matrix() { //can take array of vectors, in addition, it can be set to a
 	}else if(arguments[0] == 'rz'){
 		this.rotationZ(arguments[1]);
 	}else{
-		width		= arguments[0].getLength();
-		height		= arguments.length;
+		this.w		= arguments[0].getLength();
+		this.h		= arguments.length;
 		for(var i = 0; i < arguments.length; i++){
 			if(!(arguments[i] instanceof Vector)) throw 'Error: Matrix objects take vectors or a single array with vectors as elements.'
-			if(arguments[i].getLength() != width && width) throw 'Error: All arguments must be the same length.'
-			matrixArray.push(arguments[i]);
+			if(arguments[i].getLength() != this.w && this.w) throw 'Error: All arguments must be the same length.'
+			this.matrixArray.push(arguments[i]);
 
 		}	
 	}
 	
+}
+
+Matrix.prototype.at = function(a,b){
+	this.matrixArray[a].at(b);
+}
+Matrix.prototype.column = function(a){
+	var vector = new Vector();
+	for(var i = 0; i < this.matrixArray.length; i++){
+		vector.setAt(i,this.matrixArray[i].at(a));
+	}
+	return vector;
+}
+Matrix.prototype.row = function(a){
+	return this.matrixArray[a];
+}
+Matrix.prototype.getHeight = function(){
+	return this.h;
+}
+Matrix.prototype.getWidth = function(){
+	return this.w;
+}
+Matrix.prototype.setRow = function(r,v){
+	if(v.getLength != this.h) throw "Error: Argument not the right size. Cannot change height or width of matrix."
+	if(!(v instanceof Vector)) throw 'Error: Rows can only be set to vectors.'
+	this.matrixArray[r] = v;
+}
+Matrix.prototype.setAt = function(a,b,v){
+	this.matrixArray[a].setAt(b,v); 
+}
+Matrix.prototype.getMatrixAsArray = function(){
+	return this.matrixArray;
+}
+Matrix.prototype.setMatrix = function(){ //Overrides instance completely
+	
+	this.matrixArray = [];
+	if(arguments[0] instanceof Array){
+		this.matrixArray = arguments[0];
+		this.w = this.matrixArray[0].getLength();
+		this.h = this.matrixArray.length;
+	}else{
+		this.w		= arguments[0].getLength();
+		this.h		= arguments.length;
+		for(var i = 0; i < arguments.length; i++){
+			if(!(arguments[i] instanceof Vector)) throw 'Error: Matrix objects take vectors or a single array with vectors as elements.'
+			if(arguments[i].getLength() != this.w && this.w) throw 'Error: All arguments must be the same length.'
+			this.matrixArray.push(arguments[i]);
+		}	
+	}
 }
 
 Matrix.prototype.multiplyVector = function(v) {

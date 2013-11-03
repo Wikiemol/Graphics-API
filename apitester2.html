@@ -5,7 +5,9 @@
 		<script type = "text/javascript" src = "graphics3D.js"></script>
 		<script text = "text/javascript" src = "light.js"></script>
 		<script text = "text/javascript" src = "material.js"></script>
-		<script text = "text/javascript" src = "matrix.js"></script>	
+		<script text = "text/javascript" src = "matrix.js"></script>
+		<script text = "text/javascript" src = "triangle3D.js"></script>	
+		<script text = "text/javascript" src = "line3D.js"></script>
 		<script>
 			var canvas = null;
 			var cxt = null;
@@ -103,23 +105,12 @@
 				// g.drawGrid();
 				g.addLight(light1,true);
 				g.setMaterial({"color": [255,128,128], "specularExponent": 6, "specularMultiplier": 2});
-				g.fillEllipsoid(0,0,0,100,100,50,sx,sx,sx,8);
+				g.fillEllipsoid(0,0,0,100,100,50,sx,0,sx,8);
 				g.draw({"lights":true,"ambience":false});
 				sx+=0.03 
 				
 			}
 
-			function draw3(){
-				var imageData = cxt.getImageData(0,0,canvas.width,canvas.height);
-				var data = imageData.data;
-
-				data[(x+y*canvas.height)*4 + 0] = 255; //r
-				data[(x+y*canvas.height)*4 + 1] = 0; //g
-				data[(x+y*canvas.height)*4 + 2] = 0; //b
-				data[(x+y*canvas.height)*4 + 3] = 255; //a
-
-				cxt.putImageData(imageData,0,0);
-			}
 		</script>
 	</head>
 	<body>

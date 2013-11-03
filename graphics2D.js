@@ -1,11 +1,11 @@
 function Graphics2D(context,c){
 	this.cxt 					= context;
-	var color 					= [0,0,0];
-	var standard_coordinates 	= false;
-	var WIDTH 					= context.canvas.width;
-	var HEIGHT 					= context.canvas.height;
-	var imageData 				= context.getImageData(0,0,WIDTH,HEIGHT);
-	var data 					= imageData.data;
+	this.color 					= [0,0,0];
+	this.standard_coordinates 	= false;
+	this.WIDTH 					= context.canvas.width;
+	this.HEIGHT 				= context.canvas.height;
+	this.imageData 				= context.getImageData(0,0,this.WIDTH,this.HEIGHT);
+	this.cdata 					= this.imageData.data;
 	
 	if(!c){
 		color = [0,0,0];
@@ -13,46 +13,45 @@ function Graphics2D(context,c){
 		color = [c[0],c[1],c[2]];
 	}
 
-	this.setColor = function(cl){
+}
 
-		color = [cl[0],cl[1],cl[2]];
-	}
-	this.getColor = function(){
-		return color;
-	}
+Graphics2D.prototype.setColor = function(cl){
 
-	this.setCoordinates = function(t){
-		standard_coordinates = t;
-	}
+	this.color = [cl[0],cl[1],cl[2]];
+}
+Graphics2D.prototype.getColor = function(){
+	return this.color;
+}
 
-	this.getCoordinates = function(){
-		return standard_coordinates;
-	}
+Graphics2D.prototype.setCoordinates = function(t){
+	this.standard_coordinates = t;
+}
 
-	this.drawPixel = function(x1,y1){
-		
+Graphics2D.prototype.getCoordinates = function(){
+	return this.standard_coordinates;
+}
 
-		var x = Math.round(x1);
-		var y = Math.round(y1);
-
-		if(standard_coordinates){
-			x = Math.round(x1+WIDTH/2);
-			y = Math.round(-y1+HEIGHT/2);
-		}
-
-		if(x < WIDTH && x >= 0 && y < HEIGHT && y >= 0){
-			var point = (x+y*WIDTH)*4;
-
-			data[point + 0] = color[0]; //r
-			data[point + 1] = color[1]; //g
-			data[point + 2] = color[2]; //b
-			data[point + 3] = 255; //a
-		}
+Graphics2D.prototype.drawPixel = function(x1,y1){
+	
+	var x = Math.round(x1);
+	var y = Math.round(y1);
+	if(this.standard_coordinates){
+		x = Math.round(x1+this.WIDTH/2);
+		y = Math.round(-y1+this.HEIGHT/2);
 	}
 
-	this.draw = function(){
-		context.putImageData(imageData,0,0);
+	if(x < this.WIDTH && x >= 0 && y < this.HEIGHT && y >= 0){
+		var point = (x+y*this.WIDTH)*4;
+
+		this.cdata[point + 0] = this.color[0]; //r
+		this.cdata[point + 1] = this.color[1]; //g
+		this.cdata[point + 2] = this.color[2]; //b
+		this.cdata[point + 3] = 255; //a
 	}
+}
+
+Graphics2D.prototype.draw = function(){
+	this.cxt.putImageData(this.imageData,0,0);
 }
 
 
