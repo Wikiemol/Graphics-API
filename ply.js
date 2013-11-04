@@ -97,9 +97,9 @@ PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
 			var index2 = parseInt(wordArray[2]);
 			var index3 = parseInt(wordArray[3]);
 
-			var v1 = vertices[index1].multiply(1500);
-			var v2 = vertices[index2].multiply(1500);
-			var v3 = vertices[index3].multiply(1500);
+			var v1 = vertices[index1].multiply(50);
+			var v2 = vertices[index2].multiply(50);
+			var v3 = vertices[index3].multiply(50);
 
 			g.fillTriangle(v1.at(0),v1.at(1),v1.at(2),
 						   v2.at(0),v2.at(1),v2.at(2),

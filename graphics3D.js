@@ -95,14 +95,15 @@ function Graphics3D(context){
 		g.setCoordinates(standard_coordinates);
 		
 		queue = queue.sort(function(a,b){
-			
-			var bDistance = Math.sqrt((sensor.at(0) - b.midPoint().at(0))*(sensor.at(0) - b.midPoint().at(0)) + 
-									  (sensor.at(1) - b.midPoint().at(1))*(sensor.at(1) - b.midPoint().at(1)) +
-									  (sensor.at(2) - b.midPoint().at(2))*(sensor.at(2) - b.midPoint().at(2)));
+			var aMidPoint = a.midPoint();
+			var bMidPoint = b.midPoint();
+			var bDistance = Math.sqrt((sensor.at(0) - bMidPoint.at(0))*(sensor.at(0) - bMidPoint.at(0)) + 
+									  (sensor.at(1) - bMidPoint.at(1))*(sensor.at(1) - bMidPoint.at(1)) +
+									  (sensor.at(2) - bMidPoint.at(2))*(sensor.at(2) - bMidPoint.at(2)));
 
-			var aDistance = Math.sqrt((sensor.at(0) - a.midPoint().at(0))*(sensor.at(0) - a.midPoint().at(0)) + 
-									  (sensor.at(1) - a.midPoint().at(1))*(sensor.at(1) - a.midPoint().at(1)) +
-									  (sensor.at(2) - a.midPoint().at(2))*(sensor.at(2) - a.midPoint().at(2)));
+			var aDistance = Math.sqrt((sensor.at(0) - aMidPoint.at(0))*(sensor.at(0) - aMidPoint.at(0)) + 
+									  (sensor.at(1) - aMidPoint.at(1))*(sensor.at(1) - aMidPoint.at(1)) +
+									  (sensor.at(2) - aMidPoint.at(2))*(sensor.at(2) - aMidPoint.at(2)));
 			return bDistance - aDistance;
 		})
 

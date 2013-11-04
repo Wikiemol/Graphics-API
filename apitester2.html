@@ -38,10 +38,10 @@
 				// setInterval(draw,33);
 				// draw();
 
-				// setInterval(draw2,33)
+				setInterval(draw2,33)
 				// draw2();
 
-				draw3();
+				// draw3();
 			}
 
 
@@ -116,7 +116,7 @@
 				g.setFocalLength(500);
 				light1.setPosition(100,100,400);
 				g.addLight(light1,true);
-				var ply = new PLY("apple.ply");
+				var ply = new PLY("teapot.ply");
 				g.setMaterial({"color": [255,128,128], "specularExponent": 6, "specularMultiplier": 2})
 				ply.readTo(g);
 
