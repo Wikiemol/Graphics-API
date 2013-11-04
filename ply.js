@@ -3,12 +3,12 @@ function PLY(s){
 	var xmlhttp = new XMLHttpRequest();
 	xmlhttp.open("GET",s,false);
 	xmlhttp.send(null);
-
 	this.ply = xmlhttp.responseText;
+	this.vertices = [];
 
 }
 
-PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
+PLY.prototype.load = function() { //reads and adds to graphics object (g)
 	var l = this.ply.length;
 	var LF = "\n"; //what should be considered a new line character
 	
@@ -41,8 +41,6 @@ PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
 			break;
 		}
 	}
-
-
 
 	/****************************DEFINING WORDS***********************************/
 	var keywords = {"comment": (function(){word = wordArray.length}), /*skips comment by putting word pointer at the end of the line*/
@@ -100,10 +98,10 @@ PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
 			var v1 = vertices[index1].multiply(50);
 			var v2 = vertices[index2].multiply(50);
 			var v3 = vertices[index3].multiply(50);
-
-			g.fillTriangle(v1.at(0),v1.at(1),v1.at(2),
-						   v2.at(0),v2.at(1),v2.at(2),
-						   v3.at(0),v3.at(1),v3.at(2));
+			this.vertices.push(v1);
+			this.vertices.push(v2);
+			this.vertices.push(v3);
+			
 		}
 		
 		wordArray = [];
@@ -126,5 +124,17 @@ PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
 			}
 		}
 	}
-	lineArray = [];
+
+};
+
+PLY.prototype.addTo = function(g) {
+	var l = this.vertices.length;
+	for(var i = 0; i < l; i += 3){
+		var v1 = this.vertices[i];
+		var v2 = this.vertices[i + 1];
+		var v3 = this.vertices[i + 2];
+		g.fillTriangle(v1.at(0),v1.at(1),v1.at(2),
+						v2.at(0),v2.at(1),v2.at(2),
+						v3.at(0),v3.at(1),v3.at(2));
+	}
 };

@@ -13,6 +13,8 @@
 			var canvas = null;
 			var cxt = null;
 			var g;
+			var ply = new PLY("cow.ply");
+			ply.load();
 			window.addEventListener('load', onLoad);
 
 			function onLoad(e){
@@ -20,6 +22,7 @@
 				cxt = canvas.getContext('2d');
 				g = new Graphics3D(cxt);
 				g.setCoordinates(true);
+				
 				// var g = new Graphics2D(cxt);
 				// g.setColor("red");
 				// g.setCoordinates(true);
@@ -132,9 +135,8 @@
 				light1.setPosition(200*Math.cos(10*sx),100,400);
 				g.addLight(light1,true);
 				// g.drawGrid();
-				var ply = new PLY("cow.ply");
 				g.setMaterial({"color": [200,200,200], "specularExponent": 9, "specularMultiplier": 2})
-				ply.readTo(g);
+				ply.addTo(g);
 				g.draw({"lights":true,"ambience":false});
 
 				sx += 0.03;
