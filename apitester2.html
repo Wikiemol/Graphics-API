@@ -8,6 +8,7 @@
 		<script text = "text/javascript" src = "matrix.js"></script>
 		<script text = "text/javascript" src = "triangle3D.js"></script>	
 		<script text = "text/javascript" src = "line3D.js"></script>
+		<script text = "text/javascript" src = "ply.js"></script>
 		<script>
 			var canvas = null;
 			var cxt = null;
@@ -37,10 +38,10 @@
 				// setInterval(draw,33);
 				// draw();
 
-				setInterval(draw2,33)
+				// setInterval(draw2,33)
 				// draw2();
 
-				// draw3();
+				draw3();
 			}
 
 
@@ -108,7 +109,18 @@
 				g.fillEllipsoid(0,0,0,100,100,50,sx,0,sx,8);
 				g.draw({"lights":true,"ambience":false});
 				sx+=0.03 
-				
+			}
+
+			function draw3(){
+				g.setSensor(0,200 + sy,1100);
+				g.setFocalLength(500);
+				light1.setPosition(100,100,400);
+				g.addLight(light1,true);
+				var ply = new PLY("apple.ply");
+				g.setMaterial({"color": [255,128,128], "specularExponent": 6, "specularMultiplier": 2})
+				ply.readTo(g);
+
+				g.draw({"lights":true,"ambience":false});
 			}
 
 		</script>

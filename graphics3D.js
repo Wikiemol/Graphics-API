@@ -356,7 +356,7 @@ Graphics3D.prototype.drawPrism = function(x,y,z,w,h,d){
 
 Graphics3D.prototype.fillTriangle = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
 	if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined.");
-	var triangle = new Triangle3d(new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial());
+	var triangle = new Triangle3D(new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial());
 	this.pushToQueue(triangle);
 }
 

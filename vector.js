@@ -97,3 +97,7 @@ Vector.prototype.area = function(v){ //area of the parallelogram formed by two v
 	var a = this.cross(v).magnitude();
 	return a;
 }
+
+Vector.prototype.vpush = function(a){
+	this.vectorArray.push(a);
+}
