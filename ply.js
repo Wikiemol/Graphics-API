@@ -33,8 +33,8 @@ PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
 			line++; //increment line;
 		}
 	}
-
-	for(var i = 0; i < lineArray.length; i++){ //check header to see if carriage returns should be used with new line
+	var lineArrayLength = lineArray.length;
+	for(var i = 0; i < lineArrayLength; i++){ //check header to see if carriage returns should be used with new line
 		if(lineArray[i].substr(0,10) == "end_header") break;
 		if(this.ply.charAt(i) == '\r'){
 			LF = "\r\n";
@@ -112,22 +112,19 @@ PLY.prototype.readTo = function(g) { //reads and adds to graphics object (g)
 	}
 
 	function fillWordArray(){ //fills word array with words from the current line
-		for(var letter = 0; letter < lineArray[line].length; letter++){
-			if(lineArray[line].charCodeAt(letter) == 32 || lineArray[line].charAt(letter) == '\r' || lineArray[line].charAt(letter) == '\n'){ //if there is a space or CR or LF increment word and skip
+		var lineLength = lineArray[line].length;
+		for(var letter = 0; letter < lineLength; letter++){
+			var thisLetter = lineArray[line].charAt(letter);
+			if(thisLetter == ' ' || thisLetter == '\r' || thisLetter == '\n'){ //if there is a space or CR or LF increment word and skip
 				word++;
 			}else{
 				if(typeof wordArray[word] === 'undefined') { //in order to not have strings like "undefinedply", replace undefined with first char of word
-					wordArray[word] = lineArray[line].charAt(letter);
+					wordArray[word] = thisLetter;
 				}else{ //add letters to the word until a space is reached
-					wordArray[word] += lineArray[line].charAt(letter);
+					wordArray[word] += thisLetter;
 				}
 			}
 		}
 	}
-
-	
-	
-	
-
-	
+	lineArray = [];
 };
