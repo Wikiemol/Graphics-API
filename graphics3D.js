@@ -33,9 +33,13 @@ Graphics3D.prototype.applyLight = function(i){ //pass the item *number* in the q
 	for(var i = 0; i < this.lights.length; i++){ //totaling light contributions
 		/**Calculate Specularity**/
 		var specularLight = this.lights[i].specularIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2)).multiply(1);
+
 		var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
+
 		if(lightReflection.dot(viewPointVector)*material.getSpecularity() > 0){
+			
 			specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/this.lights[i].distance(midPoint.at(0),midPoint.at(1),midPoint.at(2)));
+
 		}
 		/**Calculate Diffusion**/
 		var diffusionLight = this.lights[i].diffusionIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2));
@@ -52,6 +56,7 @@ Graphics3D.prototype.applyLight = function(i){ //pass the item *number* in the q
 	var rRatio = 3*totalGel["r"]/totalColor;
 	var gRatio = 3*totalGel["g"]/totalColor;
 	var bRatio = 3*totalGel["b"]/totalColor;
+
 	if(diffuse < 0){
 		diffuse = 0;
 	}else if( diffuse > 1){
@@ -175,7 +180,7 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 		var b2 = bMidPoint.at(2);
 		var a0 = aMidPoint.at(0);
 		var a1 = aMidPoint.at(1);
-		var a2 = aMidPoint.at(2)
+		var a2 = aMidPoint.at(2);
 		var bDistance = Math.sqrt((s0 - b0)*(s0 - b0) + 
 								  (s1 - b1)*(s1 - b1) +
 								  (s2 - b2)*(s2 - b2));

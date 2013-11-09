@@ -18,6 +18,7 @@ function Graphics2D(context,c){
 Graphics2D.prototype.setColor = function(cl){
 
 	this.color = [cl[0],cl[1],cl[2]];
+
 }
 Graphics2D.prototype.getColor = function(){
 	return this.color;
@@ -105,8 +106,6 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 
 
 Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
-	
-	
 	var x1 = Math.round(x_1);
 	var y1 = Math.round(y_1);
 	var x2 = Math.round(x_2);
@@ -127,6 +126,58 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 		for(var j = 0; j < n2; j++){
 			
 			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
+
+					this.drawPixel(minX + i, minY + j);
+			}
+		}
+	}
+	
+	
+	function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
+		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
+	}
+}
+
+Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r1,g1,b1, r2,g2,b2, r3,g3,b3){
+	var tempColor = this.getColor();
+	
+	var c1 = new Vector(r1,g1,b1);
+	var c2 = new Vector(r2,g2,b2);
+	var c3 = new Vector(r3,g3,b3);
+
+	var p1 = new Vector(Math.round(x_1),Math.round(y_1));
+	var p2 = new Vector(Math.round(x_2),Math.round(y_2));
+	var p3 = new Vector(Math.round(x_3),Math.round(y_3));	
+
+	var minX = Math.min(Math.min(p1.at(0),p2.at(0)),p3.at(0));
+	var minY = Math.min(Math.min(p1.at(1),p2.at(1)),p3.at(1));
+	var maxX = Math.max(Math.max(p1.at(0),p2.at(0)),p3.at(0));
+	var maxY = Math.max(Math.max(p1.at(1),p2.at(1)),p3.at(1));
+
+	var area = getArea(p1.at(0),p1.at(1),
+					   p2.at(0),p2.at(1),
+					   p3.at(0),p3.at(1));
+
+	var n1 = Math.abs(maxX - minX);
+	var n2 = Math.abs(maxY - minY);
+	
+	for(var i = 0; i < n1; i++){
+		
+		for(var j = 0; j < n2; j++){
+
+			if(area == getArea(minX + i, minY + j,p1.at(0),p1.at(1),p2.at(0),p2.at(1)) + getArea(minX + i, minY + j,p2.at(0),p2.at(1),p3.at(0),p3.at(1)) + getArea(minX + i, minY + j,p3.at(0),p3.at(1),p1.at(0),p1.at(1))){
+					
+					var dis1 = p1.subtract(new Vector(minX + i,minY + j)).magnitude(); //distance this point has to p1
+					var dis2 = p2.subtract(new Vector(minX + i,minY + j)).magnitude(); //distance this point has to p2
+					var dis3 = p3.subtract(new Vector(minX + i,minY + j)).magnitude(); //distance this point has to p3
+
+					var perc1 = 1 - dis1/(dis2 + dis3); //percentage of each color will be contributed
+					var perc2 = 1 - dis2/(dis1 + dis3);
+					var perc3 = 1 - dis3/(dis1 + dis2);
+
+					var color = c1.multiply(perc1).add(c2.multiply(perc2)).add(c3.multiply(perc3));
+					console.log(perc3);
+					this.setColor([color.at(0),color.at(1),color.at(2)]);
 					this.drawPixel(minX + i, minY + j);
 			}
 		}
@@ -137,8 +188,7 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
 	}
 
-	
-	
+	this.setColor(tempColor);
 }
 
 

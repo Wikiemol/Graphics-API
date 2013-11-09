@@ -13,8 +13,8 @@
 			var canvas = null;
 			var cxt = null;
 			var g;
-			var ply = new PLY("cow.ply");
-			ply.load();
+			// var ply = new PLY("beethoven.ply");
+			// ply.load();
 			window.addEventListener('load', onLoad);
 
 			function onLoad(e){
@@ -43,8 +43,10 @@
 
 				// setInterval(draw2,33)
 				// draw2();
-				setInterval(draw3,33);
-				draw3();
+				// setInterval(draw3,33);
+				// draw3();
+
+				draw4();
 			}
 
 
@@ -60,7 +62,7 @@
 			
 
 			var t = 7*Math.PI/6;
-			var light1 = new Light({"diffusion":1,"specularity":1});
+			var light1 = new Light({"diffusion":1,"specularity":1,"type": "point"});
 			var light2 = new Light({"diffusion":0.5});
 			function draw(){
 
@@ -129,19 +131,25 @@
 				var s = 'n';
 				var n = 0 + s.charCodeAt(0);
 
-				console.log(n)
 				g.setSensor(0,200 + sy,1100);
 				g.setFocalLength(500);
 				light1.setPosition(200*Math.cos(10*sx),100,400);
 				g.addLight(light1,true);
 				// g.drawGrid();
-				g.setMaterial({"color": [200,200,200], "specularExponent": 9, "specularMultiplier": 2})
+				g.setMaterial({"color": [255,255,255], "specularExponent": 9, "specularMultiplier": 2, "diffusion": 1})
 				ply.addTo(g);
 				g.draw({"lights":true,"ambience":false});
 
 				sx += 0.03;
 			}
 
+			function draw4(){
+				var g = new Graphics2D(cxt);
+				g.setCoordinates(true);
+				g.setColor([255,0,0]);
+				g.interpolateTriangle(-100,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
+				g.draw();
+			}
 		</script>
 	</head>
 	<body>

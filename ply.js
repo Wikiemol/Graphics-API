@@ -21,18 +21,26 @@ PLY.prototype.load = function() { //reads and adds to graphics object (g)
 
 	var wordArray 			= []; //holds each word that is on the line
 	var word 				= 0; //word pointer, relative to line
-	var element 			= null;
-
-	/**store each line as string**/
+	var element 			= ""; //the current element, used for determing what the property keyword will do.
+	var format 				= "ascii"; // holds format, not taking into account versions
+	var endHeader 			= 0; //the line that ends the header
+	var endHeaderb			= 0; //the letter that ends the header
+	/**store each line of header as string**/
 
 	for(var i = 0; i < l; i++){
 		s += this.ply.charAt(i);
 		if(this.ply.charAt(i) == "\n"){
 			lineArray[line] = s;
+			if(s.substr(0,10) == "end_header"){
+				break;
+			}
 			s = ''; //Resets line string
 			line++; //increment line;
 		}
+		endHeaderb = i;
 	}
+	endHeader = line;
+
 	var lineArrayLength = lineArray.length;
 	for(var i = 0; i < lineArrayLength; i++){ //check header to see if carriage returns should be used with new line
 		if(lineArray[i].substr(0,10) == "end_header") break;
@@ -44,13 +52,14 @@ PLY.prototype.load = function() { //reads and adds to graphics object (g)
 
 	/****************************DEFINING WORDS***********************************/
 	var keywords = {"comment": (function(){word = wordArray.length}), /*skips comment by putting word pointer at the end of the line*/
-					"element": (function(){elements[wordArray[1]](); word = wordArray.length;}), /*runs code for specific element*/
+					"element": (function(){elements[wordArray[1]](); word = wordArray.length;}), 
 					"property": (function(){word = wordArray.length}), /*will skip properties for now, assuming faces are regular lists and that there are no color properties*/
-					"format": (function(){word = wordArray.length}), /*skipping format for now, assuming its ascii 1.0*/
+					"format": (function(){format = wordArray[1]; word = wordArray.length}),  
 					"ply": (function(){word = wordArray.length})}  /*skips ply, we handle it seperately*/
 
 	var elements = {"vertex": (function(){numberOfVertices = parseInt(wordArray[2]); element = "vertex"}), //assuming float
 					"face":  (function(){numberOfFaces = parseInt(wordArray[2]); element = "face"})}
+
 	/***************************************************************/
 
 	
@@ -63,7 +72,12 @@ PLY.prototype.load = function() { //reads and adds to graphics object (g)
 		/********BEGIN READING LINE*********/
 		fillWordArray();
 		for(word = 0; word < wordArray.length; word++){
-			keywords[wordArray[word]]();
+			if(keywords[wordArray[word]]){
+				keywords[wordArray[word]]();
+			}else{
+				console.warn("Unrecognized keyword '" + wordArray[word] + "' in " + this.file + ".   Line: " + (line + 1));
+				break;
+			}
 		}
 		wordArray = [];
 		word = 0;
@@ -73,43 +87,72 @@ PLY.prototype.load = function() { //reads and adds to graphics object (g)
 	/*----END READ HEADER-----*/
 
 	line++;
+	/******READ BODY******/
+	switch(format){
 
-	/********READ VERTICES********/
-	var verticesEnd = numberOfVertices + line;
-	while(line < verticesEnd){
-		fillWordArray();
-		vertices.push(new Vector(parseFloat(wordArray[0]),parseFloat(wordArray[1]),parseFloat(wordArray[2])));
-		wordArray = [];
-		word = 0;
-		line++;
-	}
-	/*------END READ VERTICES----------*/
-	
-	/********READ AND ADD FACES*******/
-	var facesEnd = numberOfFaces + line;
-
-	while(line < facesEnd){
-		fillWordArray();
-		if(wordArray[0] == 3){
-			var index1 = parseInt(wordArray[1]);
-			var index2 = parseInt(wordArray[2]);
-			var index3 = parseInt(wordArray[3]);
-
-			var v1 = vertices[index1].multiply(50);
-			var v2 = vertices[index2].multiply(50);
-			var v3 = vertices[index3].multiply(50);
-			this.vertices.push(v1);
-			this.vertices.push(v2);
-			this.vertices.push(v3);
+		case "ascii":
+			/**load the rest of the document into linearray***/
+			line = 0;
+			for(var i = 0; i < l; i++){
+				s += this.ply.charAt(i);
+				if(this.ply.charAt(i) == "\n"){
+					lineArray[line] = s;
+					s = ''; //Resets line string
+					line++; //increment line;
+				}
+			}
+			/*---------------------------------------------*/
+			line = endHeader + 1;
+			/********READ VERTICES********/
+			var verticesEnd = numberOfVertices + line;
+			while(line < verticesEnd){
+				fillWordArray();
+				vertices.push(new Vector(parseFloat(wordArray[0]),parseFloat(wordArray[1]),parseFloat(wordArray[2])));
+				wordArray = [];
+				word = 0;
+				line++;
+			}
+			/*------END READ VERTICES----------*/
 			
-		}
+			/********READ AND ADD FACES*******/
+			var facesEnd = numberOfFaces + line;
 		
-		wordArray = [];
-		word = 0;
-		line++;
+			while(line < facesEnd){
+				fillWordArray();
+				if(wordArray[0] == 3){
+					var index1 = parseInt(wordArray[1]);
+					var index2 = parseInt(wordArray[2]);
+					var index3 = parseInt(wordArray[3]);
+		
+					var v1 = vertices[index1].multiply(50);
+					var v2 = vertices[index2].multiply(50);
+					var v3 = vertices[index3].multiply(50);
+					this.vertices.push(v1);
+					this.vertices.push(v2);
+					this.vertices.push(v3);
+					
+				}
+				
+				wordArray = [];
+				word = 0;
+				line++;
+			}
+			break;
+
+		case "binary_big_endian":
+			console.log("binary_big_endian");
+			break;
+
+		case "binary_little_endian":
+
+			break;
 	}
+	
+
+
 
 	function fillWordArray(){ //fills word array with words from the current line
+		console.log( lineArray[line]);
 		var lineLength = lineArray[line].length;
 		for(var letter = 0; letter < lineLength; letter++){
 			var thisLetter = lineArray[line].charAt(letter);
