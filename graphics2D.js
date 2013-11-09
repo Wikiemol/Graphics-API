@@ -140,10 +140,6 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 
 Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r1,g1,b1, r2,g2,b2, r3,g3,b3){
 	var tempColor = this.getColor();
-	
-	var c1 = new Vector(r1,g1,b1);
-	var c2 = new Vector(r2,g2,b2);
-	var c3 = new Vector(r3,g3,b3);
 
 	var p1 = new Vector(Math.round(x_1),Math.round(y_1));
 	var p2 = new Vector(Math.round(x_2),Math.round(y_2));
@@ -164,21 +160,34 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	for(var i = 0; i < n1; i++){
 		
 		for(var j = 0; j < n2; j++){
+			var a1 = getArea(minX + i, minY + j,p2.at(0),p2.at(1),p3.at(0),p3.at(1));
+			var a2 = getArea(minX + i, minY + j,p3.at(0),p3.at(1),p1.at(0),p1.at(1));
+			var a3 = getArea(minX + i, minY + j,p1.at(0),p1.at(1),p2.at(0),p2.at(1));
+			if(area == a1 + a2 + a3){
+					var x = minX + i;
+					var y = minY + j;
 
-			if(area == getArea(minX + i, minY + j,p1.at(0),p1.at(1),p2.at(0),p2.at(1)) + getArea(minX + i, minY + j,p2.at(0),p2.at(1),p3.at(0),p3.at(1)) + getArea(minX + i, minY + j,p3.at(0),p3.at(1),p1.at(0),p1.at(1))){
+					var k = (-p1.at(0)*p2.at(1) + p1.at(0)*p3.at(1) + p2.at(0)*p1.at(1) - p2.at(0)*p3.at(1) -p3.at(0)*p1.at(1) + p3.at(0)*p2.at(1));
+
+					var Ar = (-p1.at(1)*r2 + p1.at(1)*r3 + p2.at(1)*r1 - p2.at(1)*r3 - p3.at(1)*r1 + p3.at(1)*r2)/(-k);
+					var Br = -(-p1.at(0)*r2 + p1.at(0)*r3 + p2.at(0)*r1 - p2.at(0)*r3 - p3.at(0)*r1 + p3.at(0)*r2)/(-k);
+					var Cr = r2;
+
+					var Ag = (-p1.at(1)*g2 + p1.at(1)*g3 + p2.at(1)*g1 - p2.at(1)*g3 - p3.at(1)*g1 + p3.at(1)*g2)/(-k);
+					var Bg = -(-p1.at(0)*g2 + p1.at(0)*g3 + p2.at(0)*g1 - p2.at(0)*g3 - p3.at(0)*g1 + p3.at(0)*g2)/(-k);
+					var Cg = g2;
+
+					var Ab = (-p1.at(1)*b2 + p1.at(1)*b3 + p2.at(1)*b1 - p2.at(1)*b3 - p3.at(1)*b1 + p3.at(1)*b2)/(-k);
+					var Bb = -(-p1.at(0)*b2 + p1.at(0)*b3 + p2.at(0)*b1 - p2.at(0)*b3 - p3.at(0)*b1 + p3.at(0)*b2)/(-k);
+					var Cb = b2;
+
+					var r = Ar*x + Br*y + Cr;
+					var g = Ag*x + Bg*y + Cg;
+					var b = Ab*x + Bb*y + Cb;
+
 					
-					var dis1 = p1.subtract(new Vector(minX + i,minY + j)).magnitude(); //distance this point has to p1
-					var dis2 = p2.subtract(new Vector(minX + i,minY + j)).magnitude(); //distance this point has to p2
-					var dis3 = p3.subtract(new Vector(minX + i,minY + j)).magnitude(); //distance this point has to p3
-
-					var perc1 = 1 - dis1/(dis2 + dis3); //percentage of each color will be contributed
-					var perc2 = 1 - dis2/(dis1 + dis3);
-					var perc3 = 1 - dis3/(dis1 + dis2);
-
-					var color = c1.multiply(perc1).add(c2.multiply(perc2)).add(c3.multiply(perc3));
-					console.log(perc3);
-					this.setColor([color.at(0),color.at(1),color.at(2)]);
-					this.drawPixel(minX + i, minY + j);
+					this.setColor([r,g,b]);
+					this.drawPixel(x, y);
 			}
 		}
 	}
