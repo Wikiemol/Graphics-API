@@ -172,8 +172,9 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	g.setCoordinates(this.standard_coordinates);
 	var self = this;
 	this.queue = this.queue.sort(function(a,b){
-		var aMidPoint = a.midPoint();
-		var bMidPoint = b.midPoint();
+		var aMidPoint = a.mid;
+		var bMidPoint = b.mid;
+	
 		var s0 = self.sensor.at(0);
 		var s1 = self.sensor.at(1);
 		var s2 = self.sensor.at(2);
@@ -183,12 +184,12 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 		var a0 = aMidPoint.at(0);
 		var a1 = aMidPoint.at(1);
 		var a2 = aMidPoint.at(2);
-		var bDistance = Math.sqrt((s0 - b0)*(s0 - b0) + 
-								  (s1 - b1)*(s1 - b1) +
-								  (s2 - b2)*(s2 - b2));
-		var aDistance = Math.sqrt((s0 - a0)*(s0 - a0) + 
-								  (s1 - a1)*(s1 - a1) +
-								  (s2 - a2)*(s2 - a2));
+		var bDistance = (s0 - b0)*(s0 - b0) + 
+						(s1 - b1)*(s1 - b1) +
+						(s2 - b2)*(s2 - b2);
+		var aDistance = (s0 - a0)*(s0 - a0) + 
+						(s1 - a1)*(s1 - a1) +
+						(s2 - a2)*(s2 - a2);
 		return bDistance - aDistance;
 	})
 	//Drawing polygons

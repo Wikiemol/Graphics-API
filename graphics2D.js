@@ -190,6 +190,18 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 				  (b1 - b2)*(x3 - x2) - (x1 - x2)*(b3 - b2),
 				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
 
+	var Ar = -rnormal[0]/rnormal[2];
+	var Br = -rnormal[1]/rnormal[2];
+	var Cr = -Ar*x1 - Br*y1 + r1;
+
+	var Ag = -gnormal[0]/gnormal[2];
+	var Bg = -gnormal[1]/gnormal[2];
+	var Cg = -Ag*x1 - Bg*y1 + g1;
+	
+	var Ab = -bnormal[0]/bnormal[2];
+	var Bb = -bnormal[1]/bnormal[2];
+	var Cb = -Ab*x1 - Bb*y1 + b1;
+
 	var minX = Math.min(Math.min(x1,x2),x3);
 	var minY = Math.min(Math.min(y1,y2),y3);
 	var maxX = Math.max(Math.max(x1,x2),x3);
@@ -207,22 +219,26 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 		for(var j = 0; j < n2; j++){
 			var x = minX + i;
 			var y = minY + j;
+			var isInTriangle = true;
+			var z1 = A1*x + B1*y + C1;
+			var z2 = A2*x + B2*y + C2;
+			var z3 = A3*x + B3*y + C3;
+
+			if(z1 < 0){
+				isInTriangle = false;
+			}
+			if(z2 < 0){
+				isInTriangle = false;
+			}
+			if(z3 < 0){
+				isInTriangle = false;
+			}
+
 			/*var a1 = getArea(minX + i, minY + j,x2,y2,x3,y3);
 			var a2 = getArea(minX + i, minY + j,x3,y3,x1,y1);
 			var a3 = getArea(minX + i, minY + j,x1,y1,x2,y2);*/
 			// if(area == a1 + a2 + a3){
-			if(isInTriangle(x,y)){
-					var Ar = -rnormal[0]/rnormal[2];
-					var Br = -rnormal[1]/rnormal[2];
-					var Cr = -Ar*x1 - Br*y1 + r1;
-
-					var Ag = -gnormal[0]/gnormal[2];
-					var Bg = -gnormal[1]/gnormal[2];
-					var Cg = -Ag*x1 - Bg*y1 + g1;
-					
-					var Ab = -bnormal[0]/bnormal[2];
-					var Bb = -bnormal[1]/bnormal[2];
-					var Cb = -Ab*x1 - Bb*y1 + b1;
+			if(isInTriangle){
 
 					var color = [Ar*x + Br*y + Cr, Ag*x + Bg*y + Cg, Ab*x + Bb*y + Cb];
 
@@ -240,23 +256,6 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	/*function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
 		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
 	}*/
-
-	function isInTriangle(x,y){
-		
-		// var z1 = (-x + x1)*normal1[0]/normal1[2] - (y - y1)*normal1[1]/normal1[2];
-		// var z2 = (-x + x2)*normal2[0]/normal2[2] - (y - y2)*normal2[1]/normal2[2];
-		// var z3 = (-x + x3)*normal3[0]/normal3[2] - (y - y3)*normal3[1]/normal3[2];
-		var z1 = A1*x + B1*y + C1;
-		var z2 = A2*x + B2*y + C2;
-		var z3 = A3*x + B3*y + C3;
-
-		if(z1 >= 0 && z2 >= 0 && z3 >= 0){
-			return true;
-		}else{
-			return false;
-		}
-
-	}
 	this.setColor(tempColor);
 }
 
