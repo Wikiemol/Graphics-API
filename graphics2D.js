@@ -141,34 +141,35 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r1,g1,b1, r2,g2,b2, r3,g3,b3){
 	var tempColor = this.getColor();
 
-	var p1 = new Vector(Math.round(x_1),Math.round(y_1));
-	var p2 = new Vector(Math.round(x_2),Math.round(y_2));
-	var p3 = new Vector(Math.round(x_3),Math.round(y_3));	
+	var x1 = Math.round(x_1);
+	var y1 = Math.round(y_1);
+	
+	var x2 = Math.round(x_2);
+	var y2 = Math.round(y_2);
 
-	var c1 = new Vector(r1,g1,b1);
-	var c2 = new Vector(r2,g2,b2);
-	var c3 = new Vector(r3,g3,b3);
+	var x3 = Math.round(x_3);
+	var y3 = Math.round(y_3);
 
-	var rnormal = [(p1.at(1) - p2.at(1))*(c3.at(0) - c2.at(0)) - (c1.at(0) - c2.at(0))*(p3.at(1) - p2.at(1)),
-				  (c1.at(0) - c2.at(0))*(p3.at(0) - p2.at(0)) - (p1.at(0) - p2.at(0))*(c3.at(0) - c2.at(0)),
-				  (p1.at(0) - p2.at(0))*(p3.at(1) - p2.at(1)) - (p1.at(1) - p2.at(1))*(p3.at(0) - p2.at(0))]
+	var rnormal = [(y1 - y2)*(r3 - r2) - (r1 - r2)*(y3 - y2),
+				  (r1 - r2)*(x3 - x2) - (x1 - x2)*(r3 - r2),
+				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
 
-	var gnormal = [(p1.at(1) - p2.at(1))*(c3.at(1) - c2.at(1)) - (c1.at(1) - c2.at(1))*(p3.at(1) - p2.at(1)),
-				  (c1.at(1) - c2.at(1))*(p3.at(0) - p2.at(0)) - (p1.at(0) - p2.at(0))*(c3.at(1) - c2.at(1)),
-				  (p1.at(0) - p2.at(0))*(p3.at(1) - p2.at(1)) - (p1.at(1) - p2.at(1))*(p3.at(0) - p2.at(0))]
+	var gnormal = [(y1 - y2)*(g3 - g2) - (g1 - g2)*(y3 - y2),
+				  (g1 - g2)*(x3 - x2) - (x1 - x2)*(g3 - g2),
+				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
 
-	var bnormal = [(p1.at(1) - p2.at(1))*(c3.at(2) - c2.at(2)) - (c1.at(2) - c2.at(2))*(p3.at(1) - p2.at(1)),
-				  (c1.at(2) - c2.at(2))*(p3.at(0) - p2.at(0)) - (p1.at(0) - p2.at(0))*(c3.at(2) - c2.at(2)),
-				  (p1.at(0) - p2.at(0))*(p3.at(1) - p2.at(1)) - (p1.at(1) - p2.at(1))*(p3.at(0) - p2.at(0))]
+	var bnormal = [(y1 - y2)*(b3 - b2) - (b1 - b2)*(y3 - y2),
+				  (b1 - b2)*(x3 - x2) - (x1 - x2)*(b3 - b2),
+				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
 
-	var minX = Math.min(Math.min(p1.at(0),p2.at(0)),p3.at(0));
-	var minY = Math.min(Math.min(p1.at(1),p2.at(1)),p3.at(1));
-	var maxX = Math.max(Math.max(p1.at(0),p2.at(0)),p3.at(0));
-	var maxY = Math.max(Math.max(p1.at(1),p2.at(1)),p3.at(1));
+	var minX = Math.min(Math.min(x1,x2),x3);
+	var minY = Math.min(Math.min(y1,y2),y3);
+	var maxX = Math.max(Math.max(x1,x2),x3);
+	var maxY = Math.max(Math.max(y1,y2),y3);
 
-	var area = getArea(p1.at(0),p1.at(1),
-					   p2.at(0),p2.at(1),
-					   p3.at(0),p3.at(1));
+	/*var area = getArea(x1,y1,
+					   x2,y2,
+					   x3,y3);*/
 
 	var n1 = Math.abs(maxX - minX);
 	var n2 = Math.abs(maxY - minY);
@@ -176,24 +177,24 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	for(var i = 0; i < n1; i++){
 		
 		for(var j = 0; j < n2; j++){
-			var a1 = getArea(minX + i, minY + j,p2.at(0),p2.at(1),p3.at(0),p3.at(1));
-			var a2 = getArea(minX + i, minY + j,p3.at(0),p3.at(1),p1.at(0),p1.at(1));
-			var a3 = getArea(minX + i, minY + j,p1.at(0),p1.at(1),p2.at(0),p2.at(1));
-			if(area == a1 + a2 + a3){
-					var x = minX + i;
-					var y = minY + j;
-					
+			var x = minX + i;
+			var y = minY + j;
+			/*var a1 = getArea(minX + i, minY + j,x2,y2,x3,y3);
+			var a2 = getArea(minX + i, minY + j,x3,y3,x1,y1);
+			var a3 = getArea(minX + i, minY + j,x1,y1,x2,y2);*/
+			// if(area == a1 + a2 + a3){
+			if(isInTriangle(x,y)){
 					var Ar = -rnormal[0]/rnormal[2];
 					var Br = -rnormal[1]/rnormal[2];
-					var Cr = -Ar*p1.at(0) + -Br*p1.at(1) + c1.at(0);
+					var Cr = -Ar*x1 - Br*y1 + r1;
 
 					var Ag = -gnormal[0]/gnormal[2];
 					var Bg = -gnormal[1]/gnormal[2];
-					var Cg = -Ag*p1.at(0) + -Bg*p1.at(1) + c1.at(1);
+					var Cg = -Ag*x1 - Bg*y1 + g1;
 					
 					var Ab = -bnormal[0]/bnormal[2];
 					var Bb = -bnormal[1]/bnormal[2];
-					var Cb = -Ab*p1.at(0) + -Bb*p1.at(1) + c1.at(2);
+					var Cb = -Ab*x1 - Bb*y1 + b1;
 
 					var color = [Ar*x + Br*y + Cr, Ag*x + Bg*y + Cg, Ab*x + Bb*y + Cb];
 
@@ -208,10 +209,40 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	}
 	
 	
-	function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
+	/*function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
 		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
-	}
+	}*/
 
+	function isInTriangle(x,y){
+		
+		var aboveX = (x1 + x2 + x3)/3
+		var aboveY = (y1 + y2 + y3)/3
+		
+		//assuming z of the point above the plane is 1 and z of the plane is 0
+
+		var normal1 = 	[(y1 - y2),
+						-(x1 - x2),
+						(x1 - x2)*(aboveY - y2) - (y1 - y2)*(aboveX - x2)] //p1,p2,above
+
+		var normal2 = 	[(y2 - y3),
+						-(x2 - x3),
+						(x2 - x3)*(aboveY - y3) - (y2 - y3)*(aboveX - x3)] //p2,p3,above
+
+		var normal3 = 	[(y3 - y1),
+						-(x3 - x1),
+						(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
+
+		var z1 = -(x - x1)*normal1[0]/normal1[2] - (y - y1)*normal1[1]/normal1[2];
+		var z2 = -(x - x2)*normal2[0]/normal2[2] - (y - y2)*normal2[1]/normal2[2];
+		var z3 = -(x - x3)*normal3[0]/normal3[2] - (y - y3)*normal3[1]/normal3[2];
+
+		if(z1 >= 0 && z2 >= 0 && z3 >= 0){
+			return true;
+		}else{
+			return false;
+		}
+
+	}
 	this.setColor(tempColor);
 }
 
