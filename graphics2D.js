@@ -150,6 +150,34 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var x3 = Math.round(x_3);
 	var y3 = Math.round(y_3);
 
+	/*****variables for triangle check****/
+	var aboveX = (x1 + x2 + x3)/3
+	var aboveY = (y1 + y2 + y3)/3
+	
+	//assuming z of the point above the plane is 1 and z of the plane is 0
+	var normal1 = 	[(y1 - y2),
+					-(x1 - x2),
+					(x1 - x2)*(aboveY - y2) - (y1 - y2)*(aboveX - x2)] //p1,p2,above
+	var normal2 = 	[(y2 - y3),
+					-(x2 - x3),
+					(x2 - x3)*(aboveY - y3) - (y2 - y3)*(aboveX - x3)] //p2,p3,above
+	var normal3 = 	[(y3 - y1),
+					-(x3 - x1),
+					(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
+	var A1 = -normal1[0]/normal1[2];
+	var B1 = -normal1[1]/normal1[2];
+	var C1 = x1*normal1[0]/normal1[2] + y1*normal1[1]/normal1[2];
+
+	var A2 = -normal2[0]/normal2[2];
+	var B2 = -normal2[1]/normal2[2];
+	var C2 = x2*normal2[0]/normal2[2] + y2*normal2[1]/normal2[2];
+
+	var A3 = -normal3[0]/normal3[2];
+	var B3 = -normal3[1]/normal3[2];
+	var C3 = x3*normal3[0]/normal3[2] + y3*normal3[1]/normal3[2];
+	/*------end variables for triangle check---------*/
+
+
 	var rnormal = [(y1 - y2)*(r3 - r2) - (r1 - r2)*(y3 - y2),
 				  (r1 - r2)*(x3 - x2) - (x1 - x2)*(r3 - r2),
 				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
@@ -215,26 +243,12 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 
 	function isInTriangle(x,y){
 		
-		var aboveX = (x1 + x2 + x3)/3
-		var aboveY = (y1 + y2 + y3)/3
-		
-		//assuming z of the point above the plane is 1 and z of the plane is 0
-
-		var normal1 = 	[(y1 - y2),
-						-(x1 - x2),
-						(x1 - x2)*(aboveY - y2) - (y1 - y2)*(aboveX - x2)] //p1,p2,above
-
-		var normal2 = 	[(y2 - y3),
-						-(x2 - x3),
-						(x2 - x3)*(aboveY - y3) - (y2 - y3)*(aboveX - x3)] //p2,p3,above
-
-		var normal3 = 	[(y3 - y1),
-						-(x3 - x1),
-						(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
-
-		var z1 = -(x - x1)*normal1[0]/normal1[2] - (y - y1)*normal1[1]/normal1[2];
-		var z2 = -(x - x2)*normal2[0]/normal2[2] - (y - y2)*normal2[1]/normal2[2];
-		var z3 = -(x - x3)*normal3[0]/normal3[2] - (y - y3)*normal3[1]/normal3[2];
+		// var z1 = (-x + x1)*normal1[0]/normal1[2] - (y - y1)*normal1[1]/normal1[2];
+		// var z2 = (-x + x2)*normal2[0]/normal2[2] - (y - y2)*normal2[1]/normal2[2];
+		// var z3 = (-x + x3)*normal3[0]/normal3[2] - (y - y3)*normal3[1]/normal3[2];
+		var z1 = A1*x + B1*y + C1;
+		var z2 = A2*x + B2*y + C2;
+		var z3 = A3*x + B3*y + C3;
 
 		if(z1 >= 0 && z2 >= 0 && z3 >= 0){
 			return true;
