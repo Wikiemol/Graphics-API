@@ -166,15 +166,15 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 					(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
 	var A1 = -normal1[0]/normal1[2];
 	var B1 = -normal1[1]/normal1[2];
-	var C1 = x1*normal1[0]/normal1[2] + y1*normal1[1]/normal1[2];
+	// var C1 = x1*normal1[0]/normal1[2] + y1*normal1[1]/normal1[2];
 
 	var A2 = -normal2[0]/normal2[2];
 	var B2 = -normal2[1]/normal2[2];
-	var C2 = x2*normal2[0]/normal2[2] + y2*normal2[1]/normal2[2];
+	// var C2 = x2*normal2[0]/normal2[2] + y2*normal2[1]/normal2[2];
 
 	var A3 = -normal3[0]/normal3[2];
 	var B3 = -normal3[1]/normal3[2];
-	var C3 = x3*normal3[0]/normal3[2] + y3*normal3[1]/normal3[2];
+	// var C3 = x3*normal3[0]/normal3[2] + y3*normal3[1]/normal3[2];
 	/*------end variables for triangle check---------*/
 
 
@@ -220,9 +220,9 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 			var x = minX + i;
 			var y = minY + j;
 			var isInTriangle = true;
-			var z1 = A1*x + B1*y + C1;
-			var z2 = A2*x + B2*y + C2;
-			var z3 = A3*x + B3*y + C3;
+			var z1 = (x - x1)*A1 + (y - y1)*B1;
+			var z2 = A2*(x-x2) + B2*(y-y2);
+			var z3 = A3*(x-x3) + B3*(y-y3);
 
 			if(z1 < 0){
 				isInTriangle = false;
