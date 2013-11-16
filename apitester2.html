@@ -13,8 +13,8 @@
 			var canvas = null;
 			var cxt = null;
 			var g;
-			// var ply = new PLY("beethoven.ply");
-			// ply.load();
+			var ply = new PLY("teapot.ply");
+			ply.load(50);
 			window.addEventListener('load', onLoad);
 
 			function onLoad(e){
@@ -43,10 +43,10 @@
 
 				// setInterval(draw2,33)
 				// draw2();
-				// setInterval(draw3,33);
+				setInterval(draw3,33);
 				// draw3();
-
-				draw4();
+				// setInterval(draw4,33);
+				// draw4();
 			}
 
 
@@ -135,20 +135,23 @@
 				g.setFocalLength(500);
 				light1.setPosition(200*Math.cos(10*sx),100,400);
 				g.addLight(light1,true);
+				g.shading = 'gouraud';
 				// g.drawGrid();
-				g.setMaterial({"color": [255,255,255], "specularExponent": 9, "specularMultiplier": 2, "diffusion": 1})
-				ply.addTo(g);
+				g.setMaterial({"color": [255,255,255], "specularExponent": 13, "specularMultiplier": 2, "diffusion": 1})
+				ply.addTo(g,sx,sx,sx);
 				g.draw({"lights":true,"ambience":false});
 
 				sx += 0.03;
 			}
 
 			function draw4(){
+				cxt.clearRect(0,0,500,500);
 				var g = new Graphics2D(cxt);
 				g.setCoordinates(true);
 				g.setColor([255,0,0]);
-				g.interpolateTriangle(-200,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
+				g.interpolateTriangle(-200 + sx,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
 				g.draw();
+				sx++;
 			}
 		</script>
 	</head>

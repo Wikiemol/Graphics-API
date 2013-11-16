@@ -145,6 +145,22 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var p2 = new Vector(Math.round(x_2),Math.round(y_2));
 	var p3 = new Vector(Math.round(x_3),Math.round(y_3));	
 
+	var c1 = new Vector(r1,g1,b1);
+	var c2 = new Vector(r2,g2,b2);
+	var c3 = new Vector(r3,g3,b3);
+
+	var rnormal = [(p1.at(1) - p2.at(1))*(c3.at(0) - c2.at(0)) - (c1.at(0) - c2.at(0))*(p3.at(1) - p2.at(1)),
+				  (c1.at(0) - c2.at(0))*(p3.at(0) - p2.at(0)) - (p1.at(0) - p2.at(0))*(c3.at(0) - c2.at(0)),
+				  (p1.at(0) - p2.at(0))*(p3.at(1) - p2.at(1)) - (p1.at(1) - p2.at(1))*(p3.at(0) - p2.at(0))]
+
+	var gnormal = [(p1.at(1) - p2.at(1))*(c3.at(1) - c2.at(1)) - (c1.at(1) - c2.at(1))*(p3.at(1) - p2.at(1)),
+				  (c1.at(1) - c2.at(1))*(p3.at(0) - p2.at(0)) - (p1.at(0) - p2.at(0))*(c3.at(1) - c2.at(1)),
+				  (p1.at(0) - p2.at(0))*(p3.at(1) - p2.at(1)) - (p1.at(1) - p2.at(1))*(p3.at(0) - p2.at(0))]
+
+	var bnormal = [(p1.at(1) - p2.at(1))*(c3.at(2) - c2.at(2)) - (c1.at(2) - c2.at(2))*(p3.at(1) - p2.at(1)),
+				  (c1.at(2) - c2.at(2))*(p3.at(0) - p2.at(0)) - (p1.at(0) - p2.at(0))*(c3.at(2) - c2.at(2)),
+				  (p1.at(0) - p2.at(0))*(p3.at(1) - p2.at(1)) - (p1.at(1) - p2.at(1))*(p3.at(0) - p2.at(0))]
+
 	var minX = Math.min(Math.min(p1.at(0),p2.at(0)),p3.at(0));
 	var minY = Math.min(Math.min(p1.at(1),p2.at(1)),p3.at(1));
 	var maxX = Math.max(Math.max(p1.at(0),p2.at(0)),p3.at(0));
@@ -166,27 +182,26 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 			if(area == a1 + a2 + a3){
 					var x = minX + i;
 					var y = minY + j;
-
-					var k = (-p1.at(0)*p2.at(1) + p1.at(0)*p3.at(1) + p2.at(0)*p1.at(1) - p2.at(0)*p3.at(1) -p3.at(0)*p1.at(1) + p3.at(0)*p2.at(1));
-
-					var Ar = (-p1.at(1)*r2 + p1.at(1)*r3 + p2.at(1)*r1 - p2.at(1)*r3 - p3.at(1)*r1 + p3.at(1)*r2)/(-k);
-					var Br = -(-p1.at(0)*r2 + p1.at(0)*r3 + p2.at(0)*r1 - p2.at(0)*r3 - p3.at(0)*r1 + p3.at(0)*r2)/(-k);
-					var Cr = r2;
-
-					var Ag = (-p1.at(1)*g2 + p1.at(1)*g3 + p2.at(1)*g1 - p2.at(1)*g3 - p3.at(1)*g1 + p3.at(1)*g2)/(-k);
-					var Bg = -(-p1.at(0)*g2 + p1.at(0)*g3 + p2.at(0)*g1 - p2.at(0)*g3 - p3.at(0)*g1 + p3.at(0)*g2)/(-k);
-					var Cg = g2;
-
-					var Ab = (-p1.at(1)*b2 + p1.at(1)*b3 + p2.at(1)*b1 - p2.at(1)*b3 - p3.at(1)*b1 + p3.at(1)*b2)/(-k);
-					var Bb = -(-p1.at(0)*b2 + p1.at(0)*b3 + p2.at(0)*b1 - p2.at(0)*b3 - p3.at(0)*b1 + p3.at(0)*b2)/(-k);
-					var Cb = b2;
-
-					var r = Ar*x + Br*y + Cr;
-					var g = Ag*x + Bg*y + Cg;
-					var b = Ab*x + Bb*y + Cb;
-
 					
-					this.setColor([r,g,b]);
+					var Ar = -rnormal[0]/rnormal[2];
+					var Br = -rnormal[1]/rnormal[2];
+					var Cr = -Ar*p1.at(0) + -Br*p1.at(1) + c1.at(0);
+
+					var Ag = -gnormal[0]/gnormal[2];
+					var Bg = -gnormal[1]/gnormal[2];
+					var Cg = -Ag*p1.at(0) + -Bg*p1.at(1) + c1.at(1);
+					
+					var Ab = -bnormal[0]/bnormal[2];
+					var Bb = -bnormal[1]/bnormal[2];
+					var Cb = -Ab*p1.at(0) + -Bb*p1.at(1) + c1.at(2);
+
+					var color = [Ar*x + Br*y + Cr, Ag*x + Bg*y + Cg, Ab*x + Bb*y + Cb];
+
+					/*var color1 = c1.multiply(a1/(a1 + a2 + a3));
+					var color2 = c2.multiply(a2/(a1 + a2 + a3));
+					var color3 = c3.multiply(a3/(a1 + a2 + a3));
+					var color  = color1.add(color2).add(color3).getVectorAsArray();*/
+					this.setColor(color);
 					this.drawPixel(x, y);
 			}
 		}

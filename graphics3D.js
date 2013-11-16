@@ -12,44 +12,46 @@ function Graphics3D(context){
 	this.lights 				= [];
 	this.material 				= new Material("#808080",1);
 	this.concavePolygons 		= false;
+	this.shading				= 'gouraud'
 		//console.log("0: "+queue[0]);
 		//console.log("1: "+queue[1]);
 }
 
 
-Graphics3D.prototype.applyLight = function(i){ //pass the item *number* in the queue not the item itself. Returns RGB color value.
-	var a = this.queue[i];
-	var midPoint		= a.midPoint();
+Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point normal and material, Returns RGB color value.
+	var point 			= p;
 	var specularity		= 0;
 	var diffuse			= 0;
-	var normal			= a.normal().unit();
-	var material 		= a.getMaterial();
+	var normal			= normal.unit();
+	var material 		= material;
 	var materialColor	= material.getColor();
 	
 	var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
 	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
-	var viewPointVector = new Vector(0,0,0); //Vector between midpoint and viewPoint
-	viewPointVector = viewPointVector.add(midPoint.subtract(this.getSensor())).unit();
+	var viewPointVector = new Vector(0,0,0); //Vector between point and viewPoint
+	viewPointVector = viewPointVector.add(point.subtract(this.getSensor())).unit();
 	for(var i = 0; i < this.lights.length; i++){ //totaling light contributions
 		/**Calculate Specularity**/
-		var specularLight = this.lights[i].specularIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2)).multiply(1);
+		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2)).multiply(1);
 
 		var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
 
 		if(lightReflection.dot(viewPointVector)*material.getSpecularity() > 0){
 			
-			specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/this.lights[i].distance(midPoint.at(0),midPoint.at(1),midPoint.at(2)));
+			specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/this.lights[i].distance(point.at(0),point.at(1),point.at(2)));
 
 		}
+		
 		/**Calculate Diffusion**/
-		var diffusionLight = this.lights[i].diffusionIntensityVector(midPoint.at(0),midPoint.at(1),midPoint.at(2));
+		var diffusionLight = this.lights[i].diffusionIntensityVector(point.at(0),point.at(1),point.at(2));
 		if(diffusionLight.dot(normal)*material.getDiffusion() >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
 			diffuse += diffusionLight.dot(normal)*material.getDiffusion(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
 		}
+
 		/**Calculate color contribution (totalgel contribution)**/
-		totalGel["r"] += this.lights[i].getGel()["r"]*this.lights[i].intensityAt(midPoint.at(0),midPoint.at(1),midPoint.at(2)).at(0);
-		totalGel["g"] += this.lights[i].getGel()["g"]*this.lights[i].intensityAt(midPoint.at(0),midPoint.at(1),midPoint.at(2)).at(0);
-		totalGel["b"] += this.lights[i].getGel()["b"]*this.lights[i].intensityAt(midPoint.at(0),midPoint.at(1),midPoint.at(2)).at(0);
+		totalGel["r"] += this.lights[i].getGel()["r"]*this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
+		totalGel["g"] += this.lights[i].getGel()["g"]*this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
+		totalGel["b"] += this.lights[i].getGel()["b"]*this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
 		totalColor += (this.lights[i].getGel()["r"] + this.lights[i].getGel()["g"] + this.lights[i].getGel()["b"])*diffusionLight.magnitude();
 	}
 	
@@ -191,26 +193,56 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	})
 	//Drawing polygons
 	for(var i = 0; i < this.queue.length; i++){
-		var a = this.queue[i];
-		if(a instanceof Triangle3D){
-			if(a.p1.at(2) < this.lens && a.p2.at(2) < this.lens && a.p3.at(2) < this.lens){
-				var proj1 = this.projectPoint(a.p1.at(0),a.p1.at(1),a.p1.at(2));
-				var proj2 = this.projectPoint(a.p2.at(0),a.p2.at(1),a.p2.at(2));
-				var proj3 = this.projectPoint(a.p3.at(0),a.p3.at(1),a.p3.at(2));
-				
+		var triangle = this.queue[i];
+		if(triangle instanceof Triangle3D){
+			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens && triangle.p3.at(2) < this.lens){ //if it is in front of the camera
+				//project the points
+				var proj1 = this.projectPoint(triangle.p1.at(0),triangle.p1.at(1),triangle.p1.at(2));
+				var proj2 = this.projectPoint(triangle.p2.at(0),triangle.p2.at(1),triangle.p2.at(2));
+				var proj3 = this.projectPoint(triangle.p3.at(0),triangle.p3.at(1),triangle.p3.at(2));
 				if(lightIsOn){
-					g.setColor(this.applyLight(i));
+
+					switch(this.shading){
+						
+						case('flat'):
+							
+							g.setColor(this.applyLight(triangle.midPoint(),triangle.normal(),triangle.getMaterial()));
+							g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
+
+							break;
+	
+						case('gouraud'):
+							var p1normal 	= triangle.normal1;
+							var p2normal 	= triangle.normal2;
+							var p3normal 	= triangle.normal3;
+							
+							var color1 = this.applyLight(triangle.p1, p1normal, triangle.getMaterial());
+							var color2 = this.applyLight(triangle.p2, p2normal, triangle.getMaterial());
+							var color3 = this.applyLight(triangle.p3, p3normal, triangle.getMaterial());
+
+							g.interpolateTriangle(proj1.at(0), proj1.at(1),
+												  proj2.at(0), proj2.at(1),
+												  proj3.at(0), proj3.at(1),
+												  color1[0], color1[1], color1[2],
+												  color2[0], color2[1], color2[2],
+												  color3[0], color3[1], color3[2]);
+
+							break;
+
+					}
+
 				}else{
-					g.setColor(a.getMaterial().getColor())
+					g.setColor(triangle.getMaterial().getColor())
+					g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
 				}
 				
-				g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
+				
 			}
-		}else if(a instanceof Line3D){
-			if(a.p1.at(2) < this.lens && a.p2.at(2) < this.lens){
-				var proj1 = this.projectPoint(a.p1.at(0),a.p1.at(1),a.p1.at(2));
-				var proj2 = this.projectPoint(a.p2.at(0),a.p2.at(1),a.p2.at(2));
-				g.setColor(a.getMaterial().getColor());
+		}else if(triangle instanceof Line3D){ //triangle is a line
+			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens){
+				var proj1 = this.projectPoint(triangle.p1.at(0),triangle.p1.at(1),triangle.p1.at(2));
+				var proj2 = this.projectPoint(triangle.p2.at(0),triangle.p2.at(1),triangle.p2.at(2));
+				g.setColor(triangle.getMaterial().getColor());
 				g.drawLine(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1));
 			}
 		}
@@ -271,9 +303,20 @@ Graphics3D.prototype.drawPrism = function(x,y,z,w,h,d){
 	
 }
 
-Graphics3D.prototype.fillTriangle = function(x1,y1,z1,x2,y2,z2,x3,y3,z3){
+Graphics3D.prototype.fillTriangle = function(x1,y1,z1, x2,y2,z2, x3,y3,z3, n1,n2,n3, flip){ //n1 n2 and n3 are normals of vertices as vectors 
 	if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined.");
 	var triangle = new Triangle3D(new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial());
+
+	if(n1 instanceof Vector){
+		triangle.normal1 = n1;
+	}
+	if(n2 instanceof Vector){
+		triangle.normal2 = n2;
+	}
+	if(n3 instanceof Vector){
+		triangle.normal3 = n3;
+	}
+	triangle.flip = flip;
 	this.pushToQueue(triangle);
 }
 
@@ -415,6 +458,7 @@ Graphics3D.prototype.fillEllipsoid = function(x,y,z,xRadius,yRadius,zRadius,xr,y
 							  rp2.at(0) + x,rp2.at(1) + y,rp2.at(2) + z,
 							  rp3.at(0) + x,rp3.at(1) + y,rp3.at(2) + z,
 							  rp4.at(0) + x,rp4.at(1) + y,rp4.at(2) + z]);
+
 			this.fillPolygon([rp5.at(0) + x,rp5.at(1) + y,rp5.at(2) + z,
 							  rp6.at(0) + x,rp6.at(1) + y,rp6.at(2) + z,
 							  rp7.at(0) + x,rp7.at(1) + y,rp7.at(2) + z,

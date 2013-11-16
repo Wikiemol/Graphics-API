@@ -101,3 +101,13 @@ Vector.prototype.area = function(v){ //area of the parallelogram formed by two v
 Vector.prototype.vpush = function(a){
 	this.vectorArray.push(a);
 }
+
+Vector.prototype.roundVector = function(){
+	var vector = new Vector();
+	for(var i = 0; i < this.vectorArray.length; i++){
+
+		vector.vpush(Math.round(this.vectorArray[i]));
+		console.log(Math.round(this.vectorArray[i]));
+	}
+	return vector;
+}
