@@ -137,14 +137,14 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with this.iDiff
 	var point = new Vector(x,y,z);
 	var iDiff;
 	var iSpec;
-	if (this.getType() == "point") {
-		var distance = this.distance(x,y,z);
-		iDiff = this.getReach()*100000*this.getDiffusion()/(distance*distance);
-		iSpec = this.getSpecularity()/(distance*distance);
-	}else if(this.getType() == "directional") {
+	if (this.type == "point") {
+		var distance = this.distanceSquared(x,y,z);
+		iDiff = this.getReach()*100000*this.getDiffusion()/(distance);
+		iSpec = this.getSpecularity()/(distance);
+	}else if(this.type == "directional") {
 		iDiff = this.getDiffusion();
 		iSpec = this.getSpecularity();
-	}else if(this.getType() == "spot"){
+	}else if(this.type == "spot"){
 		//Making this later
 	}
 	return new Vector(iDiff,iSpec);
@@ -153,11 +153,11 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with this.iDiff
 Light.prototype.directionAt = function(x,y,z) { //Returns unit vector in direction of the light
 	var point = new Vector(x,y,z);
 	var direction;
-	if(this.getType() == "point"){
+	if(this.type == "point"){
 		direction = point.subtract(this.getPosition()).unit();
-	}else if(this.getType() == "directional"){
+	}else if(this.type == "directional"){
 		direction = this.getDirection().unit();
-	}else if(this.getType() == "spot"){
+	}else if(this.type == "spot"){
 		//Don't forget to add this
 	}
 	return direction;
@@ -184,4 +184,14 @@ Light.prototype.distance = function(x,y,z) {
 	}
 	return distance;
 
+};
+
+Light.prototype.distanceSquared = function(x,y,z){
+	var distance; //squared
+	if(this.type == 'point'){
+		distance = (x - this.getPosition().at(0))*(x - this.getPosition().at(0)) + (y - this.getPosition().at(1))*(y - this.getPosition().at(1)) + (z - this.getPosition().at(2))*(z - this.getPosition().at(2));
+	}else if(this.type == 'directional'){
+		distance = this.directionalDistance*this.directionalDistance;
+	}
+	return distance;
 };

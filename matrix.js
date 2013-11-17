@@ -2,7 +2,8 @@ function Matrix() { //can take array of vectors, in addition, it can be set to a
 	this.matrixArray = [];
 	this.w;
 	this.h;
-
+	this.theta = 0;
+	this.type  = null;
 	if(arguments[0] instanceof Array){
 
 		this.matrixArray = arguments[0];
@@ -10,10 +11,13 @@ function Matrix() { //can take array of vectors, in addition, it can be set to a
 		this.h = this.matrixArray.length;
 	}else if(arguments[0] == 'rx'){
 		this.rotationX(arguments[1]);
+		this.type = 'rx';
 	}else if(arguments[0] == 'ry'){
 		this.rotationY(arguments[1]);
+		this.type = 'ry';
 	}else if(arguments[0] == 'rz'){
 		this.rotationZ(arguments[1]);
+		this.type = 'rz';
 	}else{
 		this.w		= arguments[0].getLength();
 		this.h		= arguments.length;
@@ -108,7 +112,23 @@ Matrix.prototype.multiply = function(s) {
 		this.setRow(i,this.row(i).multiply(s));
 	}
 };
-
+Matrix.prototype.setTheta = function(theta) {
+	if(this.type == 'rx'){
+		this.setMatrix(new Vector(1,0,0),
+				   new Vector(0,Math.cos(theta),-Math.sin(theta)),
+				   new Vector(0,Math.sin(theta),Math.cos(theta)));	
+	}else if(this.type == 'ry'){
+		this.setMatrix(new Vector(Math.cos(theta),0,Math.sin(theta)),
+			   new Vector(0,1,0),
+			   new Vector(-Math.sin(theta),0,Math.cos(theta)));		
+	}else if(this.type == 'rz'){
+		this.setMatrix(new Vector(Math.cos(theta),-Math.sin(theta),0),
+			   new Vector(Math.sin(theta),Math.cos(theta),0),
+			   new Vector(0,0,1));		
+	}else{
+		throw "Error: Matrix is not a rotation matrix";
+	}
+};
 Matrix.prototype.rotationX = function(theta) { //Makes this matrix the rotation matrix about the x axis for theta degrees
 	this.setMatrix(new Vector(1,0,0),
 				   new Vector(0,Math.cos(theta),-Math.sin(theta)),

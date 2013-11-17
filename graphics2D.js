@@ -150,6 +150,9 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var x3 = Math.round(x_3);
 	var y3 = Math.round(y_3);
 
+	if(x1 == x2 && y1 == y2 || x1 == x3 && y1 == y3 || x2 == x3 && y2 == y3){
+		return;
+	}
 	/*****variables for triangle check****/
 	var aboveX = (x1 + x2 + x3)/3
 	var aboveY = (y1 + y2 + y3)/3
@@ -207,10 +210,6 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var maxX = Math.max(Math.max(x1,x2),x3);
 	var maxY = Math.max(Math.max(y1,y2),y3);
 
-	/*var area = getArea(x1,y1,
-					   x2,y2,
-					   x3,y3);*/
-
 	var n1 = Math.abs(maxX - minX);
 	var n2 = Math.abs(maxY - minY);
 	
@@ -234,28 +233,15 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 				isInTriangle = false;
 			}
 
-			/*var a1 = getArea(minX + i, minY + j,x2,y2,x3,y3);
-			var a2 = getArea(minX + i, minY + j,x3,y3,x1,y1);
-			var a3 = getArea(minX + i, minY + j,x1,y1,x2,y2);*/
-			// if(area == a1 + a2 + a3){
 			if(isInTriangle){
 
 					var color = [Ar*x + Br*y + Cr, Ag*x + Bg*y + Cg, Ab*x + Bb*y + Cb];
 
-					/*var color1 = c1.multiply(a1/(a1 + a2 + a3));
-					var color2 = c2.multiply(a2/(a1 + a2 + a3));
-					var color3 = c3.multiply(a3/(a1 + a2 + a3));
-					var color  = color1.add(color2).add(color3).getVectorAsArray();*/
 					this.setColor(color);
 					this.drawPixel(x, y);
 			}
 		}
 	}
-	
-	
-	/*function getArea(x_1,y_1,x_2,y_2,x_3,y_3){	
-		return Math.abs((x_1*(y_2 - y_3) + x_2*(y_3 - y_1) + x_3*(y_1 - y_2))/2)
-	}*/
 	this.setColor(tempColor);
 }
 

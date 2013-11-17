@@ -30,7 +30,8 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
 	var viewPointVector = new Vector(0,0,0); //Vector between point and viewPoint
 	viewPointVector = viewPointVector.add(point.subtract(this.getSensor())).unit();
-	for(var i = 0; i < this.lights.length; i++){ //totaling light contributions
+	var lightsLength = this.lights.length;
+	for(var i = 0; i < lightsLength; i++){ //totaling light contributions
 		/**Calculate Specularity**/
 		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2)).multiply(1);
 
@@ -172,28 +173,14 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	g.setCoordinates(this.standard_coordinates);
 	var self = this;
 	this.queue = this.queue.sort(function(a,b){
-		var aMidPoint = a.mid;
-		var bMidPoint = b.mid;
-	
-		var s0 = self.sensor.at(0);
-		var s1 = self.sensor.at(1);
-		var s2 = self.sensor.at(2);
-		var b0 = bMidPoint.at(0);
-		var b1 = bMidPoint.at(1);
-		var b2 = bMidPoint.at(2);
-		var a0 = aMidPoint.at(0);
-		var a1 = aMidPoint.at(1);
-		var a2 = aMidPoint.at(2);
-		var bDistance = (s0 - b0)*(s0 - b0) + 
-						(s1 - b1)*(s1 - b1) +
-						(s2 - b2)*(s2 - b2);
-		var aDistance = (s0 - a0)*(s0 - a0) + 
-						(s1 - a1)*(s1 - a1) +
-						(s2 - a2)*(s2 - a2);
-		return bDistance - aDistance;
+		
+		return b.squareDistance - a.squareDistance;
 	})
+
+	var vertexColors = new Object(); //will hold the color of each vertex for gouraud shading
+	var queueLength = this.queue.length;
 	//Drawing polygons
-	for(var i = 0; i < this.queue.length; i++){
+	for(var i = 0; i < queueLength; i++){
 		var triangle = this.queue[i];
 		if(triangle instanceof Triangle3D){
 			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens && triangle.p3.at(2) < this.lens){ //if it is in front of the camera
@@ -217,9 +204,30 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 							var p2normal 	= triangle.normal2;
 							var p3normal 	= triangle.normal3;
 							
-							var color1 = this.applyLight(triangle.p1, p1normal, triangle.getMaterial());
-							var color2 = this.applyLight(triangle.p2, p2normal, triangle.getMaterial());
-							var color3 = this.applyLight(triangle.p3, p3normal, triangle.getMaterial());
+							var color1;
+							var color2;
+							var color3;
+
+							if(typeof vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)] === 'undefined'){
+								color1 = this.applyLight(triangle.p1, p1normal, triangle.getMaterial());
+								vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)] = color1;
+							}else{
+								color1 = vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)];
+							}
+
+							if(typeof vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)] === 'undefined'){
+								color2 = this.applyLight(triangle.p2, p2normal, triangle.getMaterial());
+								vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)] = color2;
+							}else{
+								color2 = vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)];
+							}
+
+							if(typeof vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)] === 'undefined'){
+								color3 = this.applyLight(triangle.p3, p3normal, triangle.getMaterial());
+								vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)] = color3;
+							}else{
+								color3 = vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)];
+							}
 
 							g.interpolateTriangle(proj1.at(0), proj1.at(1),
 												  proj2.at(0), proj2.at(1),
@@ -227,8 +235,8 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 												  color1[0], color1[1], color1[2],
 												  color2[0], color2[1], color2[2],
 												  color3[0], color3[1], color3[2]);
-
 							break;
+
 
 					}
 
@@ -280,6 +288,7 @@ Graphics3D.prototype.drawLine = function(x1,y1,z1,x2,y2,z2){
 	var p2 = new Vector(x2,y2,z2);
 
 	var line = new Line3D(p1,p2,this.getMaterial());
+	line.squareDistance = (line.mid.at(0) - this.sensor.at(0))*(line.mid.at(0) - this.sensor.at(0)) + (line.mid.at(1) - this.sensor.at(1))*(line.mid.at(1) - this.sensor.at(1)) + (line.mid.at(2) - this.sensor.at(2))*(line.mid.at(2) - this.sensor.at(2));
 	this.pushToQueue(line);
 
 }
@@ -317,6 +326,8 @@ Graphics3D.prototype.fillTriangle = function(x1,y1,z1, x2,y2,z2, x3,y3,z3, n1,n2
 	if(n3 instanceof Vector){
 		triangle.normal3 = n3;
 	}
+
+	triangle.squareDistance = (triangle.mid.at(0) - this.sensor.at(0))*(triangle.mid.at(0) - this.sensor.at(0)) + (triangle.mid.at(1) - this.sensor.at(1))*(triangle.mid.at(1) - this.sensor.at(1)) + (triangle.mid.at(2) - this.sensor.at(2))*(triangle.mid.at(2) - this.sensor.at(2));
 	triangle.flip = flip;
 	this.pushToQueue(triangle);
 }

@@ -1,14 +1,14 @@
 function Triangle3D(p1,p2,p3,m){ //position vectors as first three parameters and material
-	this.p1 		= p1;
-	this.p2 		= p2;
-	this.p3 		= p3;
-	this.material 	= m;
-	this.normal1 	= this.normal(); //normal for vertex 1
-	this.normal2 	= this.normal(); //normal for vertex 2
-	this.normal3 	= this.normal(); //normal for vertex 3
-	this.flip 		= false;
-	this.mid 		= this.p1.add(this.p2).add(this.p3).multiply(1/3);
-	
+	this.p1 			= p1;
+	this.p2 			= p2;
+	this.p3 			= p3;
+	this.material 		= m;
+	this.normal1 		= this.normal(); //normal for vertex 1
+	this.normal2 		= this.normal(); //normal for vertex 2
+	this.normal3 		= this.normal(); //normal for vertex 3
+	this.flip 			= false;
+	this.mid 			= this.p1.add(this.p2).add(this.p3).multiply(1/3);
+	this.squareDistance;
 }
 
 Triangle3D.prototype.midPoint = function() {
