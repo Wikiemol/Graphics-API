@@ -18,6 +18,7 @@
 			window.addEventListener('load', onLoad);
 
 			function onLoad(e){
+				window.removeEventListener('load', onLoad);
 				canvas = window.document.getElementById("can");
 				cxt = canvas.getContext('2d');
 				g = new Graphics3D(cxt);
@@ -34,7 +35,7 @@
 				}*/
 					
 				// g.fillTriangle(-100,-100,0,100,100,0);
-				
+								
 								
 				
 
@@ -128,16 +129,13 @@
 				cxt.fillText("FPS: " + Math.round(1000/(thisFrame - lastFrame)),10,20);
 				lastFrame = thisFrame;
 
-				var s = 'n';
-				var n = 0 + s.charCodeAt(0);
-
 				g.setSensor(0,200 + sy,1100);
 				g.setFocalLength(500);
 				light1.setPosition(200*Math.cos(10*sx),100,400);
 				g.addLight(light1,true);
 				g.shading = 'gouraud';
 				// g.drawGrid();
-				g.setMaterial({"color": [255,255,255], "specularExponent": 13, "specularMultiplier": 2, "diffusion": 1})
+				g.setMaterial({"color": [255,128,1], "specularExponent": 13, "specularMultiplier": 2, "diffusion": 1})
 				// sx = Math.PI/6 + 0.27;
 				ply.addTo(g,sx,sx,sx);
 				g.draw({"lights":true,"ambience":false});

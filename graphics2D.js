@@ -150,9 +150,10 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var x3 = Math.round(x_3);
 	var y3 = Math.round(y_3);
 
-	if(x1 == x2 && y1 == y2 || x1 == x3 && y1 == y3 || x2 == x3 && y2 == y3){
+	if(x1 == x2 && y1 == y2 || x1 == x3 && y1 == y3 || x2 == x3 && y2 == y3){ //if the triangle is a line we don't need to do anything
 		return;
 	}
+
 	var y12 = y1 - y2;
 	var x12 = x1 - x2;
 	var y32 = y3 - y2;
@@ -174,7 +175,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 					-(x3 - x1),
 					(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
 	
-	if(normal1[2] == 0 || normal2[2] == 0 || normal3[2] == 0){
+	if(normal1[2] == 0 || normal2[2] == 0 || normal3[2] == 0){ //avoids divide by 0 errors
 		return;
 	}
 
@@ -190,7 +191,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 				  (b1 - b2)*x32 - x12*(b3 - b2),
 				  x12*y32 - y12*x32]
 	
-	if(rnormal[2] == 0 || gnormal[2] == 0 || bnormal[2] == 0){
+	if(rnormal[2] == 0 || gnormal[2] == 0 || bnormal[2] == 0){ //avoids more divide by 0 errors
 		return;
 	}
 
@@ -278,7 +279,6 @@ Graphics2D.prototype.fillPolygon = function(a){ //points must be ordered by user
 	var shortestToCenter;
 	for(var i = 0; i < a.length/2; i++){
 		points[i] = [a[i*2],a[i*2 + 1]];
-		
 		pointsx.push(a[i*2]);
 		pointsy.push(a[i*2 + 1]);
 		
@@ -347,7 +347,3 @@ Graphics2D.prototype.fillPolygonConvex = function(a){ //assumes polygon passed i
 	}
 	this.fillTriangle(a[a.length - 2],a[a.length - 1],a[0],a[1],midPoint[0],midPoint[1]);
 }
-
-
-
-

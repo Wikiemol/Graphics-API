@@ -74,15 +74,17 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 	var red = materialColor[0];
 	var green = materialColor[1];
 	var blue = materialColor[2];
+	var colorSum = 1/(red + green + blue);
 	
 	red *= diffuse*rRatio;
 	green *= diffuse*gRatio;
 	blue *= diffuse*bRatio;
 	
 	var specComponent = Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
-	red += specComponent;
-	green += specComponent;
-	blue += specComponent;
+
+	red += specComponent*materialColor[0]*colorSum;
+	green += specComponent*materialColor[1]*colorSum;
+	blue += specComponent*materialColor[2]*colorSum;
 	
 	if(red > 255){ 
 		red = 255;
