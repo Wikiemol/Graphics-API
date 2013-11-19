@@ -25,7 +25,7 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 	var normal			= normal.unit();
 	var material 		= material;
 	var materialColor	= material.getColor();
-	
+
 	var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
 	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
 	var viewPointVector = new Vector(0,0,0); //Vector between point and viewPoint
@@ -45,14 +45,18 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 		
 		/**Calculate Diffusion**/
 		var diffusionLight = this.lights[i].diffusionIntensityVector(point.at(0),point.at(1),point.at(2));
-		if(diffusionLight.dot(normal)*material.getDiffusion() >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
-			diffuse += diffusionLight.dot(normal)*material.getDiffusion(); //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
+		var diffuseAdd = diffusionLight.dot(normal)*material.getDiffusion();
+		if(diffuseAdd >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
+			diffuse += diffuseAdd; //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
 		}
 
 		/**Calculate color contribution (totalgel contribution)**/
-		totalGel["r"] += this.lights[i].getGel()["r"]*this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
-		totalGel["g"] += this.lights[i].getGel()["g"]*this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
-		totalGel["b"] += this.lights[i].getGel()["b"]*this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
+		var intensity = this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
+
+		totalGel["r"] += this.lights[i].getGel()["r"]*intensity;
+		totalGel["g"] += this.lights[i].getGel()["g"]*intensity;
+		totalGel["b"] += this.lights[i].getGel()["b"]*intensity;
+
 		totalColor += (this.lights[i].getGel()["r"] + this.lights[i].getGel()["g"] + this.lights[i].getGel()["b"])*diffusionLight.magnitude();
 	}
 	
@@ -74,9 +78,12 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 	red *= diffuse*rRatio;
 	green *= diffuse*gRatio;
 	blue *= diffuse*bRatio;
-	red += Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
-	green += Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
-	blue += Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
+	
+	var specComponent = Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
+	red += specComponent;
+	green += specComponent;
+	blue += specComponent;
+	
 	if(red > 255){ 
 		red = 255;
 	}
@@ -108,6 +115,7 @@ Graphics3D.prototype.addLight = function(l,visible){
 		this.setMaterial(temp);
 	}
 }
+
 Graphics3D.prototype.setMaterial = function(cl){
 	
 	// if(!(cl instanceof Array)) throw "Error: setMaterial takes Array as arguments."
@@ -173,7 +181,6 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	g.setCoordinates(this.standard_coordinates);
 	var self = this;
 	this.queue = this.queue.sort(function(a,b){
-		
 		return b.squareDistance - a.squareDistance;
 	})
 
@@ -182,6 +189,7 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	//Drawing polygons
 	for(var i = 0; i < queueLength; i++){
 		var triangle = this.queue[i];
+		var triangleMaterial = triangle.getMaterial();
 		if(triangle instanceof Triangle3D){
 			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens && triangle.p3.at(2) < this.lens){ //if it is in front of the camera
 				//project the points
@@ -194,7 +202,7 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 						
 						case('flat'):
 							
-							g.setColor(this.applyLight(triangle.midPoint(),triangle.normal(),triangle.getMaterial()));
+							g.setColor(this.applyLight(triangle.mid,triangle.normal(),triangleMaterial));
 							g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
 
 							break;
@@ -207,26 +215,28 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 							var color1;
 							var color2;
 							var color3;
-
-							if(typeof vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)] === 'undefined'){
-								color1 = this.applyLight(triangle.p1, p1normal, triangle.getMaterial());
+							
+							var vertexColor1 = vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)];
+							if(typeof vertexColor1 === 'undefined'){
+								color1 = this.applyLight(triangle.p1, p1normal, triangleMaterial);
 								vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)] = color1;
 							}else{
-								color1 = vertexColors[triangle.p1.at(0) + "," + triangle.p1.at(1) + "," + triangle.p1.at(2)];
+								color1 = vertexColor1;
 							}
 
-							if(typeof vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)] === 'undefined'){
-								color2 = this.applyLight(triangle.p2, p2normal, triangle.getMaterial());
+							var vertexColor2 = vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)];
+							if(typeof vertexColor2 === 'undefined'){
+								color2 = this.applyLight(triangle.p2, p2normal, triangleMaterial);
 								vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)] = color2;
 							}else{
-								color2 = vertexColors[triangle.p2.at(0) + "," + triangle.p2.at(1) + "," + triangle.p2.at(2)];
+								color2 = vertexColor2;
 							}
-
-							if(typeof vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)] === 'undefined'){
-								color3 = this.applyLight(triangle.p3, p3normal, triangle.getMaterial());
+							var vertexColor3 = vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)];
+							if(typeof vertexColor3 === 'undefined'){
+								color3 = this.applyLight(triangle.p3, p3normal, triangleMaterial);
 								vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)] = color3;
 							}else{
-								color3 = vertexColors[triangle.p3.at(0) + "," + triangle.p3.at(1) + "," + triangle.p3.at(2)];
+								color3 = vertexColor3;
 							}
 
 							g.interpolateTriangle(proj1.at(0), proj1.at(1),
@@ -241,7 +251,7 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 					}
 
 				}else{
-					g.setColor(triangle.getMaterial().getColor())
+					g.setColor(triangleMaterial.getColor())
 					g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
 				}
 				

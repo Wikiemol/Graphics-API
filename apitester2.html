@@ -138,6 +138,7 @@
 				g.shading = 'gouraud';
 				// g.drawGrid();
 				g.setMaterial({"color": [255,255,255], "specularExponent": 13, "specularMultiplier": 2, "diffusion": 1})
+				// sx = Math.PI/6 + 0.27;
 				ply.addTo(g,sx,sx,sx);
 				g.draw({"lights":true,"ambience":false});
 
@@ -149,8 +150,8 @@
 				var g = new Graphics2D(cxt);
 				g.setCoordinates(true);
 				g.setColor([255,0,0]);
-				g.interpolateTriangle(-200 + sx,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
-				// g.interpolateTriangle(100*Math.cos(sx/10),0, 0,100*Math.sin(sx/10), 100*Math.sin(sx/10),0, 0,0,255, 255,0,0, 0,255,0)
+				// g.interpolateTriangle(-200 + sx,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
+				// g.interpolateTriangle(10*Math.cos(sx/10),0, 0,100*Math.sin(sx/10), 100*Math.sin(sx/10),0, 0,0,255, 255,0,0, 0,255,0)
 				// g.fillTriangle(-200 + sx,0, 100,0, 0,100);
 				g.draw();
 				sx++;

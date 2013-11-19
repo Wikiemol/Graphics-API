@@ -153,22 +153,52 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	if(x1 == x2 && y1 == y2 || x1 == x3 && y1 == y3 || x2 == x3 && y2 == y3){
 		return;
 	}
+	var y12 = y1 - y2;
+	var x12 = x1 - x2;
+	var y32 = y3 - y2;
+	var x32 = x3 - x2;
+
 	/*****variables for triangle check****/
 	var aboveX = (x1 + x2 + x3)/3
 	var aboveY = (y1 + y2 + y3)/3
 	
 	//assuming z of the point above the plane is 1 and z of the plane is 0
-	var normal1 = 	[(y1 - y2),
-					-(x1 - x2),
-					(x1 - x2)*(aboveY - y2) - (y1 - y2)*(aboveX - x2)] //p1,p2,above
-	var normal2 = 	[(y2 - y3),
-					-(x2 - x3),
-					(x2 - x3)*(aboveY - y3) - (y2 - y3)*(aboveX - x3)] //p2,p3,above
+	
+	var normal1 = 	[y12,
+					-x12,
+					x12*(aboveY - y2) - y12*(aboveX - x2)] //p1,p2,above
+	var normal2 = 	[y32,
+					-x32,
+					x32*(aboveY - y2) - y32*(aboveX - x2)] //p2,p3,above
 	var normal3 = 	[(y3 - y1),
 					-(x3 - x1),
 					(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
+	
+	if(normal1[2] == 0 || normal2[2] == 0 || normal3[2] == 0){
+		return;
+	}
+
+	var rnormal = [y12*(r3 - r2) - (r1 - r2)*y32,
+				  (r1 - r2)*x32 - x12*(r3 - r2),
+				  x12*y32 - y12*x32]
+
+	var gnormal = [y12*(g3 - g2) - (g1 - g2)*y32,
+				  (g1 - g2)*x32 - x12*(g3 - g2),
+				  x12*y32 - y12*x32]
+
+	var bnormal = [y12*(b3 - b2) - (b1 - b2)*y32,
+				  (b1 - b2)*x32 - x12*(b3 - b2),
+				  x12*y32 - y12*x32]
+	
+	if(rnormal[2] == 0 || gnormal[2] == 0 || bnormal[2] == 0){
+		return;
+	}
+
 	var A1 = -normal1[0]/normal1[2];
 	var B1 = -normal1[1]/normal1[2];
+	
+
+
 	// var C1 = x1*normal1[0]/normal1[2] + y1*normal1[1]/normal1[2];
 
 	var A2 = -normal2[0]/normal2[2];
@@ -181,17 +211,6 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	/*------end variables for triangle check---------*/
 
 
-	var rnormal = [(y1 - y2)*(r3 - r2) - (r1 - r2)*(y3 - y2),
-				  (r1 - r2)*(x3 - x2) - (x1 - x2)*(r3 - r2),
-				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
-
-	var gnormal = [(y1 - y2)*(g3 - g2) - (g1 - g2)*(y3 - y2),
-				  (g1 - g2)*(x3 - x2) - (x1 - x2)*(g3 - g2),
-				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
-
-	var bnormal = [(y1 - y2)*(b3 - b2) - (b1 - b2)*(y3 - y2),
-				  (b1 - b2)*(x3 - x2) - (x1 - x2)*(b3 - b2),
-				  (x1 - x2)*(y3 - y2) - (y1 - y2)*(x3 - x2)]
 
 	var Ar = -rnormal[0]/rnormal[2];
 	var Br = -rnormal[1]/rnormal[2];
@@ -204,6 +223,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var Ab = -bnormal[0]/bnormal[2];
 	var Bb = -bnormal[1]/bnormal[2];
 	var Cb = -Ab*x1 - Bb*y1 + b1;
+
 
 	var minX = Math.min(Math.min(x1,x2),x3);
 	var minY = Math.min(Math.min(y1,y2),y3);

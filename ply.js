@@ -248,11 +248,12 @@ PLY.prototype.addTo = function(g,rx,ry,rz) {
 			v1 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(v1)));
 			v2 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(v2)));
 			v3 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(v3)));
-	
+
 			n1 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(n1)));
 			n2 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(n2)));
 			n3 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(n3)));
 		}
+		
 
 		g.fillTriangle( v1.at(0),v1.at(1),v1.at(2),
 						v2.at(0),v2.at(1),v2.at(2),
