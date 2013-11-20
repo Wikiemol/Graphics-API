@@ -111,7 +111,7 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 			var verticesEnd = numberOfVertices + line;
 			while(line < verticesEnd){
 				fillWordArray();
-				vertices.push(new Vector(parseFloat(wordArray[0]),parseFloat(wordArray[1]),parseFloat(wordArray[2])));
+				vertices.push(new Vector3D(parseFloat(wordArray[0]),parseFloat(wordArray[1]),parseFloat(wordArray[2])));
 				wordArray = [];
 				word = 0;
 				line++;
@@ -230,18 +230,19 @@ PLY.prototype.addTo = function(g,rx,ry,rz) {
 		rotz = 0;
 	}
 	
-	var sinRotx = Math.sin(rotx);
-	var sinRoty = Math.sin(roty);
-	var sinRotz = Math.sin(rotz);
+	// var sinRotx = Math.sin(rotx);
+	// var sinRoty = Math.sin(roty);
+	// var sinRotz = Math.sin(rotz);
 
-	var cosRotx = Math.cos(rotx);
-	var cosRoty = Math.cos(roty);
-	var cosRotz = Math.cos(rotz);
+	// var cosRotx = Math.cos(rotx);
+	// var cosRoty = Math.cos(roty);
+	// var cosRotz = Math.cos(rotz);
 
-	// var xrotation = new Matrix('rx',rotx);
-	// var yrotation = new Matrix('ry',roty);
-	// var zrotation = new Matrix('rz',rotz);
+	var xrotation = new Matrix('rx',rotx);
+	var yrotation = new Matrix('ry',roty);
+	var zrotation = new Matrix('rz',rotz);
 
+	var rotation = zrotation.multiplyMatrix(yrotation.multiplyMatrix(xrotation));
 
 	for(var j = 0; j < l; j++){
 		var v1 = this.faces[j].p1;
@@ -254,50 +255,49 @@ PLY.prototype.addTo = function(g,rx,ry,rz) {
 		
 				
 		if(rotx != 0 && roty != 0 && rotz != 0){
-			// v1 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(v1)));
-			// v2 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(v2)));
-			// v3 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(v3)));
+			v1 = rotation.multiplyVector(v1);
+			v2 = rotation.multiplyVector(v2);
+			v3 = rotation.multiplyVector(v3);
 	
-			// n1 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(n1)));
-			// n2 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(n2)));
-			// n3 = zrotation.multiplyVector(yrotation.multiplyVector(xrotation.multiplyVector(n3)));
+			n1 = rotation.multiplyVector(n1);
+			n2 = rotation.multiplyVector(n2);
+			n3 = rotation.multiplyVector(n3);
 
-			var x1 = (v1.at(0)*cosRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*sinRoty)*cosRotz - (v1.at(1)*cosRotx - v1.at(2)*sinRotx)*sinRotz;
-			var y1 = (v1.at(0)*cosRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*sinRoty)*sinRotz + (v1.at(1)*cosRotx - v1.at(2)*sinRotx)*cosRotz;
-			var z1 = -v1.at(0)*sinRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*cosRoty;
+			// var x1 = (v1.at(0)*cosRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*sinRoty)*cosRotz - (v1.at(1)*cosRotx - v1.at(2)*sinRotx)*sinRotz;
+			// var y1 = (v1.at(0)*cosRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*sinRoty)*sinRotz + (v1.at(1)*cosRotx - v1.at(2)*sinRotx)*cosRotz;
+			// var z1 = -v1.at(0)*sinRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*cosRoty;
 
-			var x2 = (v2.at(0)*cosRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*sinRoty)*cosRotz - (v2.at(1)*cosRotx - v2.at(2)*sinRotx)*sinRotz;
-			var y2 = (v2.at(0)*cosRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*sinRoty)*sinRotz + (v2.at(1)*cosRotx - v2.at(2)*sinRotx)*cosRotz;
-			var z2 = -v2.at(0)*sinRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*cosRoty;
+			// var x2 = (v2.at(0)*cosRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*sinRoty)*cosRotz - (v2.at(1)*cosRotx - v2.at(2)*sinRotx)*sinRotz;
+			// var y2 = (v2.at(0)*cosRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*sinRoty)*sinRotz + (v2.at(1)*cosRotx - v2.at(2)*sinRotx)*cosRotz;
+			// var z2 = -v2.at(0)*sinRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*cosRoty;
 
-			var x3 = (v3.at(0)*cosRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*sinRoty)*cosRotz - (v3.at(1)*cosRotx - v3.at(2)*sinRotx)*sinRotz;
-			var y3 = (v3.at(0)*cosRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*sinRoty)*sinRotz + (v3.at(1)*cosRotx - v3.at(2)*sinRotx)*cosRotz;
-			var z3 = -v3.at(0)*sinRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*cosRoty;
+			// var x3 = (v3.at(0)*cosRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*sinRoty)*cosRotz - (v3.at(1)*cosRotx - v3.at(2)*sinRotx)*sinRotz;
+			// var y3 = (v3.at(0)*cosRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*sinRoty)*sinRotz + (v3.at(1)*cosRotx - v3.at(2)*sinRotx)*cosRotz;
+			// var z3 = -v3.at(0)*sinRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*cosRoty;
 
-			var nx1 = (n1.at(0)*cosRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*sinRoty)*cosRotz - (n1.at(1)*cosRotx - n1.at(2)*sinRotx)*sinRotz;
-			var ny1 = (n1.at(0)*cosRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*sinRoty)*sinRotz + (n1.at(1)*cosRotx - n1.at(2)*sinRotx)*cosRotz;
-			var nz1 = -n1.at(0)*sinRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*cosRoty;
+			// var nx1 = (n1.at(0)*cosRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*sinRoty)*cosRotz - (n1.at(1)*cosRotx - n1.at(2)*sinRotx)*sinRotz;
+			// var ny1 = (n1.at(0)*cosRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*sinRoty)*sinRotz + (n1.at(1)*cosRotx - n1.at(2)*sinRotx)*cosRotz;
+			// var nz1 = -n1.at(0)*sinRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*cosRoty;
 
-			var nx2 = (n2.at(0)*cosRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*sinRoty)*cosRotz - (n2.at(1)*cosRotx - n2.at(2)*sinRotx)*sinRotz;
-			var ny2 = (n2.at(0)*cosRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*sinRoty)*sinRotz + (n2.at(1)*cosRotx - n2.at(2)*sinRotx)*cosRotz;
-			var nz2 = -n2.at(0)*sinRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*cosRoty;
+			// var nx2 = (n2.at(0)*cosRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*sinRoty)*cosRotz - (n2.at(1)*cosRotx - n2.at(2)*sinRotx)*sinRotz;
+			// var ny2 = (n2.at(0)*cosRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*sinRoty)*sinRotz + (n2.at(1)*cosRotx - n2.at(2)*sinRotx)*cosRotz;
+			// var nz2 = -n2.at(0)*sinRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*cosRoty;
 
-			var nx3 = (n3.at(0)*cosRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*sinRoty)*cosRotz - (n3.at(1)*cosRotx - n3.at(2)*sinRotx)*sinRotz;
-			var ny3 = (n3.at(0)*cosRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*sinRoty)*sinRotz + (n3.at(1)*cosRotx - n3.at(2)*sinRotx)*cosRotz;
-			var nz3 = -n3.at(0)*sinRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*cosRoty;
+			// var nx3 = (n3.at(0)*cosRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*sinRoty)*cosRotz - (n3.at(1)*cosRotx - n3.at(2)*sinRotx)*sinRotz;
+			// var ny3 = (n3.at(0)*cosRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*sinRoty)*sinRotz + (n3.at(1)*cosRotx - n3.at(2)*sinRotx)*cosRotz;
+			// var nz3 = -n3.at(0)*sinRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*cosRoty;
 			
-			g.fillTriangle( x1,y1,z1,
-							x2,y2,z2,
-							x3,y3,z3,
-							new Vector(nx1,ny1,nz1),new Vector(nx2,ny2,nz2),new Vector(nx3,ny3,nz3));
-
-		}else{
-			g.fillTriangle(v1.at(0),v1.at(1),v1.at(2),
-						   v2.at(0),v2.at(1),v2.at(2),
-						   v3.at(0),v3.at(1),v3.at(2),
-						   n1,n2,n3)
 		}
 		
+		var triangle = new Triangle3D(v1,v2,v3,g.material);
+		if(triangle.norm.at(2) < 0){
+			var sensor = g.sensor;
+			triangle.normal1 = n1;
+			triangle.normal2 = n2;
+			triangle.normal3 = n3;
+			triangle.squareDistance = (triangle.mid.at(0) - sensor.at(0))*(triangle.mid.at(0) - sensor.at(0)) + (triangle.mid.at(1) - sensor.at(1))*(triangle.mid.at(1) - sensor.at(1)) + (triangle.mid.at(2) - sensor.at(2))*(triangle.mid.at(2) - sensor.at(2));
+			g.pushToQueue(triangle);
+		}
 
 	}
 };

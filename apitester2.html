@@ -9,6 +9,8 @@
 		<script text = "text/javascript" src = "triangle3D.js"></script>	
 		<script text = "text/javascript" src = "line3D.js"></script>
 		<script text = "text/javascript" src = "ply.js"></script>
+		<script text = "text/javascript" src = "vector3D.js"></script>
+		<script text = "text/javascript" src = "vector2D.js"></script>
 		<script>
 			var canvas = null;
 			var cxt = null;
@@ -135,7 +137,7 @@
 				g.addLight(light1,true);
 				g.shading = 'gouraud';
 				// g.drawGrid();
-				g.setMaterial({"color": [255,128,1], "specularExponent": 13, "specularMultiplier": 2, "diffusion": 1})
+				g.setMaterial({"color": [255,128,1], "specularExponent": 9, "specularMultiplier": 2, "diffusion": 1})
 				// sx = Math.PI/6 + 0.27;
 				ply.addTo(g,sx,sx,sx);
 				g.draw({"lights":true,"ambience":false});

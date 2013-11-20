@@ -3,6 +3,7 @@ function Triangle3D(p1,p2,p3,m){ //position vectors as first three parameters an
 	this.p2 			= p2;
 	this.p3 			= p3;
 	this.material 		= m;
+	this.norm 	 		= this.normal();
 	this.normal1 		= this.normal(); //normal for vertex 1
 	this.normal2 		= this.normal(); //normal for vertex 2
 	this.normal3 		= this.normal(); //normal for vertex 3

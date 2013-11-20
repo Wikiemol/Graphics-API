@@ -2,7 +2,7 @@ function Graphics3D(context){
 	this.cxt = context;
 	this.standard_coordinates 	= false;
 
-	this.sensor 				= new Vector(0,0,1100);
+	this.sensor 				= new Vector3D(0,0,1100);
 
 	this.focalLength 			= 600;
 	this.lens 					= this.sensor.at(2) - this.focalLength;
@@ -19,6 +19,7 @@ function Graphics3D(context){
 
 
 Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point normal and material, Returns RGB color value.
+	// return [255,255,255]
 	var point 			= p;
 	var specularity		= 0;
 	var diffuse			= 0;
@@ -28,7 +29,7 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 
 	var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
 	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
-	var viewPointVector = new Vector(0,0,0); //Vector between point and viewPoint
+	var viewPointVector = new Vector3D(0,0,0); //Vector between point and viewPoint
 	viewPointVector = viewPointVector.add(point.subtract(this.getSensor())).unit();
 	var lightsLength = this.lights.length;
 	for(var i = 0; i < lightsLength; i++){ //totaling light contributions
@@ -182,7 +183,8 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	
 	g.setCoordinates(this.standard_coordinates);
 	var self = this;
-	this.queue = this.queue.sort(function(a,b){
+
+	this.queue = this.queue.sort(function(a,b){ //sorts the queue 
 		return b.squareDistance - a.squareDistance;
 	})
 
@@ -191,8 +193,11 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 	//Drawing polygons
 	for(var i = 0; i < queueLength; i++){
 		var triangle = this.queue[i];
-		var triangleMaterial = triangle.getMaterial();
+
 		if(triangle instanceof Triangle3D){
+
+			var triangleMaterial = triangle.getMaterial();
+			
 			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens && triangle.p3.at(2) < this.lens){ //if it is in front of the camera
 				//project the points
 				var proj1 = this.projectPoint(triangle.p1.at(0),triangle.p1.at(1),triangle.p1.at(2));
@@ -284,7 +289,7 @@ Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d
 	var x1 = this.getSensor().at(0)+this.getSensor().at(0)*t1-t1*x_1; //x component of the parametric line between the point to be projected and the sensor
 	var y1 = this.getSensor().at(1)+this.getSensor().at(1)*t1-t1*y_1; //y component of the parametric line between the point to be projected and the sensor
 	
-	return new Vector(x1-this.getSensor().at(0),y1-this.getSensor().at(1));
+	return new Vector2D(x1-this.getSensor().at(0),y1-this.getSensor().at(1));
 }
 
 Graphics3D.prototype.inverseProjectPoint = function(x_1,y_1,z_1){ //with a given z (z_1) value and the already projected x (x_1) and y (y_1) on the 2d plane, this finds the original x and y that were projected from 3d space onto the plane 
@@ -296,8 +301,8 @@ Graphics3D.prototype.inverseProjectPoint = function(x_1,y_1,z_1){ //with a given
 }
 
 Graphics3D.prototype.drawLine = function(x1,y1,z1,x2,y2,z2){
-	var p1 = new Vector(x1,y1,z1);
-	var p2 = new Vector(x2,y2,z2);
+	var p1 = new Vector3D(x1,y1,z1);
+	var p2 = new Vector3D(x2,y2,z2);
 
 	var line = new Line3D(p1,p2,this.getMaterial());
 	line.squareDistance = (line.mid.at(0) - this.sensor.at(0))*(line.mid.at(0) - this.sensor.at(0)) + (line.mid.at(1) - this.sensor.at(1))*(line.mid.at(1) - this.sensor.at(1)) + (line.mid.at(2) - this.sensor.at(2))*(line.mid.at(2) - this.sensor.at(2));
@@ -350,10 +355,10 @@ Graphics3D.prototype.fillPolygon = function(a){
 		if(a.length/3 <= 2) throw "Error: Polygons must have at least 3 vertices."
 
 		var polygon = [];
-		var midpoint = new Vector(0,0,0);
+		var midpoint = new Vector3D(0,0,0);
 		var material = this.getMaterial();
 		for(var i = 0; i < a.length/3; i++){
-			polygon[i] = new Vector(a[i*3],a[i*3 + 1],a[i*3 + 2]);
+			polygon[i] = new Vector3D(a[i*3],a[i*3 + 1],a[i*3 + 2]);
 			midpoint = midpoint.add(polygon[i].multiply(3/a.length));
 		}
  
@@ -435,35 +440,35 @@ Graphics3D.prototype.fillEllipsoid = function(x,y,z,xRadius,yRadius,zRadius,xr,y
 		// x^2 + y^2 = 100 - z^2
 		for(var j = 0; j <= 2*divisions; j++){
 			
-			var p1 = new Vector(stretchX*Math.sqrt(100*100-z1*z1)*Math.cos(j*2*Math.PI/(2*divisions)), //x 
+			var p1 = new Vector3D(stretchX*Math.sqrt(100*100-z1*z1)*Math.cos(j*2*Math.PI/(2*divisions)), //x 
 								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin(j*2*Math.PI/(2*divisions)), //y
 								stretchZ*z1);													  //z
 			
-			var p2 = new Vector(stretchX*Math.sqrt(100*100-z1*z1)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+			var p2 = new Vector3D(stretchX*Math.sqrt(100*100-z1*z1)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
 								stretchZ*z1);														  //z
 			
-			var p3 = new Vector(stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+			var p3 = new Vector3D(stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
 								stretchZ*z2);														  //z
 
-			var p4 = new Vector(stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
+			var p4 = new Vector3D(stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j)*2*Math.PI/(2*divisions)), //y
 								stretchZ*z2);														//z
 
-			var p5 = new Vector(-stretchX*Math.sqrt(100*100-z1*z1)*Math.cos(j*2*Math.PI/(2*divisions)), //x 
+			var p5 = new Vector3D(-stretchX*Math.sqrt(100*100-z1*z1)*Math.cos(j*2*Math.PI/(2*divisions)), //x 
 								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin(j*2*Math.PI/(2*divisions)), //y
 								-stretchZ*z1);													  //z
 			
-			var p6 = new Vector(-stretchX*Math.sqrt(100*100-z1*z1)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+			var p6 = new Vector3D(-stretchX*Math.sqrt(100*100-z1*z1)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z1*z1)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
 								-stretchZ*z1);														  //z
 			
-			var p7 = new Vector(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
+			var p7 = new Vector3D(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j+1)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j+1)*2*Math.PI/(2*divisions)), //y
 								-stretchZ*z2);														  //z
 
-			var p8 = new Vector(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
+			var p8 = new Vector3D(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j)*2*Math.PI/(2*divisions)), //y
 								-stretchZ*z2);
 			/***Rotation transforms***/
