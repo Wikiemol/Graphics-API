@@ -20,6 +20,7 @@ Graphics2D.prototype.setColor = function(cl){
 	this.color = [cl[0],cl[1],cl[2]];
 
 }
+
 Graphics2D.prototype.getColor = function(){
 	return this.color;
 }
@@ -32,21 +33,18 @@ Graphics2D.prototype.getCoordinates = function(){
 	return this.standard_coordinates;
 }
 
-Graphics2D.prototype.drawPixel = function(x1,y1){
+Graphics2D.prototype.drawPixel = function(x1,y1,color){
 	
-	var x = Math.round(x1);
-	var y = Math.round(y1);
-	if(this.standard_coordinates){
-		x = Math.round(x1+this.WIDTH/2);
-		y = Math.round(-y1+this.HEIGHT/2);
-	}
+	var	x = x1+this.WIDTH/2;
+	var	y = -y1+this.HEIGHT/2;
+	
 
 	if(x < this.WIDTH && x >= 0 && y < this.HEIGHT && y >= 0){
 		var point = (x+y*this.WIDTH)*4;
 
-		this.cdata[point + 0] = this.color[0]; //r
-		this.cdata[point + 1] = this.color[1]; //g
-		this.cdata[point + 2] = this.color[2]; //b
+		this.cdata[point + 0] = color[0]; //r
+		this.cdata[point + 1] = color[1]; //g
+		this.cdata[point + 2] = color[2]; //b
 		this.cdata[point + 3] = 255; //a
 	}
 }
@@ -73,7 +71,7 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 	var dy = y2 - y1;
 
 	if(dx == 0 && dy == 0){
-		this.drawPixel(x1,y1);
+		this.drawPixel(x1,y1,this.color);
 		return;
 	}
 
@@ -87,7 +85,7 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 		}
 
 		for(var i = 0;i < Math.abs(dy); i++){
-			this.drawPixel(x1 + sign*i*slope,y1 + i*sign);
+			this.drawPixel(x1 + sign*i*slope,y1 + i*sign,this.color);
 		}
 
 
@@ -97,7 +95,7 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 
 		for(var i = 0; i < Math.abs(dx); i++){
 
-			this.drawPixel(x1 + i,y1 + i*slope);
+			this.drawPixel(x1 + i,y1 + i*slope,this.color);
 		}
 
 
@@ -127,7 +125,7 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 			
 			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
 
-					this.drawPixel(minX + i, minY + j);
+					this.drawPixel(minX + i, minY + j,this.color);
 			}
 		}
 	}
@@ -165,7 +163,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	
 	//assuming z of the point above the plane is 1 and z of the plane is 0
 	
-	var normal1 = 	[y12,
+	var normal1 = 	[y12, //normals for checking if pixel is in triangle. Allows us to check if the pixel would be under the plane or over the plane. 
 					-x12,
 					x12*(aboveY - y2) - y12*(aboveX - x2)] //p1,p2,above
 	var normal2 = 	[y32,
@@ -234,32 +232,26 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var n1 = Math.abs(maxX - minX);
 	var n2 = Math.abs(maxY - minY);
 	
-	for(var i = 0; i < n1; i++){
-		
-		for(var j = 0; j < n2; j++){
-			var x = minX + i;
-			var y = minY + j;
+	for(var i = 0; i < n2; i++){
+		var y = minY + i;
+		var outr = Br*y + Cr;
+		var outg = Bg*y + Cg;
+		var outb = Bb*y + Cb;
+		var yy1 = (y - y1)*B1;
+		var yy2 = (y - y2)*B2;
+		var yy3 = (y - y3)*B3;
+		for(var j = 0; j < n1; j++){
+			var x = minX + j;
 			var isInTriangle = true;
-			var z1 = (x - x1)*A1 + (y - y1)*B1;
-			var z2 = A2*(x-x2) + B2*(y-y2);
-			var z3 = A3*(x-x3) + B3*(y-y3);
 
-			if(z1 < 0){
-				isInTriangle = false;
-			}
-			if(z2 < 0){
-				isInTriangle = false;
-			}
-			if(z3 < 0){
+			if((x - x1)*A1 + yy1 < 0 || A2*(x-x2) + yy2 < 0 || A3*(x-x3) + yy3 < 0){
 				isInTriangle = false;
 			}
 
 			if(isInTriangle){
 
-					var color = [Ar*x + Br*y + Cr, Ag*x + Bg*y + Cg, Ab*x + Bb*y + Cb];
-
-					this.setColor(color);
-					this.drawPixel(x, y);
+					var color = [Ar*x + outr, Ag*x + outg, Ab*x + outb];
+					this.drawPixel(x, y, color);
 			}
 		}
 	}

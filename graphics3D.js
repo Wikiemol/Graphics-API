@@ -108,15 +108,6 @@ Graphics3D.prototype.sensorDistance = function(x,y,z){
 }
 Graphics3D.prototype.addLight = function(l,visible){
 	this.lights.push(l);
-	if(visible) {
-		if(l.getType() == "directional"){
-			console.warn("Warning: Directional lights cannot be shown. To get rid of this warning do not pass a visible boolean to addLight.");
-		}
-		var temp = this.getMaterial();
-		this.setMaterial({"color":[255,128,0]});
-		this.drawPrism(l.getPosition().at(0),l.getPosition().at(1),l.getPosition().at(2),10,10,10);
-		this.setMaterial(temp);
-	}
 }
 
 Graphics3D.prototype.setMaterial = function(cl){
