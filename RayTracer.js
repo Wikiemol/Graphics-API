@@ -93,7 +93,7 @@ RayTracer.prototype.trace = function() {
 	var g = new Graphics2D(this.cxt);
 	for(var i = -widthhalf; i < widthhalf; i++){
 		for(var j = -heighthalf; j < heighthalf; j++){
-			var ray = {"direction": new Vector3D(i-this.sensor.at(0),j - this.sensor.at(1),this.lens - this.sensor.at(2)),"+origin":this.sensor};
+			var ray = {"direction": new Vector3D(i-this.sensor.at(0),j - this.sensor.at(1),this.lens - this.sensor.at(2)),"origin":this.sensor};
 			// console.log(ray.direction.dot(ray.origin))
 			var intersect = false;
 			for(var k = 0; k < this.objects.length; k++){
