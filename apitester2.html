@@ -1,6 +1,5 @@
 <html>
 	<head>
-		<script type = "text/javascript" src = "vector.js"></script>
 		<script type = "text/javascript" src = "graphics2D.js"></script>
 		<script type = "text/javascript" src = "graphics3D.js"></script>
 		<script text = "text/javascript" src = "light.js"></script>
@@ -11,14 +10,19 @@
 		<script text = "text/javascript" src = "ply.js"></script>
 		<script text = "text/javascript" src = "vector3D.js"></script>
 		<script text = "text/javascript" src = "vector2D.js"></script>
+		<script text = "text/javascript" src = "rayTracer.js"></script>
 		<script>
 			var canvas = null;
 			var cxt = null;
 			var g;
 			var ply = new PLY("teapot.ply");
 			ply.load(50);
-			window.addEventListener('load', onLoad);
 
+			var ply2 = new PLY("cow.ply");
+			ply2.load(30);
+
+			window.addEventListener('load', onLoad);
+			
 			function onLoad(e){
 				window.removeEventListener('load', onLoad);
 				canvas = window.document.getElementById("can");
@@ -46,9 +50,11 @@
 
 				// setInterval(draw2,33)
 				// draw2();
-				setInterval(draw3,33);
+				// setInterval(draw3,33);
 				// draw3();
 				// setInterval(draw4,33);
+				// setInterval(rayTracer,33);
+				rayTracer();
 				// draw4();
 			}
 
@@ -65,7 +71,7 @@
 			
 
 			var t = 7*Math.PI/6;
-			var light1 = new Light({"diffusion":1,"specularity":1,"type": "point"});
+			var light1 = new Light({"diffusion":1,"specularity":1,"type": "directional"});
 			var light2 = new Light({"diffusion":0.5});
 			function draw(){
 
@@ -131,17 +137,19 @@
 				cxt.fillText("FPS: " + Math.round(1000/(thisFrame - lastFrame)),10,20);
 				lastFrame = thisFrame;
 
-				g.setSensor(0,200 + sy,1100);
+				g.setSensor(0,100,1300);
 				g.setFocalLength(500);
 				light1.setPosition(200*Math.cos(10*sx),100,400);
-				g.addLight(light1,true);
+				g.addLight(light1,false);
 				g.shading = 'gouraud';
 				// g.drawGrid();
-				g.setMaterial({"color": [255,128,1], "specularExponent": 9, "specularMultiplier": 2, "diffusion": 1})
+				g.setMaterial({"color": [255,255,1], "specularExponent": 3, "specularMultiplier": 2, "diffusion": 1})
 				// sx = Math.PI/6 + 0.27;
-				ply.addTo(g,sx,sx,sx);
+				ply.addTo(g,sx,sx,sx,0,0,0,false);
+				g.setMaterial({"color": [245,245,245], "specularExponent": 10, "specularMultiplier": 2, "diffusion": 1})
+				ply2.addTo(g,-sx,sx,sx,-200,0,0,false);
 				g.draw({"lights":true,"ambience":false});
-
+				x += 10;
 				sx += 0.03;
 			}
 
@@ -155,6 +163,16 @@
 				// g.fillTriangle(-200 + sx,0, 100,0, 0,100);
 				g.draw();
 				sx++;
+			}
+
+			function rayTracer(){
+				// light1.setPosition(100,0,x);
+				var r = new RayTracer(cxt);
+				r.plane(0,-40,0,new Vector3D(0,1,0),new Material({"color": [128,128,128]}));
+				r.sphere(x,0,0,50,new Material({"color": [128,1,1]}));
+				r.lights.push(light1);
+				r.trace();
+				x-=50
 			}
 		</script>
 	</head>
