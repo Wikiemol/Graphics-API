@@ -20,15 +20,13 @@ function Sphere(x,y,z,r,m){
 Sphere.prototype.intersect = function(ray){
 	var direction = ray.direction;
 	var origin    = ray.origin;
-
+	var op = origin.subtract(this.position);
 	var A = direction.dot(direction);
-	var B = direction.dot(origin) - direction.dot(this.position);
-	var C = origin.dot(origin) + origin.dot(this.position) + this.position.dot(this.position) - this.radius*this.radius;
-
+	var B = 2*(direction.dot(op)); //for some reason B is always the same
+	var C = op.dot(op);
 	var discriminant = B*B - 4*A*C
-
+	// console.log(direction.at(0) + "," + direction.at(1))
 	if(discriminant < 0){
-		// console.log(B*B)
 		return false;
 	}else{
 		var sqrt = Math.sqrt(discriminant);
@@ -42,13 +40,13 @@ Sphere.prototype.intersect = function(ray){
 			return {"intersection": intersection2, 
 					"distance": intersection2.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
-					"normal": this.normal.multiply(-1)}
+					"normal": normal}
 		}else{
 			var normal = intersection1.subtract(this.position);
 			return {"intersection": intersection1, 
 					"distance": intersection1.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
-					"normal": this.normal.multiply(-1)}
+					"normal": normal}
 		}
 	}
 }
