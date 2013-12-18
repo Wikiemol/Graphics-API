@@ -23,30 +23,32 @@ Sphere.prototype.intersect = function(ray){
 	var op = origin.subtract(this.position);
 	var A = direction.dot(direction);
 	var B = 2*(direction.dot(op)); //for some reason B is always the same
-	var C = op.dot(op);
+	var C = op.dot(op) - this.radius*this.radius;
 	var discriminant = B*B - 4*A*C
-	// console.log(direction.at(0) + "," + direction.at(1))
+	
+	// console.log(origin)
 	if(discriminant < 0){
 		return false;
 	}else{
 		var sqrt = Math.sqrt(discriminant);
-		var t1 = (-B + sqrt)/2*A;
-		var t2 = (-B - sqrt)/2*A;
-
+		var t1 = (-B + sqrt)/(2*A);
+		var t2 = (-B - sqrt)/(2*A);
+		console.log(sqrt)
 		var intersection1 = direction.multiply(t1).add(origin);
 		var intersection2 = direction.multiply(t2).add(origin);
 		if(Math.abs(t1) > Math.abs(t2)){
 			var normal = intersection2.subtract(this.position);
+			// console.log(normal.at(0) + "," + normal.at(1) + "," + normal.at(2))
 			return {"intersection": intersection2, 
 					"distance": intersection2.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
-					"normal": normal}
+					"normal": normal.multiply(-1)}
 		}else{
 			var normal = intersection1.subtract(this.position);
 			return {"intersection": intersection1, 
 					"distance": intersection1.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
-					"normal": normal}
+					"normal": normal.multiply(-1)}
 		}
 	}
 }
@@ -99,6 +101,10 @@ RayTracer.prototype.trace = function() {
 				if(temp && (!intersect || temp.distance < intersect.distance)){
 					intersect = temp;
 				}
+			}
+
+			for(var k = 0; k < this.lights.length; k++){
+				
 			}
 			if(intersect){
 				var color = this.applyLight(intersect.intersection,intersect.normal,intersect.material)
