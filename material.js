@@ -3,7 +3,7 @@ function Material(m) { //color - RGB array [r,g,b], specularity 0 - 1, specularM
 	this.specularity = 1;
 	this.diffusion = 1;
 	this.ambience = 1;
-	this.shine = 1;
+	this.shine = 100;
 	this.specularMultiplier = 5;
 	this.specularExponent = 3;
 	if(!(typeof m === 'undefined')){

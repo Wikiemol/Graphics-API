@@ -29,7 +29,7 @@ Vector3D.prototype.getLength = function(){
 Vector3D.prototype.cross = function(v){
 	var a = this.vectorArray;
 	var b = v.vectorArray;
-	return new Vector(a[1]*b[2] - a[2]*b[1],-a[0]*b[2]+a[2]*b[0],a[0]*b[1] - a[1]*b[0]);
+	return new Vector3D(a[1]*b[2] - a[2]*b[1],-a[0]*b[2]+a[2]*b[0],a[0]*b[1] - a[1]*b[0]);
 }
 
 Vector3D.prototype.dot = function(v){
@@ -43,6 +43,12 @@ Vector3D.prototype.magnitude = function(){
 	var a = this.vectorArray;
 	var k = a[0]*a[0] + a[1]*a[1] + a[2]*a[2]
 	return Math.sqrt(k);
+}
+
+Vector3D.prototype.magnitudeSquared = function(){
+	var a = this.vectorArray;
+	var k = a[0]*a[0] + a[1]*a[1] + a[2]*a[2]
+	return k;	
 }
 
 Vector3D.prototype.add = function(v){

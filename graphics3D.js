@@ -18,75 +18,114 @@ function Graphics3D(context){
 }
 
 
-Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point normal and material, Returns RGB color value.
-	// return [255,255,255]
-	var point 			= p;
-	var specularity		= 0;
-	var diffuse			= 0;
-	var normal			= normal.unit();
-	var material 		= material;
-	var materialColor	= material.getColor();
+// Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point normal and material, Returns RGB color value.
+// 	// return [255,255,255]
+// 	var point 			= p;
+// 	var specularity		= 0;
+// 	var diffuse			= 0;
+// 	var normal			= normal.unit();
+// 	var material 		= material;
+// 	var materialColor	= material.getColor();
 
-	var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
-	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
-	var viewPointVector = new Vector3D(0,0,0); //Vector between point and viewPoint
-	viewPointVector = viewPointVector.add(point.subtract(this.getSensor())).unit();
-	var lightsLength = this.lights.length;
-	for(var i = 0; i < lightsLength; i++){ //totaling light contributions
-		/**Calculate Specularity**/
-		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2)).multiply(1);
+// 	var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
+// 	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
+// 	var viewPointVector = new Vector3D(0,0,0); //Vector between point and viewPoint
+// 	viewPointVector = viewPointVector.add(point.subtract(this.sensor)).unit();
+// 	var lightsLength = this.lights.length;
+// 	for(var i = 0; i < lightsLength; i++){ //totaling light contributions
+// 		/**Calculate Specularity**/
+// 		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2)).multiply(1);
 
-		var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
+// 		var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
 
-		if(lightReflection.dot(viewPointVector)*material.getSpecularity() > 0){
+// 		if(lightReflection.dot(viewPointVector)*material.getSpecularity() > 0){
 			
-			specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/this.lights[i].distance(point.at(0),point.at(1),point.at(2)));
+// 			specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/this.lights[i].distance(point.at(0),point.at(1),point.at(2)));
 
-		}
+// 		}
 		
-		/**Calculate Diffusion**/
-		var diffusionLight = this.lights[i].diffusionIntensityVector(point.at(0),point.at(1),point.at(2));
-		var diffuseAdd = diffusionLight.dot(normal)*material.getDiffusion();
-		if(diffuseAdd >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
-			diffuse += diffuseAdd; //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
+// 		/**Calculate Diffusion**/
+// 		var diffusionLight = this.lights[i].diffusionIntensityVector(point.at(0),point.at(1),point.at(2));
+// 		var diffuseAdd = diffusionLight.dot(normal)*material.getDiffusion();
+// 		if(diffuseAdd >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
+// 			diffuse += diffuseAdd; //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
+// 		}
+
+// 		/**Calculate color contribution (totalgel contribution)**/
+// 		var intensity = this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
+
+// 		totalGel["r"] += this.lights[i].getGel()["r"]*intensity;
+// 		totalGel["g"] += this.lights[i].getGel()["g"]*intensity;
+// 		totalGel["b"] += this.lights[i].getGel()["b"]*intensity;
+
+// 		totalColor += (this.lights[i].getGel()["r"] + this.lights[i].getGel()["g"] + this.lights[i].getGel()["b"])*diffusionLight.magnitude();
+// 	}
+	
+// 	var rRatio = 3*totalGel["r"]/totalColor;
+// 	var gRatio = 3*totalGel["g"]/totalColor;
+// 	var bRatio = 3*totalGel["b"]/totalColor;
+
+// 	if(diffuse < 0){
+// 		diffuse = 0;
+// 	}else if( diffuse > 1){
+// 		diffuse = 1;
+// 	}
+	
+// 	/*** calculating color ***/
+// 	var red = materialColor[0];
+// 	var green = materialColor[1];
+// 	var blue = materialColor[2];
+// 	var colorSum = 1/(red + green + blue);
+	
+// 	red *= diffuse*rRatio;
+// 	green *= diffuse*gRatio;
+// 	blue *= diffuse*bRatio;
+	
+// 	var specComponent = Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
+
+// 	red += specComponent*materialColor[0]*colorSum;
+// 	green += specComponent*materialColor[1]*colorSum;
+// 	blue += specComponent*materialColor[2]*colorSum;
+	
+// 	if(red > 255){ 
+// 		red = 255;
+// 	}
+// 	if(blue > 255){
+// 		blue = 255;
+// 	}
+// 	if(green > 255){
+// 		green = 255;
+// 	}
+// 	var color = [red,green,blue];
+	
+// 	return color;
+// }
+
+Graphics3D.prototype.applyLight = function(point,normal,material) {
+	var normal = normal.unit();
+	var illumination = 0;
+	for(var i = 0; i < this.lights.length; i++){
+		var light = this.lights[i];
+		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2))
+		var specularIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(1);
+		var diffusionIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
+		var Lm = point.subtract(light.pos).unit();
+		// var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
+		var lightReflection = normal.multiply(2*(Lm.dot(normal))).subtract(Lm)
+		if(Lm.dot(normal) > 0){
+				illumination += light.diffusion*(Lm.dot(normal))*diffusionIntensity 
+						
 		}
+		if(lightReflection.dot(point.subtract(this.sensor)) > 0){
 
-		/**Calculate color contribution (totalgel contribution)**/
-		var intensity = this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
-
-		totalGel["r"] += this.lights[i].getGel()["r"]*intensity;
-		totalGel["g"] += this.lights[i].getGel()["g"]*intensity;
-		totalGel["b"] += this.lights[i].getGel()["b"]*intensity;
-
-		totalColor += (this.lights[i].getGel()["r"] + this.lights[i].getGel()["g"] + this.lights[i].getGel()["b"])*diffusionLight.magnitude();
+			illumination += light.specularity*Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())),material.shine)*specularIntensity
+			// console.log(specularIntensity)
+		}
 	}
-	
-	var rRatio = 3*totalGel["r"]/totalColor;
-	var gRatio = 3*totalGel["g"]/totalColor;
-	var bRatio = 3*totalGel["b"]/totalColor;
 
-	if(diffuse < 0){
-		diffuse = 0;
-	}else if( diffuse > 1){
-		diffuse = 1;
-	}
-	
-	/*** calculating color ***/
-	var red = materialColor[0];
-	var green = materialColor[1];
-	var blue = materialColor[2];
-	var colorSum = 1/(red + green + blue);
-	
-	red *= diffuse*rRatio;
-	green *= diffuse*gRatio;
-	blue *= diffuse*bRatio;
-	
-	var specComponent = Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
-
-	red += specComponent*materialColor[0]*colorSum;
-	green += specComponent*materialColor[1]*colorSum;
-	blue += specComponent*materialColor[2]*colorSum;
-	
+	var red = material.c[0]*illumination;
+	var blue = material.c[1]*illumination;
+	var green = material.c[2]*illumination;
 	if(red > 255){ 
 		red = 255;
 	}
@@ -96,10 +135,8 @@ Graphics3D.prototype.applyLight = function(p,normal,material){ //Pass point norm
 	if(green > 255){
 		green = 255;
 	}
-	var color = [red,green,blue];
-	
-	return color;
-}
+	return [red,blue,green];
+};
 
 Graphics3D.prototype.sensorDistance = function(x,y,z){
 	var distance = Math.sqrt((x-this.sensor.at(0))*(x-this.sensor.at(0)) + (y-this.sensor.at(1))*(y-this.sensor.at(1)) + (z-this.sensor.at(2))*(z-this.sensor.at(2)));
@@ -108,6 +145,11 @@ Graphics3D.prototype.sensorDistance = function(x,y,z){
 }
 Graphics3D.prototype.addLight = function(l,visible){
 	this.lights.push(l);
+	if(visible){
+		this.fillTriangle(	-10 + l.pos.at(0), -10 + l.pos.at(1),l.pos.at(2),
+							10 + l.pos.at(0), -10 + l.pos.at(1), l.pos.at(2),
+							l.pos.at(0),10 + l.pos.at(1), l.pos.at(2))
+	}
 }
 
 Graphics3D.prototype.setMaterial = function(cl){
@@ -188,20 +230,16 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 		if(triangle instanceof Triangle3D){
 
 			var triangleMaterial = triangle.getMaterial();
-			
 			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens && triangle.p3.at(2) < this.lens){ //if it is in front of the camera
 				//project the points
 				var proj1 = this.projectPoint(triangle.p1.at(0),triangle.p1.at(1),triangle.p1.at(2));
 				var proj2 = this.projectPoint(triangle.p2.at(0),triangle.p2.at(1),triangle.p2.at(2));
 				var proj3 = this.projectPoint(triangle.p3.at(0),triangle.p3.at(1),triangle.p3.at(2));
 				if(lightIsOn){
-
 					switch(this.shading){
 						
 						case('flat'):
-							
-							g.setColor(this.applyLight(triangle.mid,triangle.normal(),triangleMaterial));
-							g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1));
+							g.fillTriangle(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1),proj3.at(0),proj3.at(1),this.applyLight(triangle.mid,triangle.normal(),triangleMaterial));
 
 							break;
 	
@@ -259,7 +297,7 @@ Graphics3D.prototype.draw = function(t){ //lights true/false, ambience true/fals
 			if(triangle.p1.at(2) < this.lens && triangle.p2.at(2) < this.lens){
 				var proj1 = this.projectPoint(triangle.p1.at(0),triangle.p1.at(1),triangle.p1.at(2));
 				var proj2 = this.projectPoint(triangle.p2.at(0),triangle.p2.at(1),triangle.p2.at(2));
-				g.setColor(triangle.getMaterial().getColor());
+				g.color = triangle.material.getColor();
 				g.drawLine(proj1.at(0),proj1.at(1),proj2.at(0),proj2.at(1));
 			}
 		}
@@ -276,15 +314,15 @@ Graphics3D.prototype.getMaterial = function(){
 }	
 
 Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d space
-	var t1 = (this.getLens()-this.getSensor().at(2))/(this.getSensor().at(2) - z_1); //the t derived from the z component of the parametric line between the point to be projected and the sensor assuming the line intersects the lens, the lens is flat, and the lens is parallel to the xy plane
-	var x1 = this.getSensor().at(0)+this.getSensor().at(0)*t1-t1*x_1; //x component of the parametric line between the point to be projected and the sensor
-	var y1 = this.getSensor().at(1)+this.getSensor().at(1)*t1-t1*y_1; //y component of the parametric line between the point to be projected and the sensor
+	var t1 = (this.getLens()-this.sensor.at(2))/(this.sensor.at(2) - z_1); //the t derived from the z component of the parametric line between the point to be projected and the sensor assuming the line intersects the lens, the lens is flat, and the lens is parallel to the xy plane
+	var x1 = this.sensor.at(0)+this.sensor.at(0)*t1-t1*x_1; //x component of the parametric line between the point to be projected and the sensor
+	var y1 = this.sensor.at(1)+this.sensor.at(1)*t1-t1*y_1; //y component of the parametric line between the point to be projected and the sensor
 	
-	return new Vector2D(x1-this.getSensor().at(0),y1-this.getSensor().at(1));
+	return new Vector2D(x1-this.sensor.at(0),y1-this.sensor.at(1));
 }
 
 Graphics3D.prototype.inverseProjectPoint = function(x_1,y_1,z_1){ //with a given z (z_1) value and the already projected x (x_1) and y (y_1) on the 2d plane, this finds the original x and y that were projected from 3d space onto the plane 
-	var t1 = this.getLens()/(this.getSensor().at(2) - z_1);
+	var t1 = this.getLens()/(this.sensor.at(2) - z_1);
 	var x1 = x_1/t1;
 	var y1 = y_1/t1;
 	
@@ -323,20 +361,21 @@ Graphics3D.prototype.drawPrism = function(x,y,z,w,h,d){
 
 Graphics3D.prototype.fillTriangle = function(x1,y1,z1, x2,y2,z2, x3,y3,z3, n1,n2,n3, flip){ //n1 n2 and n3 are normals of vertices as vectors 
 	if(typeof this.getMaterial() === 'undefined') console.warn("Warning material undefined.");
-	var triangle = new Triangle3D(new Vector(x1,y1,z1),new Vector(x2,y2,z2),new Vector(x3,y3,z3),this.getMaterial());
+	var triangle = new Triangle3D(new Vector3D(x1,y1,z1),new Vector3D(x2,y2,z2),new Vector3D(x3,y3,z3),this.getMaterial());
 
-	if(n1 instanceof Vector){
+	if(n1 instanceof Vector3D){
 		triangle.normal1 = n1;
 	}
-	if(n2 instanceof Vector){
+	if(n2 instanceof Vector3D){
 		triangle.normal2 = n2;
 	}
-	if(n3 instanceof Vector){
+	if(n3 instanceof Vector3D){
 		triangle.normal3 = n3;
 	}
 
 	triangle.squareDistance = (triangle.mid.at(0) - this.sensor.at(0))*(triangle.mid.at(0) - this.sensor.at(0)) + (triangle.mid.at(1) - this.sensor.at(1))*(triangle.mid.at(1) - this.sensor.at(1)) + (triangle.mid.at(2) - this.sensor.at(2))*(triangle.mid.at(2) - this.sensor.at(2));
 	triangle.flip = flip;
+
 	this.pushToQueue(triangle);
 }
 
@@ -364,7 +403,7 @@ Graphics3D.prototype.fillPolygon = function(a){
 
 Graphics3D.prototype.drawGrid = function() {
 	var temp = this.getMaterial();
-	this.setMaterial(new Material("#808080"));
+	this.setMaterial(new Material({"color": [128,128,128]}));
 	for(var i = 0; i <= 10; i++){
 		this.drawLine(-300+i*60,0,300,-300+i*60,0,-300);
 	}

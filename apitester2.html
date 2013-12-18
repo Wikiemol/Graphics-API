@@ -50,10 +50,10 @@
 
 				// setInterval(draw2,33)
 				// draw2();
-				// setInterval(draw3,33);
+				setInterval(draw3,33);
 				// draw3();
 				// setInterval(draw4,33);
-				setInterval(rayTracer,33);
+				// setInterval(rayTracer,33);
 				// rayTracer();
 				// draw4();
 			}
@@ -72,7 +72,7 @@
 
 			var t = 7*Math.PI/6;
 			var light1 = new Light({"diffusion":1,"specularity":1,"type": "point"});
-			var light2 = new Light({"diffusion":1,"specularity":1,"type":"point"});
+			var light2 = new Light({"diffusion":100,"specularity":0,"type":"point"});
 			function draw(){
 
 				cxt.clearRect(0,0,500,500);
@@ -147,7 +147,7 @@
 				// sx = Math.PI/6 + 0.27;
 				ply.addTo(g,sx,sx,sx,0,0,0,false);
 				g.setMaterial({"color": [245,245,245], "specularExponent": 10, "specularMultiplier": 2, "diffusion": 1})
-				ply2.addTo(g,-sx,sx,sx,-200,0,0,false);
+				// ply2.addTo(g,-sx,sx,sx,-200,0,0,false);
 				g.draw({"lights":true,"ambience":false});
 				x += 10;
 				sx += 0.03;
@@ -167,11 +167,11 @@
 
 			function rayTracer(){
 				cxt.fillRect(0,0,canvas.width,canvas.height)
-				light1.setPosition(-200 + x,50,200);
+				light1.setPosition(-200 + x,50,300);
 				light2.setPosition(200,50,0)
 				var r = new RayTracer(cxt);
 				r.plane(0,-35,0,new Vector3D(0,1,0),new Material({"color": [128,128,128]}));
-				r.sphere(0,0,0,100,new Material({"color": [128,1,1],"specularExponent":0, "specularMultiplier": 0, "diffusion": 1}));
+				r.sphere(0,0,0,100,new Material({"color": [128,1,1],"shine":3, "diffusion": 1}));
 				r.lights.push(light1);
 				// r.lights.push(light2);
 				r.trace();

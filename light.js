@@ -1,9 +1,9 @@
 function Light(l){ //type, diffusion, specularity, pass a curly brackets array eg. {"type": "point", "diffusion": 1, "specularity": 1}
-		this.iDiff = 1;
-		this.iSpec = 1;
+		this.diffusion = 1;
+		this.specularity = 1;
 		this.type = "point"; //Can be "point", "directional", or "spot" **spot light isn't made yet
-		this.direction = new Vector(-10,-10,0);
-		this.pos = new Vector();
+		this.direction = new Vector3D(-10,-10,0);
+		this.pos = new Vector3D();
 		this.reach = 1;
 		this.gel = {"r": 255, "g": 255, "b": 255};
 		this.directionalDistance = 400;
@@ -11,11 +11,11 @@ function Light(l){ //type, diffusion, specularity, pass a curly brackets array e
 			
 			
 			if(!(typeof l["diffusion"] === 'undefined')){
-				this.iDiff = l["diffusion"];
+				this.diffusion = l["diffusion"];
 			}
 
 			if(!(typeof l["specularity"] === 'undefined')){
-				this.iSpec = l["specularity"];
+				this.specularity = l["specularity"];
 			}
 
 			if(!(typeof l["type"] === 'undefined')){
@@ -27,16 +27,16 @@ function Light(l){ //type, diffusion, specularity, pass a curly brackets array e
 }
 
 Light.prototype.setDiffusion = function(a){
-	this.iDiff = a;
+	this.diffusion = a;
 };
 Light.prototype.getDiffusion = function(){
-	return this.iDiff;
+	return this.diffusion;
 };
 Light.prototype.setSpecularity = function(a){
-	this.iSpec = a;
+	this.specularity = a;
 };
 Light.prototype.getSpecularity = function(){
-	return this.iSpec;
+	return this.specularity;
 };
 Light.prototype.setType = function(a){
 	this.type = a;
@@ -76,12 +76,6 @@ Light.prototype.setGelBySaturation = function(){ // R G and B values are given a
 	var redPerc   = arguments[0]["r"];
 	var greenPerc = arguments[0]["g"];
 	var bluePerc  = arguments[0]["b"];
-	/*if(typeof g === 'undefined') { //If only red is defined, green + blue will be equal to the 1 - red;
-		greenPerc  = (1 - r)/2;
-		bluePerc   = (1 - r)/2;
-	}else if(typeof b === 'undefined') { //If only blue is undefined, blue will be the remaining space of 1 - (r + g)
-		bluePerc   = 1 - (r + g);
-	}*/
 	if(typeof redPerc === 'undefined'){
 		if(typeof greenPerc === 'undefined'){
 			redPerc   = (1 - bluePerc)/2;
@@ -133,25 +127,26 @@ Light.prototype.setGelBySaturation = function(){ // R G and B values are given a
 	this.setGel({"r": red, "g": green, "b": blue});
 }
 
-Light.prototype.intensityAt = function(x,y,z) { //Returns vector with this.iDiff .at(0) and this.iSpec .at(1)
-	var point = new Vector(x,y,z);
-	var iDiff;
-	var iSpec;
+Light.prototype.intensityAt = function(x,y,z) { //Returns vector with this.diffusion .at(0) and this.specularity .at(1)
+	var point = new Vector3D(x,y,z);
+	var diffusion;
+	var specularity;
 	if (this.type == "point") {
 		var distance = this.distanceSquared(x,y,z);
-		iDiff = this.getReach()*100000*this.getDiffusion()/(distance);
-		iSpec = this.getSpecularity()/(distance);
+		diffusion = this.getReach()*100000*this.getDiffusion()/(distance);
+		specularity = 100000*this.specularity/(distance);
+
 	}else if(this.type == "directional") {
-		iDiff = this.getDiffusion();
-		iSpec = this.getSpecularity();
+		diffusion = this.getDiffusion();
+		specularity = this.getSpecularity();
 	}else if(this.type == "spot"){
 		//Making this later
 	}
-	return new Vector(iDiff,iSpec);
+	return new Vector2D(diffusion,specularity);
 };
 
 Light.prototype.directionAt = function(x,y,z) { //Returns unit vector in direction of the light
-	var point = new Vector(x,y,z);
+	var point = new Vector3D(x,y,z);
 	var direction;
 	if(this.type == "point"){
 		direction = point.subtract(this.getPosition()).unit();
@@ -175,7 +170,7 @@ Light.prototype.diffusionIntensityVector = function(x,y,z) { //Returns direction
 };
 
 Light.prototype.distance = function(x,y,z) {
-	var point = new Vector(x,y,z);
+	var point = new Vector3D(x,y,z);
 	var distance;
 	if(this.type == 'point'){
 		distance = this.getPosition().subtract(point).magnitude();
