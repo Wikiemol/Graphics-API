@@ -5,6 +5,7 @@ function RayTracer(cxt){
 	this.lens 			= this.sensor.at(2) - this.focalLength;
 	this.lights			= [];
 	this.objects		= [];	
+	this.ambience		= 0.2
 }
 
 function Sphere(x,y,z,r,m){
@@ -118,91 +119,9 @@ RayTracer.prototype.trace = function() {
 	}
 	g.draw();
 };
-
-// RayTracer.prototype.applyLight = function(p,normal,material){ //Pass point normal and material, Returns RGB color value.
-// 	// return [255,255,255]
-// 	var point 			= p;
-// 	var specularity		= 0;
-// 	var diffuse			= 0;
-// 	var normal			= normal.unit();
-// 	var material 		= material;
-// 	var materialColor	= material.getColor();
-
-// 	var totalGel		= {"r":0,"g":0,"b":0}; //After for loop below, this will contain the sum of r g and b respectively for all lights 
-// 	var totalColor		= 0; //Will contain sum of all color values without discriminating r g and b components
-// 	var viewPointVector = new Vector3D(0,0,0); //Vector between point and viewPoint
-// 	viewPointVector = viewPointVector.add(point.subtract(this.sensor)).unit();
-// 	var lightsLength = this.lights.length;
-// 	for(var i = 0; i < lightsLength; i++){ //totaling light contributions
-// 		/**Calculate Specularity**/
-// 		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2)).multiply(1);
-
-// 		var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
-
-// 		if(lightReflection.dot(viewPointVector)*material.getSpecularity() > 0){
-// 			specularity += lightReflection.dot(viewPointVector)*material.getSpecularity()*(400/this.lights[i].distance(point.at(0),point.at(1),point.at(2)));
-// 		}
-		
-// 		/**Calculate Diffusion**/
-// 		var diffusionLight = this.lights[i].diffusionIntensityVector(point.at(0),point.at(1),point.at(2));
-// 		var diffuseAdd = diffusionLight.dot(normal)*material.getDiffusion();
-// 		if(diffuseAdd >= 0){ //checks if diffusion is greater than 0, if so it will take it into account
-// 			diffuse += diffuseAdd; //diffusion contribution is equal to the dot product of the light vector and the normal multiplied by the diffusion component of the material
-// 		}
-
-// 		/**Calculate color contribution (totalgel contribution)**/
-// 		var intensity = this.lights[i].intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
-
-// 		totalGel["r"] += this.lights[i].getGel()["r"]*intensity;
-// 		totalGel["g"] += this.lights[i].getGel()["g"]*intensity;
-// 		totalGel["b"] += this.lights[i].getGel()["b"]*intensity;
-
-// 		totalColor += (this.lights[i].getGel()["r"] + this.lights[i].getGel()["g"] + this.lights[i].getGel()["b"])*diffusionLight.magnitude();
-// 	}
-	
-// 	var rRatio = 3*totalGel["r"]/totalColor;
-// 	var gRatio = 3*totalGel["g"]/totalColor;
-// 	var bRatio = 3*totalGel["b"]/totalColor;
-
-// 	if(diffuse < 0){
-// 		diffuse = 0;
-// 	}else if( diffuse > 1){
-// 		diffuse = 1;
-// 	}
-	
-// 	/*** calculating color ***/
-// 	var red = materialColor[0];
-// 	var green = materialColor[1];
-// 	var blue = materialColor[2];
-// 	var colorSum = 1/(red + green + blue);
-	
-// 	red *= diffuse*rRatio;
-// 	green *= diffuse*gRatio;
-// 	blue *= diffuse*bRatio;
-	
-// 	var specComponent = Math.pow(specularity*material.getSpecularMultiplier(),material.getSpecularExponent());
-
-// 	red += specComponent*materialColor[0]*colorSum;
-// 	green += specComponent*materialColor[1]*colorSum;
-// 	blue += specComponent*materialColor[2]*colorSum;
-	
-// 	if(red > 255){ 
-// 		red = 255;
-// 	}
-// 	if(blue > 255){
-// 		blue = 255;
-// 	}
-// 	if(green > 255){
-// 		green = 255;
-// 	}
-// 	var color = [red,green,blue];
-	
-// 	return color;
-//}
-
 RayTracer.prototype.applyLight = function(point,normal,material) {
 	var normal = normal.unit();
-	var illumination = 0;
+	var illumination = this.ambience;
 	for(var i = 0; i < this.lights.length; i++){
 		var light = this.lights[i];
 		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2))
@@ -212,28 +131,17 @@ RayTracer.prototype.applyLight = function(point,normal,material) {
 		// var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
 		var lightReflection = normal.multiply(2*(Lm.dot(normal))).subtract(Lm)
 		if(Lm.dot(normal) > 0){
-				illumination += light.diffusion*(Lm.dot(normal))*diffusionIntensity 
-						
+				illumination += light.diffusion*(Lm.dot(normal))*diffusionIntensity					
 		}
 		if(lightReflection.dot(point.subtract(this.sensor)) > 0){
-
 			illumination += light.specularity*Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())),material.shine)*specularIntensity
 			// console.log(specularIntensity)
 		}
 	}
-
 	var red = material.c[0]*illumination;
 	var blue = material.c[1]*illumination;
 	var green = material.c[2]*illumination;
-	if(red > 255){ 
-		red = 255;
-	}
-	if(blue > 255){
-		blue = 255;
-	}
-	if(green > 255){
-		green = 255;
-	}
+	
 	return [red,blue,green];
 };
 
