@@ -306,7 +306,11 @@ Graphics3D.prototype.getMaterial = function(){
 }	
 
 Graphics3D.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d space
-	var t1 = (this.getLens()-this.sensor.at(2))/(this.sensor.at(2) - z_1); //the t derived from the z component of the parametric line between the point to be projected and the sensor assuming the line intersects the lens, the lens is flat, and the lens is parallel to the xy plane
+	/*the t derived from the z component of the parametric line between the point to be projected and 
+	the sensor assuming the line intersects the lens, 
+	the lens is flat, 
+	and the lens is parallel to the xy plane*/
+	var t1 = (this.getLens()-this.sensor.at(2))/(this.sensor.at(2) - z_1); 
 	var x1 = this.sensor.at(0)+this.sensor.at(0)*t1-t1*x_1; //x component of the parametric line between the point to be projected and the sensor
 	var y1 = this.sensor.at(1)+this.sensor.at(1)*t1-t1*y_1; //y component of the parametric line between the point to be projected and the sensor
 	

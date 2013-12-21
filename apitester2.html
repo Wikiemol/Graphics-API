@@ -53,8 +53,8 @@
 				// setInterval(draw3,33);
 				// draw3();
 				// setInterval(draw4,33);
-				// setInterval(rayTracer,33);
-				rayTracer();
+				setInterval(rayTracer,33);
+				// rayTracer();
 				// draw4();
 			}
 
@@ -126,8 +126,6 @@
 			}
 			var lastFrame = new Date;
 			function draw3(){
-
-				
 				cxt.clearRect(0,0,500,500);
 				cxt.fillStyle = "#000000"
 				cxt.fillRect(0,0,500,500);
@@ -168,10 +166,15 @@
 			function rayTracer(){
 				cxt.fillRect(0,0,canvas.width,canvas.height)
 				light1.setPosition(-200 + x,50,300);
+				light1.specularity = 1
 				light2.setPosition(200,50,0)
 				var r = new RayTracer(cxt);
-				r.plane(0,-35,0,new Vector3D(0,1,0),new Material({"color": [128,128,128]}));
-				r.sphere(0,0,0,100,new Material({"color": [128,1,1],"shine":3, "diffusion": 1}));
+				r.ambience = 0.1;
+				r.sensor = new Vector3D(0,0,1100);
+				r.plane(0,-100,0,new Vector3D(0,1,0),new Material({"color": [128,128,128]}));
+				r.sphere(0,0,0,100,new Material({"color": [128,1,1],"shine":10, "diffusion": 1}));
+				r.sphere(200,0,-200,100,new Material({"color": [1,128,1],"shine":10,"diffusion": 1}))
+				r.sphere(-200,0,-200,100,new Material({"color": [1,1,128],"shine":10,"diffusion": 1}))				
 				r.lights.push(light1);
 				// r.lights.push(light2);
 				r.trace();
