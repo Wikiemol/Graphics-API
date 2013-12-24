@@ -90,3 +90,15 @@ Vector3D.prototype.roundVector = function(){
 	var vector = new Vector3D(Math.round(a[0]),Math.round(a[1]),Math.round(a[2]));
 	return vector;
 }
+
+Vector3D.prototype.reflectOver = function(vectorToReflectOver){ //return a reflected vector
+	// var t = (vectorToReflectOver.dot(vectorToReflectOver))/(this.dot(vectorToReflectOver));
+	
+	// var reflectedVector = vectorToReflectOver.subtract(this.multiply(t)).add(vectorToReflectOver);
+	// if(t < 0){
+	// 	return reflectedVector.multiply(-1)
+	// }else{
+	// 	return reflectedVector;
+	// }
+	return vectorToReflectOver.multiply(vectorToReflectOver.dot(this)).multiply(2).subtract(this);
+}

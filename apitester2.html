@@ -53,8 +53,8 @@
 				// setInterval(draw3,33);
 				// draw3();
 				// setInterval(draw4,33);
-				setInterval(rayTracer,33);
-				// rayTracer();
+				// setInterval(rayTracer,33);
+				rayTracer();
 				// draw4();
 			}
 
@@ -165,7 +165,7 @@
 
 			function rayTracer(){
 				cxt.fillRect(0,0,canvas.width,canvas.height)
-				light1.setPosition(-200 + x,50,300);
+				light1.setPosition(-200,50,300);
 				light1.specularity = 1
 				light2.setPosition(200,50,0)
 				var r = new RayTracer(cxt);
@@ -179,6 +179,7 @@
 				// r.lights.push(light2);
 				r.trace();
 				x += 10
+
 			}
 		</script>
 	</head>

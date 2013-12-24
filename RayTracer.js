@@ -1,4 +1,6 @@
 function RayTracer(cxt){
+	this.WIDTH = cxt.canvas.width;
+	this.HEIGHT = cxt.canvas.height;
 	this.cxt = cxt;
 	this.sensor 		= new Vector3D(0,0,1100);
 	this.focalLength 	= 600;
@@ -6,6 +8,9 @@ function RayTracer(cxt){
 	this.lights			= [];
 	this.objects		= [];	
 	this.ambience		= 0.2
+	this.imgData 		= this.cxt.getImageData(0,0,this.WIDTH,this.HEIGHT);
+	this.cdata			= this.imgData.data;
+	this.materialData	= [];
 }
 
 function Sphere(x,y,z,r,m){
@@ -36,7 +41,7 @@ Sphere.prototype.intersect = function(ray){
 		// console.log(sqrt)
 		var intersection1 = direction.multiply(t1).add(origin);
 		var intersection2 = direction.multiply(t2).add(origin);
-		if(Math.abs(t1) > Math.abs(t2) && (!ray.shadow || (t2 > 0 && t2 < 0.999999))){ /*Theoretically, this value (0.99999) 
+		if(Math.abs(t1) > Math.abs(t2) && t2 > 0 && (!ray.shadow || t2 < 0.999999)){ /*Theoretically, this value (0.99999) 
 																						should be 1. However, making it 1 creates 
 																						an extremely interesting mandala-like effect 
 																						on the spheres. I would like to find out why.*/
@@ -45,16 +50,16 @@ Sphere.prototype.intersect = function(ray){
 			return {"intersection": intersection2, 
 					"distance": intersection2.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
-					"normal": normal,
+					"normal": normal.unit(),
 					"t": t2,
 					"type": "sphere"}
-		}else if((!ray.shadow || (t1 > 0 && t1 < 0.999999))){
+		}else if(t1 > 0 && (!ray.shadow || t1 < 0.999999)){
 			
 			var normal = intersection1.subtract(this.position);
 			return {"intersection": intersection1, 
 					"distance": intersection1.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
-					"normal": normal,
+					"normal": normal.unit(),
 					"t": t1,
 					"type": "sphere"}
 		}else{
@@ -81,13 +86,13 @@ Plane.prototype.intersect = function(ray) {
 		//if denominator is non 0 and (if it is a shadow cast) the point is between the origin and direction vector
 		var intersect = direction.multiply(t).add(origin);
 		// if(intersect != origin && direction.subtract(origin).dot(this.normal) != 0 && (!ray.shadow || (t < 0 && t > -1))){
-		if(intersect.at(2) < direction.add(origin).at(2) && direction.dot(this.normal) != 0 && (!ray.shadow || (t > 0 && t < 1))){	
+		if(intersect.at(2) < direction.add(origin).at(2) && direction.dot(this.normal) != 0 && t > 0 && (!ray.shadow || t < 1)) {	
 			var distance  = origin.subtract(intersect).magnitudeSquared();
 			// console.log(t)
 			return {"intersection": intersect, 
 					"distance": distance, 
 					"material":this.material, 
-					"normal": this.normal.multiply(-1),
+					"normal": this.normal.multiply(-1).unit(),
 					"t": t,
 					"type": "plane"}	
 		}else{
@@ -106,15 +111,14 @@ RayTracer.prototype.plane = function(x,y,z,n,m) { //x,y,z is point on the plane,
 	this.objects.push(plane);
 }
 RayTracer.prototype.trace = function() {
-	var width = this.cxt.canvas.width;
-	var height = this.cxt.canvas.height;
-	var g = new Graphics2D(this.cxt);
-	for(var x = -width/2 + this.sensor.at(0); x < width/2 + this.sensor.at(0); x++){
-		for(var y = -height/2 + this.sensor.at(1); y < height/2 + this.sensor.at(1); y++){
+	for(var x = -this.WIDTH/2 + this.sensor.at(0); x < this.WIDTH/2 + this.sensor.at(0); x++){
+		for(var y = -this.HEIGHT/2 + this.sensor.at(1); y < this.HEIGHT/2 + this.sensor.at(1); y++){
 			var ray = {"direction": new Vector3D(x - this.sensor.at(0),y - this.sensor.at(1),this.lens - this.sensor.at(2)), "origin": this.sensor}
 			var intersect = this.cast(ray);
 			if(intersect && intersect.intersection.at(2) < this.lens){
 				var illumination = this.ambience;
+				var reflectionRay = {"direction": intersect.normal.unit().multiply(2*(ray.direction.unit().dot(intersect.normal))).subtract(ray.direction), "origin": intersect.intersection}
+				var reflection    = this.cast(reflectionRay);
 				for(var i = 0; i < this.lights.length; i++){
 					var shadowRay = {"direction": intersect.intersection.subtract(this.lights[i].pos), "origin": this.lights[i].pos, "shadow": true};
 					var cast = this.cast(shadowRay);
@@ -122,16 +126,38 @@ RayTracer.prototype.trace = function() {
 						illumination += this.illuminate(intersect.intersection,intersect.normal,intersect.material,this.lights[i]);
 					}
 				}
+
 				var red 	= intersect.material.c[0]*illumination;
 				var blue	= intersect.material.c[1]*illumination;
 				var green	= intersect.material.c[2]*illumination;
-				g.drawPixel(x - this.sensor.at(0),y - this.sensor.at(1),[red,blue,green]);
+				this.drawPixel(x - this.sensor.at(0),y - this.sensor.at(1),[red,blue,green],intersect.material.c);
 			}
 		}
 	}
-	g.draw();
+	this.cxt.putImageData(this.imgData,0,0);
 };
 
+RayTracer.prototype.bounce = function(ray,currentIllumination,numberOfBounces) {
+	var intersect = this.cast(ray);
+	var distance = ray.origin.subtract(intersect.intersection).magnitudeSquared(); //distance between ray origin and point intersected
+	var isSeen = false;
+};
+
+RayTracer.prototype.drawPixel = function(x1,y1,color,materialColor){
+	var	x = x1+this.WIDTH/2;
+	var	y = -y1+this.HEIGHT/2;
+	
+	if(x < this.WIDTH && x >= 0 && y < this.HEIGHT && y >= 0){
+		var point = (x+y*this.WIDTH)*4;
+
+		this.cdata[point + 0] = color[0]; //r
+		this.cdata[point + 1] = color[1]; //g
+		this.cdata[point + 2] = color[2]; //b
+		this.cdata[point + 3] = 255; //a
+
+		this.materialData[(x+y*this.WIDTH)] = materialColor; 
+	}
+}
 RayTracer.prototype.cast = function(ray){
 	var intersect = false; 
 	for(var k = 0; k < this.objects.length; k++){
@@ -142,46 +168,21 @@ RayTracer.prototype.cast = function(ray){
 	}
 	return intersect
 }
-RayTracer.prototype.applyLight = function(point,normal,material) {
-	var normal = normal.unit();
-	var illumination = this.ambience;
-	for(var i = 0; i < this.lights.length; i++){
-		var light = this.lights[i];
-		var specularLight = this.lights[i].specularIntensityVector(point.at(0),point.at(1),point.at(2))
-		var specularIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(1);
-		var diffusionIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
-		var Lm = point.subtract(light.pos).unit();
-		// var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
-		var lightReflection = normal.multiply(2*(Lm.dot(normal))).subtract(Lm)
-		if(Lm.dot(normal) > 0){
-				illumination += light.diffusion*(Lm.dot(normal))*diffusionIntensity					
-		}
-		if(lightReflection.dot(point.subtract(this.sensor)) > 0){
-			illumination += light.specularity*Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())),material.shine)*specularIntensity
-			// console.log(specularIntensity)
-		}
-	}
-	var red = material.c[0]*illumination;
-	var blue = material.c[1]*illumination;
-	var green = material.c[2]*illumination;
-	
-	return [red,blue,green];
-};
-
 RayTracer.prototype.illuminate = function(point,normal,material,light){
-	var normal = normal.unit();
+	var normal = normal;
 	var illumination = 0;
 	var specularLight = light.specularIntensityVector(point.at(0),point.at(1),point.at(2))
 	var specularIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(1);
 	var diffusionIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
 	var Lm = point.subtract(light.pos).unit();
-	var lightReflection = normal.multiply(2*(Lm.dot(normal))).subtract(Lm)
+	var lightReflection = Lm.reflectOver(normal);
 	if(Lm.dot(normal) > 0){
 		illumination += light.diffusion*(Lm.dot(normal))*diffusionIntensity					
 	}
 	if(lightReflection.dot(point.subtract(this.sensor)) > 0){
 		illumination += light.specularity*Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())),material.shine)*specularIntensity
 	}
+
 	return illumination;
 }
 RayTracer.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d space

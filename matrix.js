@@ -5,7 +5,6 @@ function Matrix() { //can take array of vectors, in addition, it can be set to a
 	this.theta = 0;
 	this.type  = null;
 	if(arguments[0] instanceof Array){
-
 		this.matrixArray = arguments[0];
 		this.w = this.matrixArray[0].getLength();
 		this.h = this.matrixArray.length;
@@ -19,6 +18,7 @@ function Matrix() { //can take array of vectors, in addition, it can be set to a
 		this.rotationZ(arguments[1]);
 		this.type = 'rz';
 	}else{
+		console.log("hi");
 		this.w		= arguments[0].getLength();
 		this.h		= arguments.length;
 		for(var i = 0; i < arguments.length; i++){
@@ -35,7 +35,7 @@ Matrix.prototype.at = function(a,b){
 	this.matrixArray[a].at(b);
 }
 Matrix.prototype.column = function(a){
-	var vector = new Vector();
+	var vector = new Vector3D();
 	for(var i = 0; i < this.matrixArray.length; i++){
 		vector.setAt(i,this.matrixArray[i].at(a));
 	}
@@ -72,7 +72,7 @@ Matrix.prototype.setMatrix = function(){ //Overrides instance completely
 		this.w		= arguments[0].getLength();
 		this.h		= arguments.length;
 		for(var i = 0; i < arguments.length; i++){
-			if(!(arguments[i] instanceof Vector)) throw 'Error: Matrix objects take vectors or a single array with vectors as elements.'
+			if(!(arguments[i] instanceof Vector3D)) throw 'Error: Matrix objects take vectors or a single array with vectors as elements.'
 			if(arguments[i].getLength() != this.w && this.w) throw 'Error: All arguments must be the same length.'
 			this.matrixArray.push(arguments[i]);
 		}	
@@ -81,7 +81,7 @@ Matrix.prototype.setMatrix = function(){ //Overrides instance completely
 
 Matrix.prototype.multiplyVector = function(v) {
 	if(v.getLength() != this.getWidth()) throw "Error: Cannot multiply. Incompatible sizes."
-	var vector = new Vector();
+	var vector = new Vector3D();
 	for(var i = 0; i < this.getHeight(); i++){
 		vector.setAt(i,this.row(i).dot(v));
 
@@ -94,7 +94,7 @@ Matrix.prototype.multiplyMatrix = function(m) {
 	if(m.getHeight() != this.getWidth()) throw "Error: Cannot multiply matrices. Incompatible sizes."
 	var matrixA = [];
 	for(var i = 0; i < this.getWidth(); i++){
-		matrixA.push(new Vector());
+		matrixA.push(new Vector3D());
 	}
 	for(var i = 0; i < this.getWidth(); i++){
 		for(var j = 0; j < this.getWidth(); j++){
@@ -115,35 +115,35 @@ Matrix.prototype.multiply = function(s) {
 Matrix.prototype.setTheta = function(theta) {
 	if(this.type == 'rx'){
 		this.setMatrix(new Vector(1,0,0),
-				   new Vector(0,Math.cos(theta),-Math.sin(theta)),
-				   new Vector(0,Math.sin(theta),Math.cos(theta)));	
+				   new Vector3D(0,Math.cos(theta),-Math.sin(theta)),
+				   new Vector3D(0,Math.sin(theta),Math.cos(theta)));	
 	}else if(this.type == 'ry'){
-		this.setMatrix(new Vector(Math.cos(theta),0,Math.sin(theta)),
-			   new Vector(0,1,0),
-			   new Vector(-Math.sin(theta),0,Math.cos(theta)));		
+		this.setMatrix(new Vector3D(Math.cos(theta),0,Math.sin(theta)),
+			   new Vector3D(0,1,0),
+			   new Vector3D(-Math.sin(theta),0,Math.cos(theta)));		
 	}else if(this.type == 'rz'){
-		this.setMatrix(new Vector(Math.cos(theta),-Math.sin(theta),0),
-			   new Vector(Math.sin(theta),Math.cos(theta),0),
-			   new Vector(0,0,1));		
+		this.setMatrix(new Vector3D(Math.cos(theta),-Math.sin(theta),0),
+			   new Vector3D(Math.sin(theta),Math.cos(theta),0),
+			   new Vector3D(0,0,1));		
 	}else{
 		throw "Error: Matrix is not a rotation matrix";
 	}
 };
 Matrix.prototype.rotationX = function(theta) { //Makes this matrix the rotation matrix about the x axis for theta degrees
-	this.setMatrix(new Vector(1,0,0),
-				   new Vector(0,Math.cos(theta),-Math.sin(theta)),
-				   new Vector(0,Math.sin(theta),Math.cos(theta)));
+	this.setMatrix(new Vector3D(1,0,0),
+				   new Vector3D(0,Math.cos(theta),-Math.sin(theta)),
+				   new Vector3D(0,Math.sin(theta),Math.cos(theta)));
 	
 };
 
 Matrix.prototype.rotationY = function(theta) { //Makes this matrix the rotation matrix about the y axis for theta degrees
-	this.setMatrix(new Vector(Math.cos(theta),0,Math.sin(theta)),
-				   new Vector(0,1,0),
-				   new Vector(-Math.sin(theta),0,Math.cos(theta)));
+	this.setMatrix(new Vector3D(Math.cos(theta),0,Math.sin(theta)),
+				   new Vector3D(0,1,0),
+				   new Vector3D(-Math.sin(theta),0,Math.cos(theta)));
 };
 
 Matrix.prototype.rotationZ = function(theta) { //Makes this matrix the rotation matrix about the z axis for theta degrees
-	this.setMatrix(new Vector(Math.cos(theta),-Math.sin(theta),0),
-				   new Vector(Math.sin(theta),Math.cos(theta),0),
-				   new Vector(0,0,1));
+	this.setMatrix(new Vector3D(Math.cos(theta),-Math.sin(theta),0),
+				   new Vector3D(Math.sin(theta),Math.cos(theta),0),
+				   new Vector3D(0,0,1));
 };

@@ -85,7 +85,7 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 		}
 
 		for(var i = 0;i < Math.abs(dy); i++){
-			this.drawPixel(x1 + sign*i*slope,y1 + i*sign,this.color);
+			this.drawPixel(Math.round(x1 + sign*i*slope),Math.round(y1 + i*sign),this.color);
 		}
 
 
@@ -95,7 +95,8 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 
 		for(var i = 0; i < Math.abs(dx); i++){
 
-			this.drawPixel(x1 + i,y1 + i*slope,this.color);
+			this.drawPixel(Math.round(x1 + i),Math.round(y1 + i*slope),this.color);
+
 		}
 
 
@@ -103,7 +104,7 @@ Graphics2D.prototype.drawLine = function(x_1,y_1,x_2,y_2){
 }
 
 
-Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
+Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3,color){
 	var x1 = Math.round(x_1);
 	var y1 = Math.round(y_1);
 	var x2 = Math.round(x_2);
@@ -124,8 +125,7 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 		for(var j = 0; j < n2; j++){
 			
 			if(area == getArea(minX + i, minY + j,x1,y1,x2,y2) + getArea(minX + i, minY + j,x2,y2,x3,y3) + getArea(minX + i, minY + j,x3,y3,x1,y1)){
-
-					this.drawPixel(minX + i, minY + j,this.color);
+					this.drawPixel(minX + i, minY + j,color);
 			}
 		}
 	}
@@ -139,16 +139,17 @@ Graphics2D.prototype.fillTriangle = function(x_1,y_1,x_2,y_2,x_3,y_3){
 Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r1,g1,b1, r2,g2,b2, r3,g3,b3){
 	var tempColor = this.getColor();
 
-	var x1 = Math.round(x_1);
-	var y1 = Math.round(y_1);
+	var x1 = x_1;
+	var y1 = y_1;
 	
-	var x2 = Math.round(x_2);
-	var y2 = Math.round(y_2);
+	var x2 = x_2;
+	var y2 = y_2;
 
-	var x3 = Math.round(x_3);
-	var y3 = Math.round(y_3);
-
+	var x3 = x_3;
+	var y3 = y_3;
+	
 	if(x1 == x2 && y1 == y2 || x1 == x3 && y1 == y3 || x2 == x3 && y2 == y3){ //if the triangle is a line we don't need to do anything
+		this.fillTriangle(x1,y1,x2,y2,x3,y3,[r1,g1,b1]);
 		return;
 	}
 
@@ -174,6 +175,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 					(x3 - x1)*(aboveY - y1) - (y3 - y1)*(aboveX - x1)] //p3,p1,above
 	
 	if(normal1[2] == 0 || normal2[2] == 0 || normal3[2] == 0){ //avoids divide by 0 errors
+		this.fillTriangle(x1,y1,x2,y2,x3,y3,[r1,g1,b1]);
 		return;
 	}
 
@@ -190,6 +192,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 				  x12*y32 - y12*x32]
 	
 	if(rnormal[2] == 0 || gnormal[2] == 0 || bnormal[2] == 0){ //avoids more divide by 0 errors
+		this.fillTriangle(x1,y1,x2,y2,x3,y3,[r1,g1,b1]);
 		return;
 	}
 
@@ -224,10 +227,10 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 	var Cb = -Ab*x1 - Bb*y1 + b1;
 
 
-	var minX = Math.min(Math.min(x1,x2),x3);
-	var minY = Math.min(Math.min(y1,y2),y3);
-	var maxX = Math.max(Math.max(x1,x2),x3);
-	var maxY = Math.max(Math.max(y1,y2),y3);
+	var minX = Math.floor(Math.min(Math.min(x1,x2),x3));
+	var minY = Math.floor(Math.min(Math.min(y1,y2),y3));
+	var maxX = Math.ceil(Math.max(Math.max(x1,x2),x3));
+	var maxY = Math.ceil(Math.max(Math.max(y1,y2),y3));
 
 	var n1 = Math.abs(maxX - minX);
 	var n2 = Math.abs(maxY - minY);
@@ -240,6 +243,7 @@ Graphics2D.prototype.interpolateTriangle = function(x_1,y_1, x_2,y_2, x_3,y_3, r
 		var yy1 = (y - y1)*B1;
 		var yy2 = (y - y2)*B2;
 		var yy3 = (y - y3)*B3;
+
 		for(var j = 0; j < n1; j++){
 			var x = minX + j;
 			var isInTriangle = true;

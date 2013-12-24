@@ -165,12 +165,11 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 				line++;
 			}
 			/*---------------END ADD FACES----------------*/
-			console.log(vertices.length)
 
 			/********FIND NORMALS************/
 			for(var i = 0; i < vertices.length; i++){
 				var vertex = vertices[i].multiply(scale);
-				var vertexNormal = new Vector(0,0,0);
+				var vertexNormal = new Vector3D(0,0,0);
 				
 				var facesArray = vertexFaces[vertex.at(0) + "," + vertex.at(1) + "," + vertex.at(2)]
 				
@@ -215,7 +214,7 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 
 };
 
-PLY.prototype.addTo = function(g,rx,ry,rz) {
+PLY.prototype.addTo = function(g,rx,ry,rz,x,y,z,wireframe) {
 	var l = this.faces.length;
 	var rotx = rx;
 	var roty = ry;
@@ -288,16 +287,38 @@ PLY.prototype.addTo = function(g,rx,ry,rz) {
 			// var nz3 = -n3.at(0)*sinRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*cosRoty;
 			
 		}
-		
+		var sensor = g.sensor;
 		var triangle = new Triangle3D(v1,v2,v3,g.material);
-		if(triangle.norm.at(2) < 0){
-			var sensor = g.sensor;
+		var sensorv = triangle.mid.subtract(sensor);
+		var notBackFace = sensorv.dot(triangle.norm) > 0;
+		var center = new Vector3D(x,y,z);
+		if(wireframe && notBackFace){
+			
+			var m = new Material({"color": [0,128,0]});
+			var line1 = new Line3D(v1.add(center),v2.add(center),m);
+			var line2 = new Line3D(v2.add(center),v3.add(center),m);
+			var line3 = new Line3D(v3.add(center),v1.add(center),m);
+			// console.log(line1.mid.vectorArray)
+			line1.squareDistance = (line1.mid.at(0) - sensor.at(0))*(line1.mid.at(0) - sensor.at(0)) + (line1.mid.at(1) - sensor.at(1))*(line1.mid.at(1) - sensor.at(1)) + (line1.mid.at(2) - sensor.at(2))*(line1.mid.at(2) - sensor.at(2));
+			line2.squareDistance = (line2.mid.at(0) - sensor.at(0))*(line2.mid.at(0) - sensor.at(0)) + (line2.mid.at(1) - sensor.at(1))*(line2.mid.at(1) - sensor.at(1)) + (line2.mid.at(2) - sensor.at(2))*(line2.mid.at(2) - sensor.at(2));
+			line3.squareDistance = (line3.mid.at(0) - sensor.at(0))*(line3.mid.at(0) - sensor.at(0)) + (line3.mid.at(1) - sensor.at(1))*(line3.mid.at(1) - sensor.at(1)) + (line3.mid.at(2) - sensor.at(2))*(line3.mid.at(2) - sensor.at(2));
+	
+			g.pushToQueue(line1);
+			g.pushToQueue(line2);
+			g.pushToQueue(line3);
+		}
+
+		if(notBackFace && !wireframe){
+			triangle.p1 = triangle.p1.add(center);
+			triangle.p2 = triangle.p2.add(center);
+			triangle.p3 = triangle.p3.add(center);
+
+			triangle.mid= triangle.mid.add(center);
 			triangle.normal1 = n1;
 			triangle.normal2 = n2;
 			triangle.normal3 = n3;
 			triangle.squareDistance = (triangle.mid.at(0) - sensor.at(0))*(triangle.mid.at(0) - sensor.at(0)) + (triangle.mid.at(1) - sensor.at(1))*(triangle.mid.at(1) - sensor.at(1)) + (triangle.mid.at(2) - sensor.at(2))*(triangle.mid.at(2) - sensor.at(2));
 			g.pushToQueue(triangle);
 		}
-
 	}
 };
