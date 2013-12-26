@@ -8,7 +8,7 @@ function RayTracer(cxt){
 	this.lens 			= this.sensor.at(2) - this.focalLength;
 	this.lights			= [];
 	this.objects		= [];	
-	this.ambience		= 0.2
+	this.ambience		= 0.2;
 	this.imgData 		= this.cxt.getImageData(0,0,this.WIDTH,this.HEIGHT);
 	this.cdata			= this.imgData.data;
 	this.materialData	= [];
@@ -33,40 +33,25 @@ Sphere.prototype.intersect = function(ray){
 	var C = op.dot(op) - this.radius*this.radius;
 	var discriminant = B*B - 4*A*C
 	// console.log(origin)
-	if(discriminant < 0){
-		return false;
-	}else{ //if 
+	if(discriminant >= 0){  
 		var sqrt = Math.sqrt(discriminant);
 		var t1 = (-B + sqrt)/(2*A);
 		var t2 = (-B - sqrt)/(2*A);
-		// console.log(sqrt)
-		var intersection1 = direction.multiply(t1).add(origin);
-		var intersection2 = direction.multiply(t2).add(origin);
-		if(Math.abs(t1) > Math.abs(t2) && t2 > 0 && (!ray.shadow || t2 < 0.999999)){ /*Theoretically, this value (0.99999) 
-																						should be 1. However, making it 1 creates 
-																						an extremely interesting mandala-like effect 
-			=																			on the spheres. I would like to find out why.*/
-			var normal = this.position.subtract(intersection2);
-			// console.log(normal.at(0) + "," + normal.at(1) + "," + normal.at(2))
-			return {"intersection": intersection2, 
-					"distance": intersection2.subtract(origin).magnitudeSquared(), 
+		var t = Math.min(t1,t2);
+		if(t >= 0){
+			var intersection = direction.multiply(t).add(origin);
+			var normal = this.position.subtract(intersection);
+			return {"intersection": intersection, 
+					"distance": intersection.subtract(origin).magnitudeSquared(), 
 					"material":this.material, 
 					"normal": normal.unit(),
-					"t": t2,
-					"type": "sphere"}
-		}else if(t1 > 0 && (!ray.shadow || t1 < 0.999999)){
-			
-			var normal = intersection1.subtract(this.position);
-			return {"intersection": intersection1, 
-					"distance": intersection1.subtract(origin).magnitudeSquared(), 
-					"material":this.material, 
-					"normal": normal.unit(),
-					"t": t1,
+					"t": t,
 					"type": "sphere"}
 		}else{
 			return false
 		}
 	}
+	return false;
 }
 function Plane(x,y,z,n,m,w,h){ //p is a point on the plane, n is the normal to the plane, and m is the material of the plane;
 	this.point = new Vector3D(x,y,z);
@@ -114,20 +99,20 @@ RayTracer.prototype.plane = function(x,y,z,n,m) { //x,y,z is point on the plane,
 RayTracer.prototype.trace = function() {
 	for(var x = -this.WIDTH/2 + this.sensor.at(0); x < this.WIDTH/2 + this.sensor.at(0); x++){
 		for(var y = -this.HEIGHT/2 + this.sensor.at(1); y < this.HEIGHT/2 + this.sensor.at(1); y++){
-			var ray = {"direction": new Vector3D(x - this.sensor.at(0),y - this.sensor.at(1),this.lens - this.sensor.at(2)), "origin": this.sensor}
+			var currentPosition = new Vector3D(x,y,this.lens); 
+			var ray = {"direction": currentPosition.subtract(this.sensor), "origin": this.sensor}
 			var intersect = this.cast(ray);
 			if(intersect && intersect.intersection.at(2) < this.lens){
 				var illumination = this.ambience;
 				var reflectionRay = {"direction": intersect.normal.unit().multiply(2*(ray.direction.unit().dot(intersect.normal))).subtract(ray.direction), "origin": intersect.intersection}
 				var reflection    = this.cast(reflectionRay);
 				for(var i = 0; i < this.lights.length; i++){
-					var shadowRay = {"direction": intersect.intersection.subtract(this.lights[i].pos), "origin": this.lights[i].pos, "shadow": true};
+					var shadowRay = {"direction": this.lights[i].pos.subtract(intersect.intersection), "origin": intersect.intersection, "shadow": true};
 					var cast = this.cast(shadowRay);
 					if(!cast){
 						illumination += this.illuminate(intersect.intersection,intersect.normal,intersect.material,this.lights[i]);
 					}
 				}
-
 				var red 	= intersect.material.c[0]*illumination;
 				var blue	= intersect.material.c[1]*illumination;
 				var green	= intersect.material.c[2]*illumination;
@@ -135,6 +120,7 @@ RayTracer.prototype.trace = function() {
 			}
 		}
 	}
+	console.log("Render Complete")
 	this.cxt.putImageData(this.imgData,0,0);
 };
 
