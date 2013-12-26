@@ -1,3 +1,4 @@
+define(["vector3D"], function(Vector3D){
 function Matrix() { //can take array of vectors, in addition, it can be set to a rotation matrix by passing 'rx' 'ry' or 'rx' as the first argument, and the angle to be rotated as the second
 	this.matrixArray = [];
 	this.w;
@@ -147,3 +148,5 @@ Matrix.prototype.rotationZ = function(theta) { //Makes this matrix the rotation 
 				   new Vector3D(Math.sin(theta),Math.cos(theta),0),
 				   new Vector3D(0,0,1));
 };
+return Matrix;
+});

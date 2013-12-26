@@ -1,3 +1,4 @@
+define(["light","ply","triangle3D","vector3D","material","graphics2D"], function(Light,PLY,Triangle3D,Vector3D,Material,Graphics2D){
 function RayTracer(cxt){
 	this.WIDTH = cxt.canvas.width;
 	this.HEIGHT = cxt.canvas.height;
@@ -44,7 +45,7 @@ Sphere.prototype.intersect = function(ray){
 		if(Math.abs(t1) > Math.abs(t2) && t2 > 0 && (!ray.shadow || t2 < 0.999999)){ /*Theoretically, this value (0.99999) 
 																						should be 1. However, making it 1 creates 
 																						an extremely interesting mandala-like effect 
-																						on the spheres. I would like to find out why.*/
+			=																			on the spheres. I would like to find out why.*/
 			var normal = this.position.subtract(intersection2);
 			// console.log(normal.at(0) + "," + normal.at(1) + "," + normal.at(2))
 			return {"intersection": intersection2, 
@@ -191,3 +192,6 @@ RayTracer.prototype.projectPoint = function(x_1,y_1,z_1){ //Takes a point in 3d 
 	var y1 = this.sensor.at(1)+this.sensor.at(1)*t1-t1*y_1; //y component of the parametric line between the point to be projected and the sensor
 	return new Vector2D(x1-this.sensor.at(0),y1-this.sensor.at(1));
 };
+
+return RayTracer;
+});

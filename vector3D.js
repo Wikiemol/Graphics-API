@@ -1,3 +1,5 @@
+define("vector3D",[],function(){
+
 function Vector3D(a,b,c){
 	this.vectorArray = new Float32Array(3);
 	this.vectorArray[0] = a;
@@ -102,3 +104,6 @@ Vector3D.prototype.reflectOver = function(vectorToReflectOver){ //return a refle
 	// }
 	return vectorToReflectOver.multiply(vectorToReflectOver.dot(this)).multiply(2).subtract(this);
 }
+
+return Vector3D;
+});

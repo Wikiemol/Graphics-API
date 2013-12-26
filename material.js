@@ -1,3 +1,4 @@
+define(function(){
 function Material(m) { //color - RGB array [r,g,b], specularity 0 - 1, specularMultiplier 0 - 15, specularExponent 0 - infinity, diffusion 0 - 1, ambience 0 - 1, shine 0 - 1, set by passing in a curly brackets array eg. {"color":"#808080","diffusion":0.5 ... etc.}
 	this.c = [128,128,128];
 	this.specularity = 1;
@@ -84,3 +85,6 @@ Material.prototype.getSpecularExponent = function(){
 Material.prototype.setSpecularExponent = function(a){
 	this.specularExponent = a;
 }
+
+return Material;
+});

@@ -1,3 +1,4 @@
+define(["vector3D"],function(Vector3D){
 function Light(l){ //type, diffusion, specularity, pass a curly brackets array eg. {"type": "point", "diffusion": 1, "specularity": 1}
 		this.diffusion = 1;
 		this.specularity = 1;
@@ -190,3 +191,5 @@ Light.prototype.distanceSquared = function(x,y,z){
 	}
 	return distance;
 };
+return Light;
+});

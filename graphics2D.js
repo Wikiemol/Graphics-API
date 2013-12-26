@@ -1,3 +1,4 @@
+define(["Vector2D"], function(Vector2D){
 function Graphics2D(context,c){
 	this.cxt 					= context;
 	this.color 					= [0,0,0];
@@ -343,3 +344,6 @@ Graphics2D.prototype.fillPolygonConvex = function(a){ //assumes polygon passed i
 	}
 	this.fillTriangle(a[a.length - 2],a[a.length - 1],a[0],a[1],midPoint[0],midPoint[1]);
 }
+
+return Graphics2D;
+});

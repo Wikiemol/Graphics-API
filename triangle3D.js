@@ -1,3 +1,4 @@
+define(["vector3D","material"], function(Vector3D,Material){
 function Triangle3D(p1,p2,p3,m){ //position vectors as first three parameters and material
 	this.p1 			= p1;
 	this.p2 			= p2;
@@ -31,3 +32,7 @@ Triangle3D.prototype.normal = function(){
 Triangle3D.prototype.getMaterial = function() {
 	return this.material;
 };
+
+return Triangle3D;
+
+});

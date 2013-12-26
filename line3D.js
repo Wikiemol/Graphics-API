@@ -1,3 +1,4 @@
+define(["vector3D"],function(Vector3D){
 function Line3D(p1,p2,material){
 	this.p1 = p1;
 	this.p2 = p2;
@@ -13,3 +14,5 @@ Line3D.prototype.midPoint = function() {
 Line3D.prototype.getMaterial = function() {
 	return this.material;
 };
+return Line3D;
+});

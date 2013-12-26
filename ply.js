@@ -1,3 +1,4 @@
+define(["graphics3D","triangle3D","line3D","vector3D","matrix"],function(Graphics3D,Triangle3D,Line3D,Vector3D,Matrix){
 function PLY(s){
 	this.file = s;
 	var xmlhttp = new XMLHttpRequest();
@@ -261,30 +262,6 @@ PLY.prototype.addTo = function(g,rx,ry,rz,x,y,z,wireframe) {
 			n1 = rotation.multiplyVector(n1);
 			n2 = rotation.multiplyVector(n2);
 			n3 = rotation.multiplyVector(n3);
-
-			// var x1 = (v1.at(0)*cosRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*sinRoty)*cosRotz - (v1.at(1)*cosRotx - v1.at(2)*sinRotx)*sinRotz;
-			// var y1 = (v1.at(0)*cosRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*sinRoty)*sinRotz + (v1.at(1)*cosRotx - v1.at(2)*sinRotx)*cosRotz;
-			// var z1 = -v1.at(0)*sinRoty + (v1.at(1)*sinRotx + v1.at(2)*cosRotx)*cosRoty;
-
-			// var x2 = (v2.at(0)*cosRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*sinRoty)*cosRotz - (v2.at(1)*cosRotx - v2.at(2)*sinRotx)*sinRotz;
-			// var y2 = (v2.at(0)*cosRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*sinRoty)*sinRotz + (v2.at(1)*cosRotx - v2.at(2)*sinRotx)*cosRotz;
-			// var z2 = -v2.at(0)*sinRoty + (v2.at(1)*sinRotx + v2.at(2)*cosRotx)*cosRoty;
-
-			// var x3 = (v3.at(0)*cosRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*sinRoty)*cosRotz - (v3.at(1)*cosRotx - v3.at(2)*sinRotx)*sinRotz;
-			// var y3 = (v3.at(0)*cosRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*sinRoty)*sinRotz + (v3.at(1)*cosRotx - v3.at(2)*sinRotx)*cosRotz;
-			// var z3 = -v3.at(0)*sinRoty + (v3.at(1)*sinRotx + v3.at(2)*cosRotx)*cosRoty;
-
-			// var nx1 = (n1.at(0)*cosRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*sinRoty)*cosRotz - (n1.at(1)*cosRotx - n1.at(2)*sinRotx)*sinRotz;
-			// var ny1 = (n1.at(0)*cosRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*sinRoty)*sinRotz + (n1.at(1)*cosRotx - n1.at(2)*sinRotx)*cosRotz;
-			// var nz1 = -n1.at(0)*sinRoty + (n1.at(1)*sinRotx + n1.at(2)*cosRotx)*cosRoty;
-
-			// var nx2 = (n2.at(0)*cosRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*sinRoty)*cosRotz - (n2.at(1)*cosRotx - n2.at(2)*sinRotx)*sinRotz;
-			// var ny2 = (n2.at(0)*cosRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*sinRoty)*sinRotz + (n2.at(1)*cosRotx - n2.at(2)*sinRotx)*cosRotz;
-			// var nz2 = -n2.at(0)*sinRoty + (n2.at(1)*sinRotx + n2.at(2)*cosRotx)*cosRoty;
-
-			// var nx3 = (n3.at(0)*cosRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*sinRoty)*cosRotz - (n3.at(1)*cosRotx - n3.at(2)*sinRotx)*sinRotz;
-			// var ny3 = (n3.at(0)*cosRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*sinRoty)*sinRotz + (n3.at(1)*cosRotx - n3.at(2)*sinRotx)*cosRotz;
-			// var nz3 = -n3.at(0)*sinRoty + (n3.at(1)*sinRotx + n3.at(2)*cosRotx)*cosRoty;
 			
 		}
 		var sensor = g.sensor;
@@ -322,3 +299,5 @@ PLY.prototype.addTo = function(g,rx,ry,rz,x,y,z,wireframe) {
 		}
 	}
 };
+return PLY;
+});
