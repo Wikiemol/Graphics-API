@@ -29,8 +29,9 @@ function init(){
 	cxt = canvas.getContext('2d');
 	g = new Graphics3D(cxt);
 	g.setCoordinates(true);
-	// setInterval(draw4,33);
-	// draw4();
+// 	setInterval(draw4,33);
+// 	draw4();
+  // setInterval(draw3,33);
 	// setInterval(rayTracer,33);
 	rayTracer();
 	
@@ -109,9 +110,7 @@ function draw4(){
 	var g = new Graphics2D(cxt);
 	g.setCoordinates(true);
 	g.setColor([255,0,0]);
-	// g.interpolateTriangle(-200 + sx,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
-	// g.interpolateTriangle(10*Math.cos(sx/10),0, 0,100*Math.sin(sx/10), 100*Math.sin(sx/10),0, 0,0,255, 255,0,0, 0,255,0)
-	// g.fillTriangle(-200 + sx,0, 100,0, 0,100);
+	
 	g.draw();
 	sx++;
 }
@@ -123,13 +122,14 @@ function rayTracer(){
 	light2.setPosition(200,50,0)
 	var r = new RayTracer(cxt);
 	r.ambience = 0.1;
-	r.sensor = new Vector3D(-70,50,1100);
-	r.plane(0,-100,0,new Vector3D(0,1,0),new Material({"color": [50,50,50], "reflectivity": 0.3}));
-	/*red*/r.sphere(0,0,0,100,new Material({"color": [128,1,1],"shine":100, "reflectivity": .5}));
-	/*green*/r.sphere(200,0,-200,100,new Material({"color": [250,250,250],"shine":100, "reflectivity": .9}));
-	/*blue*/r.sphere(-200,0,-200,100,new Material({"color": [50,128,50],"shine":100, "reflectivity": .9}));				
+	r.sensor = new Vector3D(-70,150,1100);
+	r.plane(0,-100,0,new Vector3D(0,1,0),new Material({"color": [50,50,50], "reflectivity": 0.5}));
+// 	r.plane(0,0,-500,new Vector3D(0,0,1),new Material({"color": [255,255,255], "reflectivity": 0}));
+	/*red*/r.sphere(0,-100,0,100,new Material({"color": [128,1,1],"shine":100, "reflectivity": 0.5}));
+	/*white*/r.sphere(200,0,-200,100,new Material({"color": [250,250,250],"shine":100, "reflectivity": 1}));
+	/*green*/r.sphere(-200,0,-200,100,new Material({"color": [50,128,50],"shine":100, "reflectivity": 0.5}));				
 	r.lights.push(light1);
-  r.backgroundColor = [13,13,13]	
+  r.backgroundColor = [0,0,0]	
 	// r.lights.push(light2);
 	r.trace();
 	x += 10

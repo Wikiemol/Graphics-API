@@ -24,7 +24,6 @@ Graphics3D.prototype.applyLight = function(point,normal,material) {
 		var specularIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(1);
 		var diffusionIntensity = light.intensityAt(point.at(0),point.at(1),point.at(2)).at(0);
 		var Lm = point.subtract(light.pos).unit();
-		// var lightReflection = specularLight.add(normal.unit().multiply(normal.unit().dot(specularLight)).subtract(specularLight).multiply(2));
 		var lightReflection = normal.multiply(2*(Lm.dot(normal))).subtract(Lm)
 		if(Lm.dot(normal) > 0){
 				illumination += light.diffusion*(Lm.dot(normal))*diffusionIntensity 
@@ -33,7 +32,7 @@ Graphics3D.prototype.applyLight = function(point,normal,material) {
 		if(lightReflection.dot(point.subtract(this.sensor)) > 0){
 
 			illumination += light.specularity*Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())),material.shine)*specularIntensity
-			// console.log(specularIntensity)
+			
 		}
 	}
 
@@ -60,7 +59,7 @@ Graphics3D.prototype.addLight = function(l,visible){
 
 Graphics3D.prototype.setMaterial = function(cl){
 	
-	// if(!(cl instanceof Array)) throw "Error: setMaterial takes Array as arguments."
+	
 	this.material = new Material({"color": cl["color"],
 							"diffusion": cl["diffusion"],
 							"ambience": cl["ambience"],
@@ -411,7 +410,7 @@ Graphics3D.prototype.fillEllipsoid = function(x,y,z,xRadius,yRadius,zRadius,xr,y
 			var p8 = new Vector3D(-stretchX*Math.sqrt(100*100-z2*z2)*Math.cos((j)*2*Math.PI/(2*divisions)), //x
 								stretchY*Math.sqrt(100*100-z2*z2)*Math.sin((j)*2*Math.PI/(2*divisions)), //y
 								-stretchZ*z2);
-			/***Rotation transforms***/
+			//***Rotation transforms***//
 
 			var rp1 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p1)))
 			var rp2 = rz.multiplyVector(ry.multiplyVector(rx.multiplyVector(p2)))
