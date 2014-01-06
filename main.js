@@ -141,7 +141,7 @@ function rayTracer(){
 	r.ambience = 0.1;
 	r.sensor = new Vector3D(0,0,1100);
 	r.plane(0,-100,0,new Vector3D(0,1,0),new Material({"color": [128,128,128]}));
-	r.sphere(0,0,0,100,new Material({"color": [128,1,1],"shine":10, "diffusion": 1}));
+	r.sphere(0,-100,0,100,new Material({"color": [128,1,1],"shine":10, "diffusion": 1}));
 	r.sphere(200,0,-200,100,new Material({"color": [1,128,1],"shine":10,"diffusion": 1}))
 	r.sphere(-200,0,-200,100,new Material({"color": [1,1,128],"shine":10,"diffusion": 1}))				
 	r.lights.push(light1);
