@@ -2,10 +2,13 @@ require(["graphics3D","light","ply","triangle3D","vector3D","material","graphics
 var canvas = null;
 var cxt = null;
 var g;
+
 var ply = new PLY("teapot.ply");
 ply.load(50);
+
 var ply2 = new PLY("cow.ply");
 ply2.load(30);
+
 var x = 0;
 var y = 0;
 var x1 = 0;
@@ -16,7 +19,7 @@ var sz = 0;
 var p = -495;
 
 var t = 7*Math.PI/6;
-var light1 = new Light({"diffusion":1,"specularity":1,"type": "point"});
+var light1 = new Light({"diffusion":1,"specularity":0,"type": "point"});
 var light2 = new Light({"diffusion":100,"specularity":0,"type":"point"});
 // window.addEventListener('load', onLoad);
 init();
@@ -26,30 +29,12 @@ function init(){
 	cxt = canvas.getContext('2d');
 	g = new Graphics3D(cxt);
 	g.setCoordinates(true);
-	
-	// var g = new Graphics2D(cxt);
-	// g.setColor("red");
-	// g.setCoordinates(true);
-	/*var cx = 0;
-	var cy = 0;
-	for (var t= 0; t < 2*Math.PI; t += 0.1) {
- 					g.drawLine(cx, cy, cx + Math.cos(t)*50, cy + Math.sin(t)*50);
-	}*/
-		
-	// g.fillTriangle(-100,-100,0,100,100,0);
-					
-					
-	
-	// setInterval(draw,33);
-	// draw();
-	// setInterval(draw2,33)
-	// draw2();
-	// setInterval(draw3,33);
-	// draw3();
-	// setInterval(draw4,33);
+// 	setInterval(draw4,33);
+// 	draw4();
+  // setInterval(draw3,33);
 	// setInterval(rayTracer,33);
 	rayTracer();
-	// draw4();
+	
 }
 function draw(){
 	cxt.clearRect(0,0,500,500);
@@ -125,26 +110,34 @@ function draw4(){
 	var g = new Graphics2D(cxt);
 	g.setCoordinates(true);
 	g.setColor([255,0,0]);
-	// g.interpolateTriangle(-200 + sx,0, 100,0, 0,100, 0,0,255, 255,0,0, 0,255,0)
-	// g.interpolateTriangle(10*Math.cos(sx/10),0, 0,100*Math.sin(sx/10), 100*Math.sin(sx/10),0, 0,0,255, 255,0,0, 0,255,0)
-	// g.fillTriangle(-200 + sx,0, 100,0, 0,100);
+	
 	g.draw();
 	sx++;
 }
 
 function rayTracer(){
-	cxt.fillRect(0,0,canvas.width,canvas.height)
-	light1.setPosition(-200,50,300);
+	
+	light1.setPosition(-100,50,300);
 	light1.specularity = 1
 	light2.setPosition(200,50,0)
 	var r = new RayTracer(cxt);
 	r.ambience = 0.1;
+
 	r.sensor = new Vector3D(0,0,1100);
 	r.plane(0,-100,0,new Vector3D(0,1,0),new Material({"color": [128,128,128]}));
 	r.sphere(0,-100,0,100,new Material({"color": [128,1,1],"shine":10, "diffusion": 1}));
 	r.sphere(200,0,-200,100,new Material({"color": [1,128,1],"shine":10,"diffusion": 1}))
 	r.sphere(-200,0,-200,100,new Material({"color": [1,1,128],"shine":10,"diffusion": 1}))				
+
+	r.sensor = new Vector3D(-70,150,1100);
+	r.plane(0,-100,0,new Vector3D(0,1,0),new Material({"color": [50,50,50], "reflectivity": 0.5}));
+// 	r.plane(0,0,-500,new Vector3D(0,0,1),new Material({"color": [255,255,255], "reflectivity": 0}));
+	/*red*/r.sphere(0,-100,0,100,new Material({"color": [128,1,1],"shine":100, "reflectivity": 0.5}));
+	/*white*/r.sphere(200,0,-200,100,new Material({"color": [250,250,250],"shine":100, "reflectivity": 1}));
+	/*green*/r.sphere(-200,0,-200,100,new Material({"color": [50,128,50],"shine":100, "reflectivity": 0.5}));				
+
 	r.lights.push(light1);
+  r.backgroundColor = [0,0,0]	
 	// r.lights.push(light2);
 	r.trace();
 	x += 10

@@ -94,14 +94,7 @@ Vector3D.prototype.roundVector = function(){
 }
 
 Vector3D.prototype.reflectOver = function(vectorToReflectOver){ //return a reflected vector
-	// var t = (vectorToReflectOver.dot(vectorToReflectOver))/(this.dot(vectorToReflectOver));
 	
-	// var reflectedVector = vectorToReflectOver.subtract(this.multiply(t)).add(vectorToReflectOver);
-	// if(t < 0){
-	// 	return reflectedVector.multiply(-1)
-	// }else{
-	// 	return reflectedVector;
-	// }
 	return vectorToReflectOver.multiply(vectorToReflectOver.dot(this)).multiply(2).subtract(this);
 }
 
