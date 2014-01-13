@@ -1,4 +1,4 @@
-define(["vector3D"],function(Vector3D){
+define(["vector3D","vector2D"],function(Vector3D,Vector2D){
 function Light(l){ //type, diffusion, specularity, pass a curly brackets array eg. {"type": "point", "diffusion": 1, "specularity": 1}
 		this.diffusion = 1;
 		this.specularity = 1;
@@ -8,19 +8,18 @@ function Light(l){ //type, diffusion, specularity, pass a curly brackets array e
 		this.reach = 1;
 		this.gel = {"r": 255, "g": 255, "b": 255};
 		this.directionalDistance = 400;
-		if(!(typeof l === 'undefined')){
-			
-			
-			if(!(typeof l["diffusion"] === 'undefined')){
-				this.diffusion = l["diffusion"];
+		if(typeof l !== 'undefined'){
+						
+			if(typeof l.diffusion !== 'undefined'){
+				this.diffusion = l.diffusion;
 			}
 
-			if(!(typeof l["specularity"] === 'undefined')){
-				this.specularity = l["specularity"];
+			if(typeof l.specularity !== 'undefined'){
+				this.specularity = l.specularity;
 			}
 
-			if(!(typeof l["type"] === 'undefined')){
-				this.type = l["type"];
+			if(typeof l.type !== 'undefined'){
+				this.type = l.type;
 			}
 
 		}
@@ -58,25 +57,25 @@ Light.prototype.setDirection = function(x,y,z){
 };
 Light.prototype.getDirection = function(){
 	return this.direction;
-}
+};
 Light.prototype.setReach = function(r){
 	this.reach = r;
-}
+};
 Light.prototype.getReach = function(){
 	return this.reach;
-}
+};
 Light.prototype.setGel = function(a){
-	this.gel["r"] = Math.round(a["r"]);
-	this.gel["g"] = Math.round(a["g"]);
-	this.gel["b"] = Math.round(a["b"]);
-}
+	this.gel.r = Math.round(a.r);
+	this.gel.g = Math.round(a.g);
+	this.gel.b = Math.round(a.b);
+};
 Light.prototype.getGel = function(){
 	return this.gel;
-}
+};
 Light.prototype.setGelBySaturation = function(){ // R G and B values are given as percentages of total color (or satuaturation). R + G + B = 1 is a statement that must always be true. Will fill in empty values.
-	var redPerc   = arguments[0]["r"];
-	var greenPerc = arguments[0]["g"];
-	var bluePerc  = arguments[0]["b"];
+	var redPerc   = arguments[0].r;
+	var greenPerc = arguments[0].g;
+	var bluePerc  = arguments[0].b;
 	if(typeof redPerc === 'undefined'){
 		if(typeof greenPerc === 'undefined'){
 			redPerc   = (1 - bluePerc)/2;
@@ -126,10 +125,9 @@ Light.prototype.setGelBySaturation = function(){ // R G and B values are given a
 	}
 	
 	this.setGel({"r": red, "g": green, "b": blue});
-}
+};
 
 Light.prototype.intensityAt = function(x,y,z) { //Returns vector with this.diffusion .at(0) and this.specularity .at(1)
-	var point = new Vector3D(x,y,z);
 	var diffusion;
 	var specularity;
 	if (this.type == "point") {
@@ -143,6 +141,7 @@ Light.prototype.intensityAt = function(x,y,z) { //Returns vector with this.diffu
 	}else if(this.type == "spot"){
 		//Making this later
 	}
+	
 	return new Vector2D(diffusion,specularity);
 };
 
@@ -165,7 +164,6 @@ Light.prototype.specularIntensityVector = function(x,y,z) { //Returns directiona
 };
 
 Light.prototype.diffusionIntensityVector = function(x,y,z) { //Returns directional unit vector multiplied by the diffusion component
-	// console.log(this.directionAt(x,y,z).multiply(this.intensityAt(x,y,z).at(0)).getVectorAsArray());
 	return this.directionAt(x,y,z).multiply(this.intensityAt(x,y,z).at(0));
 
 };
