@@ -1,8 +1,8 @@
-define(["graphics3D","triangle3D","line3D","vector3D","matrix3D"],function(Graphics3D,Triangle3D,Line3D,Vector3D,Matrix3D){
+define(["graphics3D", "triangle3D", "line3D", "vector3D", "matrix3D"], function(Graphics3D, Triangle3D, Line3D, Vector3D, Matrix3D){
 function PLY(s){
     this.file = s;
     var xmlhttp = new XMLHttpRequest();
-    xmlhttp.open("GET",s,false);
+    xmlhttp.open("GET", s, false);
     xmlhttp.send(null);
 
     this.ply        = xmlhttp.responseText;
@@ -10,11 +10,13 @@ function PLY(s){
     this.normals    = {}; //an object that will assign a normal to a vertex
 }
 
-PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
+PLY.prototype.load = function(s, flip) { //reads and adds to graphics object (g)
     var scale = s;
     var l = this.ply.length;
     var LF = "\n"; //what should be considered a new line character
-    if(typeof flip === 'undefined') flip = 1;
+    if (typeof flip === 'undefined'){ 
+        flip = 1;
+    }
     var lineArray           = []; //stores each line as string
     var s                   = ''; //temp for store each line as string
     var line                = 0; //line pointer
@@ -32,11 +34,11 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
     var vertexFaces         = {};
     /**store each line of header as string**/
 
-    for(var i = 0; i < l; i++){
+    for (var i = 0; i < l; i++){
         s += this.ply.charAt(i);
-        if(this.ply.charAt(i) == "\n"){
+        if (this.ply.charAt(i) == "\n"){
             lineArray[line] = s;
-            if(s.substr(0,10) == "end_header"){
+            if (s.substr(0, 10) == "end_header"){
                 break;
             }
             s = ''; //Resets line string
@@ -47,9 +49,11 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
     endHeader = line;
 
     var lineArrayLength = lineArray.length;
-    for(var i = 0; i < lineArrayLength; i++){ //check header to see if carriage returns should be used with new line
-        if(lineArray[i].substr(0,10) == "end_header") break;
-        if(this.ply.charAt(i) == '\r'){
+    for (var i = 0; i < lineArrayLength; i++){ //check header to see if carriage returns should be used with new line
+        if (lineArray[i].substr(0, 10) == "end_header"){
+            break;
+        }
+        if (this.ply.charAt(i) == '\r'){
             LF = "\r\n";
             break;
         }
@@ -69,17 +73,19 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 
     
     /**check if file begins with "ply"**/
-    if(lineArray[0] != "ply" + LF) console.warn("Warning: " + this.file + " may be corrupted or may not be a ply file.");
+    if (lineArray[0] != "ply" + LF){
+        console.warn("Warning: " + this.file + " may be corrupted or may not be a ply file.");
+    }
 
     /****READ HEADER*****/
-    for(line = 0; lineArray[line] != "end_header" + LF; line++){
+    for (line = 0; lineArray[line] != "end_header" + LF; line++){
 
         /********BEGIN READING LINE*********/
         fillWordArray();
-        for(word = 0; word < wordArray.length; word++){
-            if(keywords[wordArray[word]]){
+        for (word = 0; word < wordArray.length; word++){
+            if (keywords[wordArray[word]]){
                 keywords[wordArray[word]]();
-            }else{
+            } else {
                 console.warn("Unrecognized keyword '" + wordArray[word] + "' in " + this.file + ".   Line: " + (line + 1));
                 break;
             }
@@ -93,14 +99,14 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 
     line++;
     /******READ BODY******/
-    switch(format){
+    switch (format){
 
         case "ascii":
             /**load the rest of the document into linearray***/
             line = 0;
-            for(var i = 0; i < l; i++){
+            for (var i = 0; i < l; i++){
                 s += this.ply.charAt(i);
-                if(this.ply.charAt(i) == "\n"){
+                if (this.ply.charAt(i) == "\n"){
                     lineArray[line] = s;
                     s = ''; //Resets line string
                     line++; //increment line;
@@ -110,22 +116,21 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
             line = endHeader + 1;
             /********READ VERTICES********/
             var verticesEnd = numberOfVertices + line;
-            while(line < verticesEnd){
+            while (line < verticesEnd){
                 fillWordArray();
-                vertices.push(new Vector3D(parseFloat(wordArray[0]),parseFloat(wordArray[1]),parseFloat(wordArray[2])));
+                vertices.push(new Vector3D(parseFloat(wordArray[0]), parseFloat(wordArray[1]), parseFloat(wordArray[2])));
                 wordArray = [];
                 word = 0;
                 line++;
             }
             /*------END READ VERTICES----------*/
 
-
             /********ADD FACES TO FACE ARRAY*******/
             var facesEnd = numberOfFaces + line;
         
-            while(line < facesEnd){
+            while (line < facesEnd){
                 fillWordArray();
-                if(wordArray[0] == 3){
+                if (wordArray[0] == 3){
                     var index1 = parseInt(wordArray[1]); //index of vertex1 in vertices array
                     var index2 = parseInt(wordArray[2]); //...............2..................
                     var index3 = parseInt(wordArray[3]); //...............3..................
@@ -134,27 +139,27 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
                     var v2 = vertices[index2].multiply(scale);
                     var v3 = vertices[index3].multiply(scale);
 
-                    var triangle = new Triangle3D(v1,v2,v3);
+                    var triangle = new Triangle3D(v1, v2, v3);
 
-                    var v1string = v1.at(0) + "," + v1.at(1) + "," + v1.at(2);
-                    var v2string = v2.at(0) + "," + v2.at(1) + "," + v2.at(2);
-                    var v3string = v3.at(0) + "," + v3.at(1) + "," + v3.at(2);
+                    var v1string = v1.at(0) + ", " + v1.at(1) + ", " + v1.at(2);
+                    var v2string = v2.at(0) + ", " + v2.at(1) + ", " + v2.at(2);
+                    var v3string = v3.at(0) + ", " + v3.at(1) + ", " + v3.at(2);
 
-                    if(vertexFaces[v1string]){
+                    if (vertexFaces[v1string]){
                         vertexFaces[v1string].push(triangle);
-                    }else{
+                    } else {
                         vertexFaces[v1string] = [triangle];
                     }
 
-                    if(vertexFaces[v2string]){
+                    if (vertexFaces[v2string]){
                         vertexFaces[v2string].push(triangle);
-                    }else{
+                    } else {
                         vertexFaces[v2string] = [triangle];
                     }
 
-                    if(vertexFaces[v3string]){
+                    if (vertexFaces[v3string]){
                         vertexFaces[v3string].push(triangle);
-                    }else{
+                    } else {
                         vertexFaces[v3string] = [triangle];
                     }
 
@@ -168,19 +173,19 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
             /*---------------END ADD FACES----------------*/
 
             /********FIND NORMALS************/
-            for(var i = 0; i < vertices.length; i++){
+            for (var i = 0; i < vertices.length; i++){
                 var vertex = vertices[i].multiply(scale);
-                var vertexNormal = new Vector3D(0,0,0);
+                var vertexNormal = new Vector3D(0, 0, 0);
                 
-                var facesArray = vertexFaces[vertex.at(0) + "," + vertex.at(1) + "," + vertex.at(2)];
+                var facesArray = vertexFaces[vertex.at(0) + ", " + vertex.at(1) + ", " + vertex.at(2)];
                 
-                for(var j = 0; j < facesArray.length; j++){
+                for (var j = 0; j < facesArray.length; j++){
                     vertexNormal = vertexNormal.add(facesArray[0].normal().unit());
                 }
 
-                vertexNormal = vertexNormal.multiply(1/facesArray.length);
+                vertexNormal = vertexNormal.multiply(1 / facesArray.length);
 
-                this.normals[vertex.at(0) + "," + vertex.at(1) + "," + vertex.at(2)] = vertexNormal.multiply(flip);
+                this.normals[vertex.at(0) + ", " + vertex.at(1) + ", " + vertex.at(2)] = vertexNormal.multiply(flip);
             }
 
             break;
@@ -193,20 +198,17 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 
             break;
     }
-    
-
-
 
     function fillWordArray(){ //fills word array with words from the current line
         var lineLength = lineArray[line].length;
-        for(var letter = 0; letter < lineLength; letter++){
+        for (var letter = 0; letter < lineLength; letter++){
             var thisLetter = lineArray[line].charAt(letter);
-            if(thisLetter == ' ' || thisLetter == '\r' || thisLetter == '\n'){ //if there is a space or CR or LF increment word and skip
+            if (thisLetter == ' ' || thisLetter == '\r' || thisLetter == '\n'){ //if there is a space or CR or LF increment word and skip
                 word++;
-            }else{
-                if(typeof wordArray[word] === 'undefined') { //in order to not have strings like "undefinedply", replace undefined with first char of word
+            } else {
+                if (typeof wordArray[word] === 'undefined') { //in order to not have strings like "undefinedply", replace undefined with first char of word
                     wordArray[word] = thisLetter;
-                }else{ //add letters to the word until a space is reached
+                } else { //add letters to the word until a space is reached
                     wordArray[word] += thisLetter;
                 }
             }
@@ -215,38 +217,38 @@ PLY.prototype.load = function(s,flip) { //reads and adds to graphics object (g)
 
 };
 
-PLY.prototype.addTo = function(g,rx,ry,rz,x,y,z,wireframe) {
+PLY.prototype.addTo = function(g, rx, ry, rz, x, y, z, wireframe) {
     var l = this.faces.length;
     var rotx = rx;
     var roty = ry;
     var rotz = rz;
-    if(typeof rx === 'undefined'){
+    if (typeof rx === 'undefined'){
         rotx = 0;
     }
-    if(typeof ry === 'undefined'){
+    if (typeof ry === 'undefined'){
         roty = 0;
     }
-    if(typeof rz === 'undefined'){
+    if (typeof rz === 'undefined'){
         rotz = 0;
     }
 
-    var xrotation = new Matrix3D('rx',rotx);
-    var yrotation = new Matrix3D('ry',roty);
-    var zrotation = new Matrix3D('rz',rotz);
+    var xrotation = new Matrix3D('rx', rotx);
+    var yrotation = new Matrix3D('ry', roty);
+    var zrotation = new Matrix3D('rz', rotz);
 
     var rotation = zrotation.multiplyMatrix(yrotation.multiplyMatrix(xrotation));
 
-    for(var j = 0; j < l; j++){
+    for (var j = 0; j < l; j++){
         var v1 = this.faces[j].p1;
         var v2 = this.faces[j].p2;
         var v3 = this.faces[j].p3;
         
-        var n1 = this.normals[v1.at(0)+","+v1.at(1)+","+v1.at(2)];
-        var n2 = this.normals[v2.at(0)+","+v2.at(1)+","+v2.at(2)];
-        var n3 = this.normals[v3.at(0)+","+v3.at(1)+","+v3.at(2)];
+        var n1 = this.normals[v1.at(0) + ", " + v1.at(1) + ", " + v1.at(2)];
+        var n2 = this.normals[v2.at(0) + ", " + v2.at(1) + ", " + v2.at(2)];
+        var n3 = this.normals[v3.at(0) + ", " + v3.at(1) + ", " + v3.at(2)];
         
                 
-        if(rotx !== 0 && roty !== 0 && rotz !== 0){
+        if (rotx !== 0 && roty !== 0 && rotz !== 0){
             v1 = rotation.multiplyVector(v1);
             v2 = rotation.multiplyVector(v2);
             v3 = rotation.multiplyVector(v3);
@@ -257,36 +259,44 @@ PLY.prototype.addTo = function(g,rx,ry,rz,x,y,z,wireframe) {
             
         }
         var sensor = g.sensor;
-        var triangle = new Triangle3D(v1,v2,v3,g.material);
+        var triangle = new Triangle3D(v1, v2, v3, g.material);
         var sensorv = triangle.mid.subtract(sensor);
         var notBackFace = sensorv.dot(triangle.norm) > 0;
-        var center = new Vector3D(x,y,z);
-        if(wireframe && notBackFace){
+        var center = new Vector3D(x, y, z);
+        if (wireframe && notBackFace){
             
-            var m = new Material({"color": [0,128,0]});
-            var line1 = new Line3D(v1.add(center),v2.add(center),m);
-            var line2 = new Line3D(v2.add(center),v3.add(center),m);
-            var line3 = new Line3D(v3.add(center),v1.add(center),m);
-            // console.log(line1.mid.vectorArray)
-            line1.squareDistance = (line1.mid.at(0) - sensor.at(0))*(line1.mid.at(0) - sensor.at(0)) + (line1.mid.at(1) - sensor.at(1))*(line1.mid.at(1) - sensor.at(1)) + (line1.mid.at(2) - sensor.at(2))*(line1.mid.at(2) - sensor.at(2));
-            line2.squareDistance = (line2.mid.at(0) - sensor.at(0))*(line2.mid.at(0) - sensor.at(0)) + (line2.mid.at(1) - sensor.at(1))*(line2.mid.at(1) - sensor.at(1)) + (line2.mid.at(2) - sensor.at(2))*(line2.mid.at(2) - sensor.at(2));
-            line3.squareDistance = (line3.mid.at(0) - sensor.at(0))*(line3.mid.at(0) - sensor.at(0)) + (line3.mid.at(1) - sensor.at(1))*(line3.mid.at(1) - sensor.at(1)) + (line3.mid.at(2) - sensor.at(2))*(line3.mid.at(2) - sensor.at(2));
+            var m = new Material({"color": [0, 128, 0]});
+            var line1 = new Line3D(v1.add(center), v2.add(center), m);
+            var line2 = new Line3D(v2.add(center), v3.add(center), m);
+            var line3 = new Line3D(v3.add(center), v1.add(center), m);
+
+            line1.squareDistance = (line1.mid.at(0) - sensor.at(0)) * (line1.mid.at(0) - sensor.at(0)) + 
+                                    (line1.mid.at(1) - sensor.at(1)) * (line1.mid.at(1) - sensor.at(1)) + 
+                                    (line1.mid.at(2) - sensor.at(2)) * (line1.mid.at(2) - sensor.at(2));
+
+            line2.squareDistance = (line2.mid.at(0) - sensor.at(0)) * (line2.mid.at(0) - sensor.at(0)) + 
+                                    (line2.mid.at(1) - sensor.at(1)) * (line2.mid.at(1) - sensor.at(1)) + 
+                                    (line2.mid.at(2) - sensor.at(2)) * (line2.mid.at(2) - sensor.at(2));
+
+            line3.squareDistance = (line3.mid.at(0) - sensor.at(0)) * (line3.mid.at(0) - sensor.at(0)) + 
+                                    (line3.mid.at(1) - sensor.at(1)) * (line3.mid.at(1) - sensor.at(1)) + 
+                                    (line3.mid.at(2) - sensor.at(2)) * (line3.mid.at(2) - sensor.at(2));
     
             g.pushToQueue(line1);
             g.pushToQueue(line2);
             g.pushToQueue(line3);
         }
 
-        if(notBackFace && !wireframe){
+        if (notBackFace && !wireframe){
             triangle.p1 = triangle.p1.add(center);
             triangle.p2 = triangle.p2.add(center);
             triangle.p3 = triangle.p3.add(center);
 
-            triangle.mid= triangle.mid.add(center);
+            triangle.mid = triangle.mid.add(center);
             triangle.normal1 = n1;
             triangle.normal2 = n2;
             triangle.normal3 = n3;
-            triangle.squareDistance = (triangle.mid.at(0) - sensor.at(0))*(triangle.mid.at(0) - sensor.at(0)) + (triangle.mid.at(1) - sensor.at(1))*(triangle.mid.at(1) - sensor.at(1)) + (triangle.mid.at(2) - sensor.at(2))*(triangle.mid.at(2) - sensor.at(2));
+            triangle.squareDistance = (triangle.mid.at(0) - sensor.at(0)) * (triangle.mid.at(0) - sensor.at(0)) + (triangle.mid.at(1) - sensor.at(1)) * (triangle.mid.at(1) - sensor.at(1)) + (triangle.mid.at(2) - sensor.at(2)) * (triangle.mid.at(2) - sensor.at(2));
             g.pushToQueue(triangle);
         }
     }
