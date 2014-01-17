@@ -29,7 +29,7 @@ Constructors
 3. **Material(m)** When used with the new keyword it creates a new Material. Takes object i.e. {"color": "#808080", "diffusion:" 1, ... etc.}
     - *m["color"]*: color of material
     - *m["diffusion"]*: diffusion component of material, a value from 0 to 1
-    - ~~*m["specularity"]*: specular component of material, a value from 0 to 1~~
+    - *m["specularity"]*: specular component of material, a value from 0 to 1
     - *m["shine"]*: shine component of material
 4. **Graphics2D(context)** Handles 2d graphics
 5. **RayTracer(context)** Handles RayTraced 3D graphics.
@@ -72,21 +72,11 @@ Methods
     - *x1,y1,z1* First vertex of the triangle
     - *x2,y2,z2* Second vertex of the triangle
     - *x3,y3,z3* Third vertex of the triangle
-20. **fillPolygon(a)** Takes an array of length divisible by 3. The members of the array are the points of the polygon in 3d space.
 21. **drawGrid()** Adds a 600x600 grid centered at the origin and parallel to the xz plane to the render queue.
-22. **fillPrism(x,y,z,w,h,d,xr,yr,zr)** Adds a prism to the render queue.
-    - *x,y,z* Center point of the prism (not the corner)
-    - *w*: width
-    - *h*: height
-    - *d*: depth
-    - *xr* rotation about x axis
-    - *yr* rotation about y axis
-    - *zr* rotation about z axis
 
 **• RayTracer**
 
 1. **sphere(x, y, z, r, m)** Adds a sphere at point (x y z) with radius r and material m.
 2. **plane(x, y, z, n, m)** Adds a plane passing through the point (x y z) with a normal vector n and material m.
-3. **trace()** Renders the scene.
-4. **addLight(l)** Adds light l to the scene.
+3. **render()** Renders the scene.
 

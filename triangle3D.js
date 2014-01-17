@@ -1,5 +1,6 @@
 define(["vector3D", "material"], function(Vector3D, Material){
-    function Triangle3D(p1, p2, p3, m){ //position vectors as first three parameters and material
+    //position vectors as first three parameters and material
+    function Triangle3D(p1, p2, p3, m){ 
         this.p1       = p1;
         this.p2       = p2;
         this.p3       = p3;
@@ -33,6 +34,14 @@ define(["vector3D", "material"], function(Vector3D, Material){
         return this.material;
     };
     
+    //Flips the normals of the triangle
+    Triangle3D.prototype.flip = function() {
+        this.norm = this.norm.multiply(-1);
+        this.normal1 = this.normal1.multiply(-1);
+        this.normal2 = this.normal2.multiply(-1);
+        this.normal3 = this.normal3.multiply(-1);
+    };
+
     return Triangle3D;
 
 });
