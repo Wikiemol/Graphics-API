@@ -49,7 +49,6 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
             var lightReflection    = normal.multiply(2 * (Lm.dot(normal))).subtract(Lm);
             if (Lm.dot(normal) > 0) {
                     illumination += light.diffusion * (Lm.dot(normal)) * diffusionIntensity; 
-                            
             }
             if (lightReflection.dot(point.subtract(this.sensor)) > 0) {    
                 illumination += light.specularity * Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())), material.shine) * specularIntensity;
@@ -310,13 +309,13 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
         var triangle = new Triangle3D(new Vector3D(x1, y1, z1), new Vector3D(x2, y2, z2), new Vector3D(x3, y3, z3), this.getMaterial());
     
         if (n1 instanceof Vector3D) {
-            triangle.normal1 = n1;
+            triangle.normal1 = n1.multiply(-1);
         }
         if (n2 instanceof Vector3D) {
-            triangle.normal2 = n2;
+            triangle.normal2 = n2.multiply(-1);
         }
         if (n3 instanceof Vector3D) {
-            triangle.normal3 = n3;
+            triangle.normal3 = n3.multiply(-1);
         }
         
         //the square of the distance between the triangle and the camera
@@ -331,8 +330,8 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
     //draws a simple grid onto the screen at the origin.
     Graphics3D.prototype.drawGrid = function() {
         var i;
-        var temp = this.getMaterial();
-        this.setMaterial(new Material({"color": [128, 128, 128]}));
+        var temp = this.material;
+        this.material = new Material({"color": [128, 128, 128]});
         for (i = 0; i <= 10; i++) {
             this.drawLine(-300 + i * 60, 0, 300, -300 + i * 60, 0, -300);
         }
@@ -340,7 +339,7 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
             this.drawLine(-300, 0, -300 + i * 60, 300, 0, -300 + i * 60);
         }
         
-        this.setMaterial(temp);
+        this.material = temp;
     };
     
     return Graphics3D;
