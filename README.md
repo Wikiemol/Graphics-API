@@ -5,6 +5,14 @@ A simple 3d graphics library for html5 canvas I'm making for the sake of learnin
 
 ~~Strikethrough~~ indicates a feature that is yet to be implemented or completed. 
 
+To Run Examples
+---------------
+
+1. In terminal, cd to the directory where the file was downloaded.
+2. Type the following command into terminal:
+
+    $ ./RUN
+ 
 Images
 ------
 
