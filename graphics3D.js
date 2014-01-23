@@ -41,18 +41,7 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
         //Uses Phong illumination model. Applied for each light.    
         var illumination = 0;
         for (var i = 0; i < this.lights.length; i++) {
-            var light              = this.lights[i];
-            var specularLight      = this.lights[i].specularIntensityVector(point.at(0), point.at(1), point.at(2));
-            var specularIntensity  = light.intensityAt(point.at(0), point.at(1), point.at(2)).at(1);
-            var diffusionIntensity = light.intensityAt(point.at(0), point.at(1), point.at(2)).at(0);
-            var Lm                 = point.subtract(light.position).unit();
-            var lightReflection    = normal.multiply(2 * (Lm.dot(normal))).subtract(Lm);
-            if (Lm.dot(normal) > 0) {
-                    illumination += light.diffusion * (Lm.dot(normal)) * diffusionIntensity; 
-            }
-            if (lightReflection.dot(point.subtract(this.sensor)) > 0) {    
-                illumination += light.specularity * Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())), material.shine) * specularIntensity;
-            }
+            illumination += this.illuminate(point, normal, material, this.lights[i]).total;
         }
         
         //Apply illumination and return.
@@ -62,7 +51,25 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
         
         return [red, blue, green];
     };
-    
+    Graphics3D.prototype.illuminate = function(point, normal, material, light, type) {
+        //Applies the phong illumination model to a point given the arguments
+        var specularLight = light.specularIntensityVector(point.at(0), point.at(1), point.at(2));
+        var specularIntensity = light.intensityAt(point.at(0), point.at(1), point.at(2)).at(1);
+        var diffusionIntensity = light.intensityAt(point.at(0), point.at(1), point.at(2)).at(0);
+        var Lm = point.subtract(light.position).unit();
+        var lightReflection = Lm.reflectOver(normal);
+        var diffuseComponent = 0;
+        var specularComponent = 0;
+        if (Lm.dot(normal) > 0) {
+          diffuseComponent += light.diffusion * (Lm.dot(normal)) * diffusionIntensity;
+        }
+        if (lightReflection.dot(point.subtract(this.sensor)) > 0) {
+          specularComponent += light.specularity * Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())), material.shine) * specularIntensity;
+        }
+        var illumination = diffuseComponent + specularComponent;
+        
+        return {"total": illumination, "specular": specularComponent, "diffuse": diffuseComponent};
+    };
     //Returns the distance between a point and the camera
     Graphics3D.prototype.sensorDistance = function(x, y, z) {
         var distance = Math.sqrt((x - this.sensor.at(0)) * (x - this.sensor.at(0)) + (y - this.sensor.at(1)) * (y - this.sensor.at(1)) + (z - this.sensor.at(2)) * (z - this.sensor.at(2))); 
@@ -175,7 +182,7 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
                             case 'gouraud':
                                 //gets the normal at each vertex.
                                 //This is calculated beforehand in ply.js
-                                //and should be calculated in any mathods 
+                                //and should be calculated in any methods 
                                 //that create 3D objects.
                                 var p1normal = triangle.normal1;
                                 var p2normal = triangle.normal2;
@@ -306,16 +313,16 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
         if (typeof this.getMaterial() === 'undefined') { 
             console.warn("Warning material undefined.");
         }
-        var triangle = new Triangle3D(new Vector3D(x1, y1, z1), new Vector3D(x2, y2, z2), new Vector3D(x3, y3, z3), this.getMaterial());
+        var triangle = new Triangle3D(new Vector3D(x1, y1, z1), new Vector3D(x2, y2, z2), new Vector3D(x3, y3, z3), this.material);
     
         if (n1 instanceof Vector3D) {
-            triangle.normal1 = n1.multiply(-1);
+            triangle.normal1 = n1;
         }
         if (n2 instanceof Vector3D) {
-            triangle.normal2 = n2.multiply(-1);
+            triangle.normal2 = n2;
         }
         if (n3 instanceof Vector3D) {
-            triangle.normal3 = n3.multiply(-1);
+            triangle.normal3 = n3;
         }
         
         //the square of the distance between the triangle and the camera

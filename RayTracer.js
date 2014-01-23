@@ -1,5 +1,6 @@
-define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "plane", "sphere"], function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere) {
-  function RayTracer(cxt) {
+define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "plane", "sphere", "graphics3D"], 
+function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, Graphics3D) {
+  function RayTracer(cxt) { /* Extends Graphics 3D*/ 
     //see Graphics3D.js for explanation of these variables
     this.WIDTH        = cxt.canvas.width;
     this.HEIGHT       = cxt.canvas.height;
@@ -10,14 +11,23 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
     this.lights       = [];
     this.queue        = [];  
     this.ambience     = 0;
-    this.imgData      = this.cxt.getImageData(0, 0, this.WIDTH, this.HEIGHT);
-    this.cdata        = this.imgData.data;
     this.materialData = [];
+
+    //The graphics2D object to use for drawing
+    //to the canvas.
+    this.g = new Graphics2D(this.cxt);
+    this.g.standard_coordinates = true;
+
+    //An array holding the image data for frames if the scene is animated
+    this.frames = [];
 
     //number of iterations to reflect light
     this.maxIterations   = 100; 
     this.backgroundColor = [0, 0, 0];
   }
+
+  //Extends Graphics3D
+  RayTracer.prototype = Object.create(Graphics3D.prototype);
 
   //x, y, z is center, r is radius, m is material
   //adds a sphere.js object to the scene
@@ -33,7 +43,8 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
     this.queue.push(plane);
   };
 
-  //renders the scene
+  //renders the scene and updates the canvas after a set number of 
+  //scanlines have been added to the imgdata array
   RayTracer.prototype.render = function() {
     //Keeps track of vertical scanline.
     //Used for deciding when to update the screen 
@@ -43,31 +54,6 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
 
     //The initial condition of recursive loop
     var x = -this.WIDTH / 2 + this.sensor.at(0);
-    
-    //The graphics2D object to use for drawing
-    //to the canvas.
-    var g = new Graphics2D(this.cxt);
-    g.standard_coordinates = true;
-
-    //Body of loop() below.
-    //Adds one scanline to cdata.
-    var scan = function() {
-
-      for (var y = -self.HEIGHT / 2 + self.sensor.at(1); 
-           y < self.HEIGHT / 2 + self.sensor.at(1); 
-           y++) {
-
-        //Current point being rendered on the lens plane
-        var currentPosition = new Vector3D(x, y, self.lens); 
-
-        //The ray between the camera and the point on the plane
-        var ray = {"direction": currentPosition.subtract(self.sensor), "origin": self.sensor};
-
-        //Drawing the pixel relative to where the position of the camera. Reflect() returns a color 
-        //based on the objects in the scene.
-        g.drawPixel(x - self.sensor.at(0), y - self.sensor.at(1), self.reflect(ray));
-      }
-    };
     
     setTimeout(function() { //start loop
       loop();
@@ -79,7 +65,7 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
     //     x++) 
     function loop() { 
       //loop body is in scan
-      scan();
+      self.scan(x);
 
       x++;
       scanline++;
@@ -103,7 +89,37 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
         }
       }
       
-      g.draw();    
+      self.g.draw();    
+    }
+  };
+
+  //Loads img data for the frame and stores it in g
+  RayTracer.prototype.loadImgData = function() {
+    var x;
+    for (x = -this.WIDTH / 2 + this.sensor.at(0); 
+      x <= this.WIDTH / 2 + this.sensor.at(0); 
+      x++) {
+
+      this.scan(x);
+    }
+  };
+ 
+  //adds a vertical scanline in image data (which is in g, a graphics2D object)
+  RayTracer.prototype.scan = function(x) {
+
+    for (var y = -this.HEIGHT / 2 + this.sensor.at(1); 
+         y < this.HEIGHT / 2 + this.sensor.at(1); 
+         y++) {
+
+      //Current point being rendered on the lens plane
+      var currentPosition = new Vector3D(x, y, this.lens); 
+
+      //The ray between the camera and the point on the plane
+      var ray = {"direction": currentPosition.subtract(this.sensor), "origin": this.sensor};
+
+      //Drawing the pixel relative to where the position of the camera. Reflect() returns a color 
+      //based on the objects in the scene.
+      this.g.drawPixel(x - this.sensor.at(0), y - this.sensor.at(1), this.reflect(ray));
     }
   };
 
@@ -238,40 +254,77 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
     return intersect;
   };
 
-  RayTracer.prototype.illuminate = function(point, normal, material, light, type) {
-    //Applies the phong illumination model to a point given the arguments
-    var specularLight = light.specularIntensityVector(point.at(0), point.at(1), point.at(2));
-    var specularIntensity = light.intensityAt(point.at(0), point.at(1), point.at(2)).at(1);
-    var diffusionIntensity = light.intensityAt(point.at(0), point.at(1), point.at(2)).at(0);
-    var Lm = point.subtract(light.position).unit();
-    var lightReflection = Lm.reflectOver(normal);
-    var diffuseComponent = 0;
-    var specularComponent = 0;
-    if (Lm.dot(normal) > 0) {
-      diffuseComponent += light.diffusion * (Lm.dot(normal)) * diffusionIntensity;
+  //Animates Camera from init (vector3D object) to end (also vector3D object) at a speed of speed/unit
+  RayTracer.prototype.animateCamera = function(init, end, speed){
+    var self = this;
+    //Direction is the vector in the direction of movement
+    var direction = end.subtract(init);
+    var velocity = direction.unit().multiply(speed);
+    //initialize sensor
+
+    this.setSensor(init.at(0), init.at(1), init.at(2));
+
+    //The number of steps between the init and end points
+    var steps = (direction.magnitude()) / (velocity.magnitude());
+
+    var i = 0;
+
+    setTimeout(function(){
+        self.cxt.fillText("Loading " + (100 * i / steps) + "%", 10, 10);
+        loop();
+
+    }, 0);
+
+    function loop(){
+      
+      //loads image data into graphics2D object
+      self.loadImgData();
+
+      //push frame data into frame array for playback later
+      self.frames.push(copy(self.g.cdata));
+      
+
+      //The new sensor position is the velocity added to the sensor
+      var newSensor = self.sensor.add(velocity);
+      self.setSensor(newSensor.at(0), newSensor.at(1), newSensor.at(2));
+
+      //A function that copies an array into another array and returns it
+      //This is apparently the fastest way according to http://jsperf.com/new-array-vs-splice-vs-slice/19
+      //Plus, imageData is a Uint8ClampedArray and has no methods like slice
+      function copy(a){
+        var result = [];
+        for (var j = 0; j < a.length; j++) {
+          result.push(a[j]);
+        }
+
+        return result;
+      }
+
+      if (i > steps){
+        alert("Load Complete");
+        i = 0;
+        setInterval(function() {
+          self.g.cdata.set(self.frames[i]);
+          self.cxt.putImageData(self.g.imageData, 0, 0);
+          i++;
+
+          if (i >= self.frames.length) {
+            i = 0;
+          }
+        }, 33);
+        return;
+
+      }
+
+      i++;
+      setTimeout(function(){
+        self.cxt.clearRect(0, 0, self.WIDTH, self.HEIGHT);
+        self.cxt.fillText("Loading " + (100 * i / steps) + "%", 10, 10);
+        loop();  
+      }, 0);
     }
-    if (lightReflection.dot(point.subtract(this.sensor)) > 0) {
-      specularComponent += light.specularity * Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())), material.shine) * specularIntensity;
-    }
-    var illumination = diffuseComponent + specularComponent;
+
     
-    return {"total": illumination, "specular": specularComponent, "diffuse": diffuseComponent};
-  };
-
-  RayTracer.prototype.projectPoint = function(x_1, y_1, z_1) { //Takes a point in 3d space
-
-    //the t derived from the z component of the parametric 
-    //line between the point to be projected and the sensor 
-    //assuming the line intersects the lens, the lens is flat, 
-    //and the lens is parallel to the xy plane
-    var t1 = (this.getLens() - this.sensor.at(2)) / (this.sensor.at(2) - z_1); 
-
-    //x component of the parametric line between the point to be projected and the sensor
-    var x1 = this.sensor.at(0) + this.sensor.at(0) * t1 - t1 * x_1; 
-
-    //y component of the parametric line between the point to be projected and the sensor
-    var y1 = this.sensor.at(1) + this.sensor.at(1) * t1 - t1 * y_1; 
-    return new Vector2D(x1 - this.sensor.at(0), y1 - this.sensor.at(1));
   };
   
   return RayTracer;

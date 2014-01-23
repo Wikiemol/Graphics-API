@@ -191,7 +191,6 @@ define(["vector3D", "vector2D"], function(Vector3D, Vector2D) {
     //Returns directional unit vector multiplied by the diffusion component
     Light.prototype.diffusionIntensityVector = function(x, y, z) { 
         return this.directionAt(x, y, z).multiply(this.intensityAt(x, y, z).at(0));
-    
     };
     
     //Distance between point passed as argument and the light
