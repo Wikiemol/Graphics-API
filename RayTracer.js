@@ -282,7 +282,6 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
 
       //push frame data into frame array for playback later
       self.frames.push(copy(self.g.cdata));
-      
 
       //The new sensor position is the velocity added to the sensor
       var newSensor = self.sensor.add(velocity);
@@ -301,13 +300,24 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
       }
 
       if (i > steps){
+        //An alert so that I can goof off while its loading
+        //without worrying about missing anything.
         alert("Load Complete");
+
         i = 0;
+
+        //Loops through frame array over and over again, 
+        //displaying each frame on the screen.
         setInterval(function() {
+          //Put the image data ont he screen
           self.g.cdata.set(self.frames[i]);
           self.cxt.putImageData(self.g.imageData, 0, 0);
+
+          //Next frame;
           i++;
 
+          //If we've reached the end of the frame array
+          //  go back to the beginning.
           if (i >= self.frames.length) {
             i = 0;
           }

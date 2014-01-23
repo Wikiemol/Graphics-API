@@ -5,10 +5,10 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
     var cxt = null;
     var g;
     
-    var ply = new PLY("teapot.ply");
+    var ply = new PLY("/ply/teapot.ply");
     ply.load(50);
     
-    var ply2 = new PLY("cow.ply");
+    var ply2 = new PLY("/ply/cow.ply");
     ply2.load(30);
     
     var x = 0;
