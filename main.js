@@ -20,14 +20,15 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
     
     init();
     function init() {
+        
         canvas = window.document.getElementById("can");
         cxt = canvas.getContext('2d');
         g = new Graphics3D(cxt);
         g.standard_coordinates = true;
     
         // setInterval(rasterizerDemo, 33);
-        // rayTracerDemo();
-        animateRayTrace();        
+        rayTracerDemo();
+       // animateRayTrace();        
     }
                 
     var lastFrame = new Date;
@@ -62,7 +63,7 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
         light2.position = new Vector3D(200, 50, 0);
         var r = new RayTracer(cxt);
         r.ambience = 0.1;
-        r.sensor = new Vector3D(-70, 150, 1100);
+        r.sensor = new Vector3D(0, 150, 1100);
         r.plane(0, -100, 0, new Vector3D(0, 1, 0), new Material({"color": [100, 100, 100], "reflectivity": 0.5}));
         r.plane(0, 0, -500, new Vector3D(0, 0, 1), new Material({"color": [255, 255, 255], "reflectivity": 0}));
         /*red*/r.sphere(0, -100, 0, 100, new Material({"color": [128, 1, 1], "shine": 100, "reflectivity": 0.5}));
@@ -81,7 +82,7 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
 
         var r = new RayTracer(cxt);
         r.ambience = 0.1;
-        r.sensor = new Vector3D(-70, 150, 1100);
+        r.sensor = new Vector3D(-1000, 150, 1100);
 
         r.plane(0, -100, 0, new Vector3D(0, 1, 0), new Material({"color": [100, 100, 100], "reflectivity": 0.5}));
         r.plane(0, 0, -500, new Vector3D(0, 0, 1), new Material({"color": [255, 255, 255], "reflectivity": 0}));
@@ -90,6 +91,6 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
         /*green*/r.sphere(-200, 0, -200, 100, new Material({"color": [0, 128, 0], "shine": 100, "reflectivity": 1}));
         r.lights.push(light1);
         r.backgroundColor = [20, 20, 20];   
-        r.animateCamera(r.sensor, r.sensor.add(new Vector3D(100,0,0)), 10);
+        r.animateCamera(r.sensor, r.sensor.add(new Vector3D(1400,0,0)), 10);
     }
 });

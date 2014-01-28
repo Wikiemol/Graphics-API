@@ -124,6 +124,7 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
   };
 
   RayTracer.prototype.reflect = function(ray, numberOfIterations) {
+    
       //initializing the number of iterations
       if (typeof numberOfIterations === "undefined") {
         numberOfIterations = 0;
@@ -151,7 +152,7 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
           var illumination = this.ambience;
 
           //vector from the intersection to the camera
-          var viewVector = this.sensor.subtract(intersect.intersection); 
+          var viewVector = ray.origin.subtract(intersect.intersection); 
 
           //view Vector reflected
           var reflectionVector = viewVector.reflectOver(intersect.normal); 
@@ -199,11 +200,13 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
           //  the reflection color is the background color
           //if the number of iterations are exceeded
           //  reflect an arbitrary color
+          
           if (numberOfIterations <= this.maxIterations && reflectTrue) {     
             reflectionColor = this.reflect(reflectionRay, numberOfIterations + 1);
-          }else if (!reflectTrue) { 
+          } else if (!reflectTrue) { 
             reflectionColor = this.backgroundColor;
-          } else { 
+          } else {
+		    //return [255, 128, 0]; 
             reflectionColor = [0, 0, 0];
           }
           
@@ -269,13 +272,15 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
 
     var i = 0;
 
-    setTimeout(function(){
-        self.cxt.fillText("Loading " + (100 * i / steps) + "%", 10, 10);
+    setTimeout(function() {
+        self.cxt.fillStyle = "#AAAAFF";
+        self.cxt.fillText("Loading 0%", 10, 10);
         loop();
 
     }, 0);
 
-    function loop(){
+    //for i = 0; i < the number of frames; i++
+    function loop() {
       
       //loads image data into graphics2D object
       self.loadImgData();
@@ -299,7 +304,7 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
         return result;
       }
 
-      if (i > steps){
+      if (i > steps) {
         //An alert so that I can goof off while its loading
         //without worrying about missing anything.
         alert("Load Complete");
@@ -309,7 +314,7 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
         //Loops through frame array over and over again, 
         //displaying each frame on the screen.
         setInterval(function() {
-          //Put the image data ont he screen
+          //Put the image data on the screen
           self.g.cdata.set(self.frames[i]);
           self.cxt.putImageData(self.g.imageData, 0, 0);
 
@@ -327,9 +332,13 @@ function(Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Plane, Sphere, 
       }
 
       i++;
-      setTimeout(function(){
+      setTimeout(function() {
         self.cxt.clearRect(0, 0, self.WIDTH, self.HEIGHT);
-        self.cxt.fillText("Loading " + (100 * i / steps) + "%", 10, 10);
+        self.cxt.putImageData(self.g.imageData, 0, 0);
+        self.cxt.fillStyle = "#AAAAFF";
+
+        //Rounds to two decimal places
+        self.cxt.fillText("Loading " + Math.round(100 * 100 * i / steps)/100 + "%", 10, 10);
         loop();  
       }, 0);
     }
