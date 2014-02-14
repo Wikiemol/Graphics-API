@@ -25,10 +25,10 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
         cxt = canvas.getContext('2d');
         g = new Graphics3D(cxt);
         g.standard_coordinates = true;
-    
-        // setInterval(rasterizerDemo, 33);
+        //setInterval(rasterizerDemo, 33);
+        //rasterizerDemo();
         rayTracerDemo();
-       // animateRayTrace();        
+       //  animateRayTrace();        
     }
                 
     var lastFrame = new Date;
@@ -48,9 +48,9 @@ function(Graphics3D, Light, PLY, Triangle3D, Vector3D, Material, Graphics2D, Ray
         // g.drawGrid();
         g.setMaterial({"color": [255, 255, 1], "specularExponent": 3, "specularMultiplier": 2, "diffusion": 1});
         // sx = Math.PI/6 + 0.27;
-        ply.addTo(g, sx, sx, sx, 0, 0, 0, false);
-        // var triangle = new Triangle3D();
+         ply.addTo(g, sx, sx, sx, 0, 0, 0, false);
 
+        //g.drawHemisphere(new Vector3D(0, 0, 0), 100, 10);
         g.draw({"lights": true, "ambience": false});
 
         x += 10;

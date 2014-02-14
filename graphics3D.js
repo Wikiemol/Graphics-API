@@ -1,4 +1,6 @@
-define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"], function(Light, Triangle3D, Vector3D, Vector2D, Material, Graphics2D) {
+define( ["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D", "ray", "sphere"], 
+function(Light, Triangle3D, Vector3D, Vector2D, Material, Graphics2D, Ray, Sphere) {
+
     function Graphics3D(context) {
         this.cxt = context;
 
@@ -29,7 +31,7 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
 
         //The type of shading to be used.
         //Curently allows for 'flat' and 'gouraud'.
-        this.shading = 'gouraud';
+        this.shading = 'flat';
     }
 
     //Returns the absolute color of a point based on lighting in the scene.
@@ -67,7 +69,7 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
           specularComponent += light.specularity * Math.pow((lightReflection.dot(point.subtract(this.sensor).unit())), material.shine) * specularIntensity;
         }
         var illumination = diffuseComponent + specularComponent;
-        
+       
         return {"total": illumination, "specular": specularComponent, "diffuse": diffuseComponent};
     };
     //Returns the distance between a point and the camera
@@ -241,8 +243,10 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
                     //If lightOn is set to false
                     //  we don't need to run applylight.
                     } else {
-                        g.setColor(triangleMaterial.getColor());
-                        g.fillTriangle(proj1.at(0), proj1.at(1), proj2.at(0), proj2.at(1), proj3.at(0), proj3.at(1));
+                        g.fillTriangle(proj1.at(0), proj1.at(1), 
+                                       proj2.at(0), proj2.at(1), 
+                                       proj3.at(0), proj3.at(1),
+                                       triangleMaterial.color);
                     }
                     
                     
@@ -348,6 +352,6 @@ define(["light", "triangle3D", "vector3D", "vector2D", "material", "graphics2D"]
         
         this.material = temp;
     };
-    
+
     return Graphics3D;
 });
