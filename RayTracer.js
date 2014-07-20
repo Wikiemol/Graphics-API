@@ -62,46 +62,79 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
           
             function loop() {
 
-                   var row = i % self.HEIGHT;
-                   var column = Math.floor(i / self.WIDTH);
-                   var x = column - self.WIDTH / 2 + self.sensor.at(0);
-                   var y = row - self.HEIGHT / 2 + self.sensor.at(1);
+              var row = i % self.HEIGHT;
+              var column = Math.floor(i / self.WIDTH);
+              var x = column - self.WIDTH / 2 + self.sensor.at(0);
+              var y = row - self.HEIGHT / 2 + self.sensor.at(1);
 
-                   //Current point being rendered on the lens plane
-                   var currentPosition = new Vector3D(x, y, self.lens); 
+              //Current point being rendered on the lens plane
+              var currentPosition = new Vector3D(x, y, self.lens); 
 
-                   //The ray between the camera and the point on the plane
-                   var ray = new Ray(currentPosition.subtract(self.sensor), self.sensor);
- 
-                   //Drawing the pixel relative to where the position of the camera. Reflect() returns a color 
-                   //based on the objects in the scene.
-                   self.g.drawPixel(x - self.sensor.at(0), y - self.sensor.at(1), self.reflect(ray));
- 
-                   self.g.draw();
-                   i++; 
+              var color = [0, 0, 0];
+              //The ray between the camera and the point on the plane
+              var ray = new Ray(currentPosition.subtract(self.sensor), self.sensor);
+              {
+                var tempColor = self.reflect(ray);
+                color[0] += tempColor[0];
+                color[1] += tempColor[1];
+                color[2] += tempColor[2];
+              }
 
-                   if (i < self.WIDTH * self.HEIGHT) {
-                        var newDate = new Date;
-                        var interval = 33;
+              ray.direction = ray.direction.add(new Vector3D(0, 0.5, 0));
+              {
+                var tempColor = self.reflect(ray);
+                color[0] += tempColor[0];
+                color[1] += tempColor[1];
+                color[2] += tempColor[2];
+              }
 
-                        //if <interval> time has passed since the last screen update
-                        //  update the date when the last screen update occured
-                        //  update the screen
-                        //otherwise
-                        //  run through the loop like normal
+              ray.direction = ray.direction.add(new Vector3D(0.5, 0, 0));
+              {
+                var tempColor = self.reflect(ray);
+                color[0] += tempColor[0];
+                color[1] += tempColor[1];
+                color[2] += tempColor[2];
+              }
 
-                        if (newDate - date > interval) {
-                            date = newDate;
-                            setTimeout(loop, 0);
-                        } else {
-                            loop();
-                        }
-                   } else {
-                           console.log("Render Complete");
-                   }
+              ray.direction = ray.direction.add(new Vector3D(0, -0.5, 0));
+              {
+                var tempColor = self.reflect(ray);
+                color[0] += tempColor[0];
+                color[1] += tempColor[1];
+                color[2] += tempColor[2];
+              }
 
+              color[0] *= 1 / 4;
+              color[1] *= 1 / 4;
+              color[2] *= 1 / 4;
+
+              //Drawing the pixel relative to where the position of the camera. Reflect() returns a color 
+              //based on the objects in the scene.
+              self.g.drawPixel(x - self.sensor.at(0), y - self.sensor.at(1), color);
+
+              self.g.draw();
+              i++; 
+
+              if (i < self.WIDTH * self.HEIGHT) {
+                var newDate = new Date;
+                var interval = 33;
+
+                //if <interval> time has passed since the last screen update
+                //  update the date when the last screen update occured
+                //  update the screen
+                //otherwise
+                //  run through the loop like normal
+
+                if (newDate - date > interval) {
+                    date = newDate;
+                    setTimeout(loop, 0);
+                } else {
+                    loop();
+                }
+              } else {
+                console.log("Render Complete");
+              }
             }
-
           };
 
           //Loads img data for the frame and stores it in g
@@ -157,6 +190,7 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
                   //view Vector reflected
                   var reflectionVector = viewVector.reflectOver(intersect.normal); 
                   var reflectionRay = new Ray(reflectionVector, intersect.intersection);
+                    
                   var reflectTrue = this.cast(reflectionRay);
                   var reflectionColor;
 
@@ -210,27 +244,6 @@ define(["light", "ply", "triangle3D", "vector3D", "material", "graphics2D", "pla
                     reflectionColor = [0, 0, 0];
                   }
                   
-                  //Scattering light and averaging the color to get an ambient component
-                  //var scatter = this.scatter(intersect.intersection, intersect.normal);
-                  //var scatterColor = [0, 0, 0];
-                  //for (var i = 0; i < scatter.length; i++) {
-                  //  if (numberOfIterations < this.maxIterations) {
-                  //      var scatterRay = new Ray(scatter[i].subtract(intersect.intersection), intersect.intersection);
-                  //      var scatterRayColor = this.reflect(scatterRay, numberOfIterations + 1);
-                  //      scatterColor[0] += scatterRayColor[0];
-                  //      scatterColor[1] += scatterRayColor[1];
-                  //      scatterColor[2] += scatterRayColor[2];
-                  //  } else {
-                  //      scatterColor = this.backgroundColor;
-                  //      break;
-                  //  }
-                  //}
-                  //if (i !== 0) {
-                  //  scatterColor[0] /= i;
-                  //  scatterColor[1] /= i;
-                  //  scatterColor[2] /= i;
-                  //}
-
                   //The difference between the rgb without reflection and the pure reflection rgb
                   //This is then multiplied by the reflectivity of the material to mix the color without reflection
                   //and the color with reflection
