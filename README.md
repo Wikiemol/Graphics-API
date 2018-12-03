@@ -1,7 +1,7 @@
 3d Graphics Library
 ===================
 
-A simple 3d graphics library for html5 canvas I'm making for the sake of learning. The library itself is not very practical for others to use, but I decided to make a bit of documentation so that I remember how to use everything and so that I remember what needs to be done.
+A simple 3d graphics library for html5 canvas I'm making for the sake of learning. It was an exercise to see if I could make a complete rasterizer without OpenGL, only using one function that draws a pixel on the screen. This means I had to write the a method for drawing lines, triangles, etc. all from scratch and optimize it so that it had at least a semi-decent frame rate. The library itself is not very practical for others to use, but I decided to make a bit of documentation so that I remember how to use everything and so that I remember what needs to be done.
 
 ~~Strikethrough~~ indicates a feature that is yet to be implemented or completed. 
 
