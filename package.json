@@ -1,0 +1,22 @@
+{
+  "name": "Graphics-API",
+  "version": "0.0.0",
+  "description": "JavaScript graphics library.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wikiemol/Graphics-API.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/Wikiemol/Graphics-API/issues"
+  },
+  "homepage": "https://github.com/Wikiemol/Graphics-API",
+  "devDependencies": {
+    "jscs": "~1.2.2"
+  }
+}
