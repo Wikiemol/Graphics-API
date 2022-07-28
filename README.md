@@ -23,8 +23,7 @@ Images
 
 *Raytraced spheres using RayTracer.js*
 
-!["The image could not be displayed."](https://raw.github.com/Wikiemol/Graphics-API/master/images/raytracer.gif "Raytraced Spheres")
-
+<img src="images/raytracer.gif?raw=true" width="200px">
 
 Constructors
 ------------
